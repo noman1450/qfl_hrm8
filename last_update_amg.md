@@ -1,0 +1,8 @@
+-- permission action created new
+EmployeeJoiningApprovalAction
+LeaveAprovalAction
+PendingManualAttendanceAction
+ReportingBossChange
+ProbationEmployeeList
+
+

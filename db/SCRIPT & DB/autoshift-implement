@@ -1,0 +1,16 @@
+
+2025-07-01- implement korte chai
+
+1. Database backup
+2. select * from hrm_employee_shift Where end_date is null and start_date < '2025-06-30';
+3. UPDATE hrm_employee_shift SET end_date='2025-06-30' Where end_date is null and start_date < '2025-06-30';
+4.
+INSERT INTO hrm_employee_shift_auto (hrm_shift_id, start_date, end_date, valid, hrm_employee_job_info_id, users_id, comment, created_at, updated_at)
+SELECT 
+    hrm_shift_id,'2025-06-29',null as end_date,1,a.hrm_employee_job_info_id,7,'','2020-10-22 17:51:10',null
+FROM
+    hrm_employee_shift a
+        JOIN
+    hrm_employee_job_info b ON a.hrm_employee_job_info_id = b.id
+        AND b.employee_activity = 1
+	GROUP BY a.hrm_shift_id,a.hrm_employee_job_info_id

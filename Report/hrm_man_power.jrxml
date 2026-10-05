@@ -1,0 +1,575 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.20.6.final using JasperReports Library version 6.20.6-5c96b6aa8a39ac1dc6b6bea4b81168e16dd39231  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="hrm_man_power" language="groovy" pageWidth="820" pageHeight="842" columnWidth="780" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="9438248a-295f-40af-a669-de9baf60f08d">
+	<property name="ireport.zoom" value="3.0"/>
+	<property name="ireport.x" value="603"/>
+	<property name="ireport.y" value="100"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="291"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="701"/>
+	<parameter name="company_name" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="address" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="title" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="condition_parameter" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="user_id" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT  
+    a.id,
+    LPAD(a.id, 5, "0") as Unique_Code,
+    CONCAT(a.employee_name, ' | ',ifnull(b.employee_code,'') ) AS employee_name,
+    c.location_name,
+    d.depertment_name,
+    e.alis as  designation_name,
+    b.basic_salary,
+    a.contact_number,
+    f.joining_date,
+    f.confirmation_date,
+    g.employment_status AS employeestatus_name,
+    h.category_name,
+    i.section_name,
+    b.overtime_status,
+    j.employee_name AS manage_by_name,
+    l.shift_name,
+    a.Images,
+    n.card_code,
+    DATEDIFF(CURDATE(), f.confirmation_date) AS totaldays,
+    TIMESTAMPDIFF(YEAR,
+        f.confirmation_date,
+        CURDATE()) AS years,
+    MOD(TIMESTAMPDIFF(MONTH,
+            f.confirmation_date,
+            CURDATE()),
+        12) AS month,
+    ifnull( CONCAT(TIMESTAMPDIFF(YEAR,
+        f.confirmation_date,
+        CURDATE()),' Y(s) ' , MOD(TIMESTAMPDIFF(MONTH,
+            f.confirmation_date,
+            CURDATE()),
+        12),' M(s)' ),'')  as  year,
+        (SELECT 
+     ifnull(DATE_FORMAT(MAX(promotion_date),'%d-%m-%Y'),'') as 	promotion_date
+	FROM
+	hrm_last_promotion
+	WHERE
+	hrm_last_promotion.hrm_employee_id = a.id
+	AND hrm_last_promotion.promotion_date < curdate()) last_promotion_date
+        
+FROM
+    hrm_employee a
+        JOIN
+    hrm_employee_job_info b ON a.id = b.hrm_employee_id
+        AND a.active_status = 1
+        AND b.employee_activity = 1
+        JOIN
+    hrm_location c ON b.hrm_location_id = c.id
+        JOIN
+    hrm_depertment d ON b.hrm_depertment_id = d.id
+        JOIN
+    hrm_designation e ON b.hrm_designation_id = e.id
+        JOIN
+    hrm_employee_joining f ON b.hrm_employee_id = f.hrm_employee_id
+        JOIN
+    hrm_employment_status g ON b.hrm_employment_status_id = g.id
+        JOIN
+    hrm_category h ON b.hrm_category_id = h.id
+        JOIN
+    hrm_section i ON b.hrm_section_id = i.id
+        JOIN
+    hrm_employee j ON b.hrm_manage_by_id = j.id
+        JOIN
+    hrm_employee_shift k ON b.id = k.hrm_employee_job_info_id
+               and k.id in(SELECT id from
+(SELECT Max(id) as id,hrm_employee_job_info_id FROM hrm_employee_shift 
+group by hrm_employee_job_info_id) aa)
+        JOIN
+    hrm_shift l ON k.hrm_shift_id = l.id
+   $P!{condition_parameter}
+		JOIN
+	user_location m ON c.id = m.hrm_location_id AND m.users_id = $P{user_id}
+       
+        LEFT JOIN
+    hrm_employee_card_code n ON b.id = n.hrm_employee_job_info_id
+Order By     d.depertment_name ASC,c.location_name,e.priority ASC,TIMESTAMPDIFF(YEAR,
+        f.confirmation_date,
+        CURDATE()) DESC,
+    MOD(TIMESTAMPDIFF(MONTH,
+            f.confirmation_date,
+            CURDATE()),
+        12) DESC]]>
+	</queryString>
+	<field name="id" class="java.lang.Integer">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="Unique_Code" class="java.lang.String"/>
+	<field name="employee_name" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="location_name" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="depertment_name" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="designation_name" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="basic_salary" class="java.lang.Double">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="contact_number" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="joining_date" class="java.sql.Date">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="confirmation_date" class="java.sql.Date">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="employeestatus_name" class="java.lang.String"/>
+	<field name="category_name" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="section_name" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="overtime_status" class="java.lang.Integer">
+		<fieldDescription><![CDATA[0 for not applycable
+1 for applycable]]></fieldDescription>
+	</field>
+	<field name="manage_by_name" class="java.lang.String"/>
+	<field name="shift_name" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="Images" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="card_code" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="totaldays" class="java.lang.Integer"/>
+	<field name="years" class="java.lang.Long"/>
+	<field name="month" class="java.lang.Long"/>
+	<field name="year" class="java.lang.String"/>
+	<field name="last_promotion_date" class="java.lang.String"/>
+	<group name="department">
+		<groupExpression><![CDATA[$F{depertment_name}]]></groupExpression>
+		<groupHeader>
+			<band height="19">
+				<textField>
+					<reportElement mode="Opaque" x="0" y="0" width="780" height="18" backcolor="#F2F0F0" uuid="3b3a3688-3a56-4c8f-8a78-2440e1f7248b"/>
+					<box>
+						<topPen lineWidth="0.5" lineColor="#999999"/>
+						<leftPen lineWidth="0.5" lineColor="#999999"/>
+						<bottomPen lineWidth="0.5" lineColor="#999999"/>
+						<rightPen lineWidth="0.5" lineColor="#999999"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font size="9" isBold="true"/>
+						<paragraph leftIndent="3"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{depertment_name}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band/>
+		</groupFooter>
+	</group>
+	<group name="location">
+		<groupExpression><![CDATA[$F{location_name}]]></groupExpression>
+		<groupHeader>
+			<band/>
+		</groupHeader>
+		<groupFooter>
+			<band/>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="57" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="779" height="20" uuid="686c0060-65bc-4d17-aa29-24011c2bd7c8"/>
+				<textElement verticalAlignment="Middle">
+					<font size="15" isBold="true"/>
+					<paragraph leftIndent="3"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{company_name}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="20" width="779" height="16" uuid="aa27e13a-e093-4006-b3e5-2c4a6a48aecb"/>
+				<textElement verticalAlignment="Middle">
+					<paragraph leftIndent="3"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{address}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="36" width="779" height="16" uuid="1b94d2e6-11cf-4812-b2ab-c421198849a5"/>
+				<textElement verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+					<paragraph leftIndent="3"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{title}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="24" splitType="Stretch">
+			<staticText>
+				<reportElement mode="Opaque" x="30" y="2" width="120" height="17" backcolor="#CCCCCC" uuid="600314c6-b98c-4a83-80ac-0978e3f5e54b"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="0.0"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[Employee Name]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="151" y="2" width="69" height="17" backcolor="#CCCCCC" uuid="a8348786-8ba2-4a06-baa6-6134c7d495d1"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[Designation]]></text>
+			</staticText>
+			<line>
+				<reportElement x="0" y="1" width="780" height="1" uuid="742e49a0-a4db-47eb-851f-30735235b113"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineColor="#333333"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="0" y="19" width="780" height="1" uuid="58f32f14-43ff-4454-9c02-cd5943286422"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineColor="#333333"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="2" width="30" height="17" backcolor="#CCCCCC" uuid="d98b6756-eeec-4e10-8ac6-3992082b4b9e"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[SL]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="420" y="2" width="62" height="17" backcolor="#CCCCCC" uuid="d1623fa6-952a-46ce-9ff5-01781ac35d82"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[Job Confirm Date]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="311" y="2" width="48" height="17" backcolor="#CCCCCC" uuid="6580a081-681f-44a7-93d9-f63450f9b740"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[Card Code]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="482" y="2" width="73" height="17" backcolor="#CCCCCC" uuid="025c6680-5c4c-4ba2-b5e8-dee4a6b18d21"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[Job Duration]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="359" y="2" width="61" height="17" backcolor="#CCCCCC" uuid="ff5b46cc-dd10-4b65-ba23-707bfda26991"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[Joining Date]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="264" y="2" width="47" height="17" backcolor="#CCCCCC" uuid="91060c4b-3acf-4eab-a7d7-4b34f83a0306"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[Unique Code]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="555" y="2" width="105" height="17" backcolor="#CCCCCC" uuid="1ec33662-9afe-4e39-8506-5f47c45e319b"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[Job Location]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="660" y="2" width="50" height="17" backcolor="#CCCCCC" uuid="9edd75c1-3ec2-41a6-9117-b405c55d1ad3"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[Salary]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="220" y="2" width="44" height="17" backcolor="#CCCCCC" uuid="466156de-df95-4f59-b3a5-f527ba168c78"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[Status]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="710" y="2" width="70" height="17" backcolor="#CCCCCC" uuid="cb651353-abf4-4a60-aee5-52bd461bc338"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[Last Promotion]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="19" splitType="Stretch">
+			<textField>
+				<reportElement x="30" y="0" width="120" height="17" uuid="e329f4a9-1a69-4ab6-aabb-5d190159f00e"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{employee_name}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="0" width="30" height="17" uuid="b86fd7e2-17e6-48fa-ab2e-2a7c7c66ad77"/>
+				<box>
+					<leftPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{department_COUNT}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement positionType="FixRelativeToBottom" x="0" y="17" width="780" height="1" uuid="e02b55fb-f505-4ecc-9a32-15cade979a8e"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineColor="#999999"/>
+				</graphicElement>
+			</line>
+			<textField>
+				<reportElement x="150" y="0" width="70" height="17" isPrintWhenDetailOverflows="true" uuid="e1372548-677f-4212-98f0-0585c63683bd"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{designation_name}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="311" y="0" width="48" height="17" uuid="2cd2d061-84db-4e5b-b971-604672ed3699"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{card_code}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="482" y="0" width="73" height="17" uuid="1b6db506-37c7-4b8c-84f7-abed6df028a4"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{year}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy" isBlankWhenNull="false">
+				<reportElement x="420" y="0" width="62" height="17" uuid="a6a619fe-f71b-48ef-aa8b-e8ec607c73f9"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{confirmation_date}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="359" y="0" width="61" height="17" uuid="2a65ce8e-dc3a-450a-b055-a0e7e90869be"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{joining_date}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="264" y="0" width="47" height="17" uuid="a5d2199e-7d30-44d6-b2fe-a78c493eea10"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Unique_Code}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="555" y="0" width="105" height="17" isPrintWhenDetailOverflows="true" uuid="ba276d82-eeb7-45a0-bc43-5c205115af86"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{location_name}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.###;(#,##0.###-)">
+				<reportElement x="660" y="0" width="50" height="17" uuid="86f6a664-bc02-4cac-97de-199db065c85a"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{basic_salary}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="220" y="0" width="44" height="17" isPrintWhenDetailOverflows="true" uuid="b60ba622-ff40-41a2-9f97-36f809e79b17"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{employeestatus_name}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="710" y="0" width="70" height="17" uuid="f497718f-eabc-427d-9db4-f8f2c2a6b782">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="09afa907-34f7-4a75-9fbd-30fcdb9fc1f4"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{last_promotion_date}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="16">
+			<staticText>
+				<reportElement x="0" y="0" width="311" height="16" uuid="c4b1f6f2-b196-4216-843e-f6fc4b3e5c85"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Software Generated Report ,IBS, www.i-infotechsolution.com]]></text>
+			</staticText>
+			<textField evaluationTime="Report">
+				<reportElement x="555" y="0" width="104" height="16" uuid="81b749de-8254-4b50-ac4c-a605111247fe"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="482" y="0" width="72" height="16" uuid="e5ad423c-8cf7-4f49-b3d9-2d37d95cf592"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="311" y="0" width="48" height="16" uuid="aa7f5f4e-9ace-45ca-947d-ad02c0fd54ac"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<text><![CDATA[Print Date]]></text>
+			</staticText>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="359" y="0" width="61" height="16" uuid="1e04cdb9-6f76-44ea-8a6b-2e9580ab4765"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<textField pattern="h.mm a">
+				<reportElement x="420" y="0" width="62" height="16" uuid="9bbd0927-1651-4e96-8d52-a528a5719383"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="19" splitType="Stretch">
+			<textField>
+				<reportElement x="150" y="0" width="70" height="19" uuid="ab86ea50-e056-4f86-ada7-1a07917ece8b"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="0" width="150" height="19" uuid="08246490-cf5c-4fbb-97b8-853356e399b9"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<text><![CDATA[Total Employee(s) :]]></text>
+			</staticText>
+		</band>
+	</summary>
+</jasperReport>

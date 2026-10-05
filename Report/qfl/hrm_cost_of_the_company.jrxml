@@ -1,0 +1,764 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.16.0.final using JasperReports Library version 6.4.0  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="hrm_cost_of_the_company" language="groovy" pageWidth="1008" pageHeight="612" orientation="Landscape" columnWidth="968" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="807c7558-758d-45ac-a1e5-1e4f928f64a9">
+	<property name="ireport.zoom" value="2.0"/>
+	<property name="ireport.x" value="635"/>
+	<property name="ireport.y" value="123"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="232"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="762"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="HRM Local Database"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="506"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="483"/>
+	<style name="Crosstab Data Text" hTextAlign="Center" hImageAlign="Center"/>
+	<parameter name="condition_parameter" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="title" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="address" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="company_name" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="hrm_month_id" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="year_id" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT *,
+ SUM(yyy.gross_salary + yyy.two_festival_bonus + yyy.pf_contribution + yyy.transport_outOfPocket + yyy.houseRent_allowance + yyy.fixed_allowance) AS existing_cost
+ FROM(
+
+SELECT 
+aa.id,
+aa.employee_name,
+aa.designation_name,
+aa.depertment_name,
+'' as education_name,
+aa.joining_date,
+aa.confirmation_date,
+aa.section_name,
+aa.category_name,
+aa.priority,
+aa.gross_salary,
+Round(((aa.basic_salary*2)/12),0) as two_festival_bonus,
+aa.PF as pf_contribution,
+IFNULL((SELECT 
+	SUM(bbb.actual_amount)
+FROM
+	hrm_employee_salary aaa
+JOIN hrm_employee_salary_details bbb ON aaa.id = bbb.hrm_employee_salary_id
+WHERE
+	aa.id = aaa.hrm_employee_job_info_id
+		AND bbb.hrm_salary_head_id IN (11 , 8)), 0) AS transport_outOfPocket,
+IFNULL((SELECT 
+	SUM(bbb.actual_amount)
+FROM
+	hrm_employee_salary aaa
+JOIN hrm_employee_salary_details bbb ON aaa.id = bbb.hrm_employee_salary_id
+WHERE
+	aa.id = aaa.hrm_employee_job_info_id
+		AND bbb.hrm_salary_head_id IN (9)), 0) AS houseRent_allowance,         
+IFNULL((SELECT 
+	SUM(bbb.actual_amount)
+FROM
+	hrm_employee_salary aaa
+JOIN hrm_employee_salary_details bbb ON aaa.id = bbb.hrm_employee_salary_id
+WHERE
+	aa.id = aaa.hrm_employee_job_info_id
+		AND bbb.hrm_salary_head_id IN (12)), 0) AS fixed_allowance
+
+
+FROM
+(SELECT
+	a.id,
+    concat(e.employee_name,' | ',a.employee_code) as employee_name,
+    f.depertment_name,
+    g.alis as designation_name,
+    a.basic_salary as gross_salary,
+    aa.accounts_code,
+    e.tin,
+    h.joining_date,
+    h.confirmation_date,
+    aa.day_of_month,
+    aa.total_present,
+    (aa.day_of_month - aa.total_present) AS absent,
+    IF(d.id = 1,
+        SUM(b.actual_amount),
+        0) AS basic_salary,
+    IF(d.id = 4,
+        SUM(b.actual_amount),
+        0) AS medical_allowance,
+	   IF(d.id = 5,
+        SUM(b.actual_amount),
+        0) AS house_rent,
+		     IF(d.id = 14,
+        SUM(b.actual_amount),
+        0) AS others_addition,
+          IF(d.id = 3,
+        SUM(b.actual_amount),
+        0) AS attendance_deduction,
+       IF(d.id = 6,
+        SUM(b.actual_amount),
+        0) AS PF,
+	     IF(d.id = 7,
+        SUM(b.actual_amount),
+        0) AS TDS,
+		     IF(d.id = 15,
+        SUM(b.actual_amount),
+        0) AS others_deduction,
+	     IF(d.id = 2,
+        SUM(b.actual_amount),
+        0) AS loan_advance,
+        
+    aa.payment_mode,
+    aa.account_no,
+    g.priority,
+    i.section_name,
+    i.id as section_id,
+    a.employee_code,
+    j.category_name
+FROM
+    pay_register aa
+        JOIN
+    hrm_employee_job_info a ON aa.hrm_employee_job_info_id = a.id
+        AND aa.year_id =  $P{year_id} 
+        AND aa.hrm_month_id =  $P{hrm_month_id} 
+        JOIN
+    pay_register_details b ON aa.id = b.pay_register_id
+        JOIN
+    hrm_salary_head c ON b.hrm_salary_head_id = c.id
+        JOIN
+    hrm_salary_head_group d ON c.hrm_salary_head_group_id = d.id
+        JOIN
+    hrm_employee e ON a.hrm_employee_id = e.id
+        JOIN
+    hrm_depertment f ON a.hrm_depertment_id = f.id
+        JOIN
+    hrm_designation g ON a.hrm_designation_id = g.id
+        JOIN
+    hrm_employee_joining h ON a.hrm_employee_id = h.hrm_employee_id
+        JOIN
+    hrm_section i ON a.hrm_section_id = i.id
+		JOIN
+	hrm_category j ON a.hrm_category_id = j.id
+
+Where  aa.salary_genarate_type<>0 AND aa.apply_for = 1
+
+ $P!{condition_parameter} 
+ 
+GROUP BY a.id,d.id) aa
+GROUP BY aa.id) yyy
+group by yyy.id
+order by yyy.section_name,yyy.priority
+]]>
+	</queryString>
+	<field name="id" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="id"/>
+		<property name="com.jaspersoft.studio.field.label" value="id"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="hrm_employee_job_info"/>
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="employee_name" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="employee_name"/>
+		<property name="com.jaspersoft.studio.field.label" value="employee_name"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="hrm_employee"/>
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="designation_name" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="designation_name"/>
+		<property name="com.jaspersoft.studio.field.label" value="designation_name"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="hrm_designation"/>
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="depertment_name" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="depertment_name"/>
+		<property name="com.jaspersoft.studio.field.label" value="depertment_name"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="hrm_depertment"/>
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="education_name" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="education_name"/>
+		<property name="com.jaspersoft.studio.field.label" value="education_name"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="hrm_education"/>
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="joining_date" class="java.sql.Date">
+		<property name="com.jaspersoft.studio.field.name" value="joining_date"/>
+		<property name="com.jaspersoft.studio.field.label" value="joining_date"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="hrm_employee_joining"/>
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="confirmation_date" class="java.sql.Date">
+		<property name="com.jaspersoft.studio.field.name" value="confirmation_date"/>
+		<property name="com.jaspersoft.studio.field.label" value="confirmation_date"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="hrm_employee_joining"/>
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="category_name" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="category_name"/>
+		<property name="com.jaspersoft.studio.field.label" value="category_name"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="hrm_category"/>
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="section_name" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="section_name"/>
+		<property name="com.jaspersoft.studio.field.label" value="section_name"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="hrm_section"/>
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="priority" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="priority"/>
+		<property name="com.jaspersoft.studio.field.label" value="priority"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="hrm_designation"/>
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="gross_salary" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="gross_salary"/>
+		<property name="com.jaspersoft.studio.field.label" value="gross_salary"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="hrm_employee_job_info"/>
+	</field>
+	<field name="two_festival_bonus" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="two_festival_bonus"/>
+		<property name="com.jaspersoft.studio.field.label" value="two_festival_bonus"/>
+	</field>
+	<field name="pf_contribution" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="pf_contribution"/>
+		<property name="com.jaspersoft.studio.field.label" value="pf_contribution"/>
+	</field>
+	<field name="transport_outOfPocket" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="transport_outOfPocket"/>
+		<property name="com.jaspersoft.studio.field.label" value="transport_outOfPocket"/>
+	</field>
+	<field name="houseRent_allowance" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="houseRent_allowance"/>
+		<property name="com.jaspersoft.studio.field.label" value="houseRent_allowance"/>
+	</field>
+	<field name="fixed_allowance" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="fixed_allowance"/>
+		<property name="com.jaspersoft.studio.field.label" value="fixed_allowance"/>
+	</field>
+	<field name="existing_cost" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="existing_cost"/>
+		<property name="com.jaspersoft.studio.field.label" value="existing_cost"/>
+	</field>
+	<variable name="existing_cost1" class="java.lang.Double" resetType="Group" resetGroup="category_name" calculation="Sum">
+		<variableExpression><![CDATA[$F{existing_cost}]]></variableExpression>
+	</variable>
+	<variable name="existing_cost2" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{existing_cost}]]></variableExpression>
+	</variable>
+	<variable name="two_festival_bonus1" class="java.lang.Double" resetType="Group" resetGroup="category_name" calculation="Sum">
+		<variableExpression><![CDATA[$F{two_festival_bonus}]]></variableExpression>
+	</variable>
+	<variable name="two_festival_bonus2" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{two_festival_bonus}]]></variableExpression>
+	</variable>
+	<variable name="pf_contribution1" class="java.lang.Double" resetType="Group" resetGroup="category_name" calculation="Sum">
+		<variableExpression><![CDATA[$F{pf_contribution}]]></variableExpression>
+	</variable>
+	<variable name="pf_contribution2" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{pf_contribution}]]></variableExpression>
+	</variable>
+	<variable name="transport_outOfPocket1" class="java.lang.Double" resetType="Group" resetGroup="category_name" calculation="Sum">
+		<variableExpression><![CDATA[$F{transport_outOfPocket}]]></variableExpression>
+	</variable>
+	<variable name="transport_outOfPocket2" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{transport_outOfPocket}]]></variableExpression>
+	</variable>
+	<variable name="houseRent_allowance1" class="java.lang.Double" resetType="Group" resetGroup="category_name" calculation="Sum">
+		<variableExpression><![CDATA[$F{houseRent_allowance}]]></variableExpression>
+	</variable>
+	<variable name="houseRent_allowance2" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{houseRent_allowance}]]></variableExpression>
+	</variable>
+	<variable name="fixed_allowance1" class="java.lang.Double" resetType="Group" resetGroup="category_name" calculation="Sum">
+		<variableExpression><![CDATA[$F{fixed_allowance}]]></variableExpression>
+	</variable>
+	<variable name="fixed_allowance2" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{fixed_allowance}]]></variableExpression>
+	</variable>
+	<variable name="existing_cost3" class="java.lang.Double" resetType="Group" resetGroup="category_name" calculation="Sum">
+		<variableExpression><![CDATA[$F{existing_cost}]]></variableExpression>
+	</variable>
+	<variable name="existing_cost4" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{existing_cost}]]></variableExpression>
+	</variable>
+	<group name="category_name">
+		<groupExpression><![CDATA[$F{category_name}]]></groupExpression>
+		<groupHeader>
+			<band height="21">
+				<textField>
+					<reportElement mode="Opaque" x="0" y="0" width="968" height="20" backcolor="#E3E3E3" uuid="19fba5df-376d-4a7a-9cec-e5c2b122b79a">
+						<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					</reportElement>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{category_name}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="15">
+				<staticText>
+					<reportElement x="1" y="0" width="404" height="15" uuid="7f78c429-958d-4014-803c-de13e8480fe7"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="6" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Sub Total :]]></text>
+				</staticText>
+				<textField>
+					<reportElement x="405" y="0" width="46" height="14" uuid="6ce75952-00be-4c16-90fb-1ac8a2d2b527"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="7.5"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{existing_cost1}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="451" y="0" width="44" height="14" uuid="984868e6-2506-46fc-9463-0af33b898de9"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="7.5"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{two_festival_bonus1}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="496" y="0" width="52" height="14" uuid="eed16c08-8a80-4332-ad1e-b4292a0da01b"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="7.5"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{pf_contribution1}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="549" y="0" width="50" height="14" uuid="50b55282-a756-4d7f-ba6d-7cd52b041487"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="7.5"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{transport_outOfPocket1}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="599" y="0" width="48" height="14" uuid="dd1a32c9-2bc1-4261-a818-17d26f283412"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="7.5"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{houseRent_allowance1}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="648" y="0" width="70" height="14" uuid="953c1a95-e44b-494f-98c0-dea8f4e40c89"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="7.5"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{fixed_allowance1}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="719" y="0" width="56" height="14" uuid="0ccc82f2-e6c1-451d-a7a0-2796eaaee196"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="7.5"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{existing_cost3}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="1" splitType="Stretch"/>
+	</title>
+	<pageHeader>
+		<band height="121" splitType="Stretch">
+			<staticText>
+				<reportElement x="683" y="24" width="71" height="16" uuid="ab653476-de6f-462a-9391-1f9ea7ac0ac7"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Print Date:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="683" y="40" width="71" height="20" uuid="aa6c876f-82fa-403b-8d8f-6efc6e9a5089"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Print Time:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="0" y="40" width="679" height="20" uuid="fb22847f-e6ff-4c3c-87ef-1dde5f8d95b2"/>
+				<textElement verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+					<paragraph leftIndent="3"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{title}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="24" width="679" height="16" uuid="9eff8d25-55fc-4ea2-8fa9-d42deb9f0a6f"/>
+				<textElement verticalAlignment="Middle">
+					<font size="12"/>
+					<paragraph leftIndent="3"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{address}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="4" width="679" height="20" uuid="9dbc7da0-9f2a-40aa-a90d-9b34d1b05dc4"/>
+				<textElement verticalAlignment="Middle">
+					<font size="15" isBold="true"/>
+					<paragraph leftIndent="3"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{company_name}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="28" y="83" width="122" height="33" uuid="4b154057-ac00-4fad-8eb3-7ed8171fcaae"/>
+				<textElement verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Name]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="150" y="83" width="60" height="33" uuid="a98e5e10-6331-4a68-911c-06eba00f5213"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Designation]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="83" width="28" height="33" uuid="ead49f38-c9e0-4df8-9a4c-1bbc55014b92"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Sl.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="300" y="83" width="53" height="33" uuid="584bc319-577d-4fee-99fd-352a7a58ccce"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ Joining]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="353" y="83" width="52" height="33" uuid="6d4d2882-3c52-41ce-bc4f-7215e8bd965f"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Confirm.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="495" y="83" width="52" height="33" uuid="7fc455c5-4f8f-4a3c-9f11-a6890a2d3d2f"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[PF Com. Contribution]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="548" y="83" width="50" height="33" uuid="8212631b-b327-4546-a489-0516d6e29fd8"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Transport Allow. / Out Of Pocket]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="598" y="83" width="49" height="33" uuid="4c3261d8-2345-409d-933e-1fd7f30d2d07"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[House Rent Allow.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="648" y="83" width="70" height="33" uuid="d98616e2-94c7-4f3d-a2a2-e75de4a91dab"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="5" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Fixed Allow.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="718" y="83" width="56" height="33" uuid="a4e595cc-777c-4aa0-9bf7-f68444803f1a"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Existing Cost to the Company.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="450" y="83" width="45" height="33" uuid="cba8a9e1-023a-4e3f-8f6c-f6e3623fb0f2"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Monthly Average of 2 Festival Bonus]]></text>
+			</staticText>
+			<line>
+				<reportElement x="0" y="80" width="968" height="1" uuid="81d7579e-0e61-4568-981f-5e887f254ba0"/>
+			</line>
+			<line>
+				<reportElement x="0" y="116" width="968" height="1" uuid="eee2cd30-71f1-40e7-b950-5d4ef7d85b67"/>
+			</line>
+			<staticText>
+				<reportElement x="405" y="83" width="45" height="33" uuid="a90d453d-6dc3-4fff-b8d5-dbcf508c46e0"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Existing Gross  Salary]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="774" y="83" width="192" height="33" uuid="669de546-eeab-4dbc-8f1e-e059bc06eaac"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Remarks]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="210" y="83" width="90" height="33" uuid="8ad113bd-0bc4-4eb4-8fda-04b2d9fb44fd"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Department Name]]></text>
+			</staticText>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band height="19" splitType="Stretch">
+			<textField isStretchWithOverflow="true">
+				<reportElement x="28" y="2" width="122" height="15" uuid="8d2ca7a9-9042-45f7-a5c4-6eb4600f81ef"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{employee_name}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="150" y="2" width="60" height="15" uuid="298f52aa-240e-436a-ac3e-0381868ff431"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{designation_name}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="0" y="2" width="28" height="15" uuid="e5ccaf59-4813-44ca-9d4b-bddaa006938b"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="dd/MM/yyyy">
+				<reportElement x="354" y="2" width="52" height="15" uuid="4171397c-9649-4adf-bc6d-c10e0fa62fb4"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{confirmation_date}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="dd/MM/yyyy">
+				<reportElement x="301" y="2" width="53" height="15" uuid="81a41183-84e2-4f5f-91d0-5959502adf13"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{joining_date}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement mode="Opaque" x="2" y="17" width="778" height="1" forecolor="#030303" backcolor="#0D0808" uuid="3d0f85c0-7669-4f08-a35f-ef07880bef55">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<graphicElement>
+					<pen lineStyle="Solid" lineColor="#0A0A0A"/>
+				</graphicElement>
+			</line>
+			<textField isStretchWithOverflow="true" pattern="#,##0.###;(#,##0.###-)">
+				<reportElement x="406" y="2" width="45" height="15" printWhenGroupChanges="category_name" uuid="2b8e27f4-e59b-4964-8cfa-0e6815f0396f"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{gross_salary}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.###;(#,##0.###-)">
+				<reportElement x="451" y="2" width="45" height="15" printWhenGroupChanges="category_name" uuid="b8a8a209-14fe-4893-96c1-71ec4559215f">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{two_festival_bonus}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.###;(#,##0.###-)">
+				<reportElement x="495" y="2" width="52" height="15" printWhenGroupChanges="category_name" uuid="c6eb3b68-cb73-4bbd-9050-eccb40681db6">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{pf_contribution}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.###;(#,##0.###-)">
+				<reportElement x="549" y="2" width="50" height="15" printWhenGroupChanges="category_name" uuid="749cb969-1f54-44df-8817-47ee0f7a7600">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{transport_outOfPocket}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.###;(#,##0.###-)">
+				<reportElement x="599" y="2" width="49" height="15" printWhenGroupChanges="category_name" uuid="8e99b403-3d7a-4e0a-b058-bb21a99c3ee4">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{houseRent_allowance}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.###;(#,##0.###-)">
+				<reportElement x="648" y="2" width="71" height="15" printWhenGroupChanges="category_name" uuid="f5224159-65cd-44df-bc77-ec9dc8b73c14">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{fixed_allowance}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.###;(#,##0.###-)">
+				<reportElement x="719" y="2" width="56" height="15" printWhenGroupChanges="category_name" uuid="c935372f-1e98-445f-a362-780af433140f">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{existing_cost}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="210" y="2" width="90" height="15" uuid="eeef8ab9-baf0-4b98-a4e1-f5e2935c39f4"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{depertment_name}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="77" splitType="Stretch">
+			<staticText>
+				<reportElement x="1" y="56" width="779" height="16" uuid="c0fe15b9-0d77-4942-a02a-671ca18424df"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Software Generated Report || Design & Developed By : i-infotech Business Solution, www.i-infotechsolution.com]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="130" y="35" width="74" height="15" uuid="97acbb5e-f964-4c75-a5b9-6e2cb067ae95"/>
+				<box topPadding="2">
+					<topPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Executive(A/C)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="683" y="35" width="57" height="15" uuid="fe3d9cd2-3b2e-4ed5-8fdb-ce6437001065"/>
+				<box topPadding="2">
+					<topPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Director]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="13" y="35" width="71" height="15" uuid="816d6729-5ada-4e03-a792-c4f88935431a"/>
+				<box topPadding="2">
+					<topPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Admin(Officer)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="430" y="35" width="57" height="15" uuid="54bb4cbb-1a45-48f3-8a22-b274efd6286c"/>
+				<box topPadding="2">
+					<topPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[G.M(A/C)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="265" y="35" width="57" height="15" uuid="a9e1843e-dfd8-4375-8f9c-a77a7bccaa52"/>
+				<box topPadding="2">
+					<topPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Incharge(A/C)]]></text>
+			</staticText>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="16" splitType="Stretch">
+			<staticText>
+				<reportElement x="1" y="0" width="404" height="15" uuid="39c27bcd-adf0-4612-a39c-858ec4b1f66e"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Grand Total :]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="409" y="0" width="40" height="14" uuid="9eda0d43-b96b-4bd7-8fe7-c5ccb57112ae"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7.5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{existing_cost2}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="451" y="0" width="44" height="14" uuid="6eaab4a4-a0a1-4c54-b0fa-de3fbf761acf"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7.5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{two_festival_bonus2}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="496" y="0" width="50" height="14" uuid="7877fedc-1b51-46e8-bca8-a6b1a6a45ce2"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7.5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{pf_contribution2}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="547" y="0" width="52" height="14" uuid="7c912161-dc74-4c10-a96d-0650063fde9f"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7.5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{transport_outOfPocket2}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="599" y="0" width="48" height="14" uuid="fc7985b4-80c6-4688-be14-f533bbc7abc6"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7.5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{houseRent_allowance2}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="648" y="0" width="70" height="14" uuid="ab7d3af8-bd81-4dd2-96a0-b83c8bbed613"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7.5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{fixed_allowance2}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="719" y="0" width="54" height="14" uuid="9f567b03-331c-4d6c-8df5-3427a52868dd"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7.5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{existing_cost4}]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

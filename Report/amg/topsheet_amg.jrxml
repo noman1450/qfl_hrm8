@@ -1,0 +1,991 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.20.6.final using JasperReports Library version 6.0.2  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="topsheet_amg" pageWidth="942" pageHeight="595" orientation="Landscape" columnWidth="902" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="37346d60-ae4f-448e-b516-4ee982eaacd3">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="HRM Local Database"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="341"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="654"/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<parameter name="condition_parameter" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="title" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="address" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="company_name" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="year_id" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="hrm_month_id" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="pre_hrm_month_id" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="pre_year_id" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="year_month_current" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="year_month_previous" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT 
+    aaaa.location_name,
+    aaaa.section_name,
+    SUM(aaaa.manpower) AS manpower,
+	SUM(aaaa.gross_previous) AS gross_previous,
+    SUM(aaaa.net_total_previous) AS net_total_previous,
+    SUM(aaaa.current_manpower) AS current_manpower,
+    SUM(aaaa.current_gross_amount) AS current_gross_amount,
+    SUM(aaaa.current_additional_amount) AS current_additional_amount,
+    SUM(aaaa.current_deduction_amount) AS current_deduction_amount,
+    SUM(aaaa.current_netpayable) AS current_netpayable,
+    SUM(aaaa.net_total_previous - aaaa.current_netpayable) AS comparative_amount
+FROM
+    (SELECT 
+        aaa.location_name,
+            aaa.section_name,
+            COUNT(aaa.manpower) AS manpower,
+			SUM(aaa.gross_previous) AS gross_previous,
+            SUM(aaa.net_total_previous) AS net_total_previous,
+            aaa.current_manpower AS current_manpower,
+            SUM(aaa.current_gross_amount) AS current_gross_amount,
+            SUM(aaa.current_additional_amount) AS current_additional_amount,
+            SUM(aaa.current_deduction_amount) AS current_deduction_amount,
+            SUM(aaa.current_netpayable) AS current_netpayable
+    FROM
+        (SELECT 
+        aa.location_name,
+            aa.section_name,
+            aa.manpower,
+			SUM(aa.basic_salary + aa.medical_allowance + aa.house_rent + aa.Transportation +  aa.other_allowances) AS gross_previous,
+            SUM(aa.basic_salary + aa.medical_allowance + aa.house_rent + aa.Transportation + aa.others_addition + aa.other_allowances - aa.PF - aa.TDS - aa.others_deduction - aa.loan_advance - aa.attendance_deduction - aa.stamp) AS net_total_previous,
+            0 AS current_manpower,
+            0 AS current_gross_amount,
+            0 AS current_additional_amount,
+            0 AS current_deduction_amount,
+            0 AS current_netpayable
+    FROM
+        (SELECT 
+        e.location_name,
+            i.section_name,
+            aa.id AS manpower,
+            IF(d.id = 1, SUM(b.actual_amount), 0) AS basic_salary,
+            IF(d.id = 8, SUM(b.actual_amount), 0) AS medical_allowance,
+            IF(d.id = 7, SUM(b.actual_amount), 0) AS house_rent,
+            IF(d.id = 11, SUM(b.actual_amount), 0) AS other_allowances,
+            IF(d.id = 18, SUM(b.actual_amount), 0) AS others_addition,
+            IF(d.id = 3, SUM(b.actual_amount), 0) AS attendance_deduction,
+            IF(d.id = 4, SUM(b.actual_amount), 0) AS PF,
+            IF(d.id = 6, SUM(b.actual_amount), 0) AS TDS,
+            IF(d.id = 5, SUM(b.actual_amount), 0) AS others_deduction,
+            IF(d.id = 2, SUM(b.actual_amount), 0) AS loan_advance,
+            IF(d.id = 9, SUM(b.actual_amount), 0) AS stamp,
+            IF(d.id = 10, SUM(b.actual_amount), 0) AS Transportation,
+            aa.payment_mode,
+            i.id AS section_id,
+            aa.by_bank_percent
+    FROM
+        pay_register aa
+    JOIN hrm_employee_job_info a ON aa.hrm_employee_job_info_id = a.id
+        AND aa.year_id = $P{pre_year_id} 
+        AND aa.hrm_month_id = $P{pre_hrm_month_id} 
+    JOIN pay_register_details b ON aa.id = b.pay_register_id
+    JOIN hrm_salary_head c ON b.hrm_salary_head_id = c.id
+    JOIN hrm_salary_head_group d ON c.hrm_salary_head_group_id = d.id
+    JOIN hrm_location e ON aa.hrm_location_id = e.id
+    JOIN hrm_section i ON a.hrm_section_id = i.id
+        $P!{condition_parameter} 
+    GROUP BY i.id , e.location_name , i.section_name , d.id , aa.payment_mode , aa.by_bank_percent , aa.id) aa
+    GROUP BY aa.location_name , aa.section_name , aa.manpower) aaa
+    GROUP BY aaa.location_name , aaa.section_name 
+    
+    UNION ALL 
+    
+    SELECT 
+        aaa.location_name,
+            aaa.section_name,
+            aaa.manpower AS manpower,
+            SUM(aaa.gross_previous) AS gross_previous,
+            SUM(aaa.net_total_previous) AS net_total_previous,
+            COUNT(aaa.current_manpower) AS current_manpower,
+            SUM(aaa.current_gross_amount) AS current_gross_amount,
+            SUM(aaa.current_additional_amount) AS current_additional_amount,
+            SUM(aaa.current_deduction_amount) AS current_deduction_amount,
+            SUM(aaa.current_netpayable) AS current_netpayable
+    FROM
+        (SELECT 
+        aa.location_name,
+            aa.section_name,
+            0 AS manpower,
+            0 AS gross_previous,
+            0 AS net_total_previous,
+            aa.manpower AS current_manpower,
+            SUM(aa.basic_salary + aa.medical_allowance + aa.house_rent + aa.Transportation + aa.other_allowances) AS current_gross_amount,
+            SUM(aa.others_addition) AS current_additional_amount,
+            SUM(aa.PF + aa.TDS + aa.others_deduction + aa.loan_advance + aa.attendance_deduction + aa.stamp) AS current_deduction_amount,
+            SUM(aa.basic_salary + aa.medical_allowance + aa.house_rent + aa.Transportation + aa.others_addition + aa.other_allowances - aa.PF - aa.TDS - aa.others_deduction - aa.loan_advance - aa.attendance_deduction - aa.stamp) AS current_netpayable
+    FROM
+        (SELECT 
+        e.location_name,
+            i.section_name,
+            aa.id AS manpower,
+            IF(d.id = 1, SUM(b.actual_amount), 0) AS basic_salary,
+            IF(d.id = 8, SUM(b.actual_amount), 0) AS medical_allowance,
+            IF(d.id = 7, SUM(b.actual_amount), 0) AS house_rent,
+            IF(d.id = 11, SUM(b.actual_amount), 0) AS other_allowances,
+            IF(d.id = 18, SUM(b.actual_amount), 0) AS others_addition,
+            IF(d.id = 3, SUM(b.actual_amount), 0) AS attendance_deduction,
+            IF(d.id = 4, SUM(b.actual_amount), 0) AS PF,
+            IF(d.id = 6, SUM(b.actual_amount), 0) AS TDS,
+            IF(d.id = 5, SUM(b.actual_amount), 0) AS others_deduction,
+            IF(d.id = 2, SUM(b.actual_amount), 0) AS loan_advance,
+            IF(d.id = 9, SUM(b.actual_amount), 0) AS stamp,
+            IF(d.id = 10, SUM(b.actual_amount), 0) AS Transportation,
+            aa.payment_mode,
+            i.id AS section_id,
+            aa.by_bank_percent
+    FROM
+        pay_register aa
+    JOIN hrm_employee_job_info a ON aa.hrm_employee_job_info_id = a.id
+        AND aa.year_id = $P{year_id} 
+        AND aa.hrm_month_id =   $P{hrm_month_id} 
+    JOIN pay_register_details b ON aa.id = b.pay_register_id
+    JOIN hrm_salary_head c ON b.hrm_salary_head_id = c.id
+    JOIN hrm_salary_head_group d ON c.hrm_salary_head_group_id = d.id
+    JOIN hrm_location e ON aa.hrm_location_id = e.id
+    JOIN hrm_section i ON a.hrm_section_id = i.id
+          $P!{condition_parameter} 
+    GROUP BY i.id , e.location_name , i.section_name , d.id , aa.payment_mode , aa.by_bank_percent , aa.id) aa
+    GROUP BY aa.location_name , aa.section_name , aa.manpower) aaa
+    GROUP BY aaa.location_name , aaa.section_name) aaaa
+GROUP BY aaaa.location_name , aaaa.section_name]]>
+	</queryString>
+	<field name="gross_previous" class="java.lang.Double"/>
+	<field name="location_name" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="location_name"/>
+		<property name="com.jaspersoft.studio.field.label" value="location_name"/>
+	</field>
+	<field name="section_name" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="section_name"/>
+		<property name="com.jaspersoft.studio.field.label" value="section_name"/>
+	</field>
+	<field name="manpower" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.name" value="manpower"/>
+		<property name="com.jaspersoft.studio.field.label" value="manpower"/>
+	</field>
+	<field name="net_total_previous" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="net_total_previous"/>
+		<property name="com.jaspersoft.studio.field.label" value="net_total_previous"/>
+	</field>
+	<field name="current_manpower" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.name" value="current_manpower"/>
+		<property name="com.jaspersoft.studio.field.label" value="current_manpower"/>
+	</field>
+	<field name="current_gross_amount" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="current_gross_amount"/>
+		<property name="com.jaspersoft.studio.field.label" value="current_gross_amount"/>
+	</field>
+	<field name="current_additional_amount" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="current_additional_amount"/>
+		<property name="com.jaspersoft.studio.field.label" value="current_additional_amount"/>
+	</field>
+	<field name="current_deduction_amount" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="current_deduction_amount"/>
+		<property name="com.jaspersoft.studio.field.label" value="current_deduction_amount"/>
+	</field>
+	<field name="current_netpayable" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="current_netpayable"/>
+		<property name="com.jaspersoft.studio.field.label" value="current_netpayable"/>
+	</field>
+	<field name="comparative_amount" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="comparative_amount"/>
+		<property name="com.jaspersoft.studio.field.label" value="comparative_amount"/>
+	</field>
+	<variable name="manpower1" class="java.math.BigDecimal" resetType="Group" resetGroup="location_name" calculation="Sum">
+		<variableExpression><![CDATA[$F{manpower}]]></variableExpression>
+	</variable>
+	<variable name="net_total_previous1" class="java.lang.Double" resetType="Group" resetGroup="location_name" calculation="Sum">
+		<variableExpression><![CDATA[$F{net_total_previous}]]></variableExpression>
+	</variable>
+	<variable name="current_manpower1" class="java.math.BigDecimal" resetType="Group" resetGroup="location_name" calculation="Sum">
+		<variableExpression><![CDATA[$F{current_manpower}]]></variableExpression>
+	</variable>
+	<variable name="current_gross_amount1" class="java.lang.Double" resetType="Group" resetGroup="location_name" calculation="Sum">
+		<variableExpression><![CDATA[$F{current_gross_amount}]]></variableExpression>
+	</variable>
+	<variable name="current_additional_amount1" class="java.lang.Double" resetType="Group" resetGroup="location_name" calculation="Sum">
+		<variableExpression><![CDATA[$F{current_additional_amount}]]></variableExpression>
+	</variable>
+	<variable name="current_deduction_amount1" class="java.lang.Double" resetType="Group" resetGroup="location_name" calculation="Sum">
+		<variableExpression><![CDATA[$F{current_deduction_amount}]]></variableExpression>
+	</variable>
+	<variable name="current_netpayable1" class="java.lang.Double" resetType="Group" resetGroup="location_name" calculation="Sum">
+		<variableExpression><![CDATA[$F{current_netpayable}]]></variableExpression>
+	</variable>
+	<variable name="comparative_amount1" class="java.lang.Double" resetType="Group" resetGroup="location_name" calculation="Sum">
+		<variableExpression><![CDATA[$F{comparative_amount}]]></variableExpression>
+	</variable>
+	<variable name="manpower2" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{manpower}]]></variableExpression>
+	</variable>
+	<variable name="net_total_previous2" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{net_total_previous}]]></variableExpression>
+	</variable>
+	<variable name="current_manpower2" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{current_manpower}]]></variableExpression>
+	</variable>
+	<variable name="current_gross_amount2" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{current_gross_amount}]]></variableExpression>
+	</variable>
+	<variable name="current_additional_amount2" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{current_additional_amount}]]></variableExpression>
+	</variable>
+	<variable name="current_deduction_amount2" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{current_deduction_amount}]]></variableExpression>
+	</variable>
+	<variable name="current_netpayable2" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{current_netpayable}]]></variableExpression>
+	</variable>
+	<variable name="comparative_amount2" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{comparative_amount}]]></variableExpression>
+	</variable>
+	<variable name="gross_previous1" class="java.lang.Double" resetType="Group" resetGroup="location_name" calculation="Sum">
+		<variableExpression><![CDATA[$F{gross_previous}]]></variableExpression>
+	</variable>
+	<variable name="gross_previous2" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{gross_previous}]]></variableExpression>
+	</variable>
+	<group name="location_name">
+		<groupExpression><![CDATA[$F{location_name}]]></groupExpression>
+		<groupHeader>
+			<band height="22">
+				<textField>
+					<reportElement x="0" y="0" width="902" height="20" uuid="aa220554-881b-49d9-b11b-ed5e78cdd9e8">
+						<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					</reportElement>
+					<textElement verticalAlignment="Middle">
+						<font size="14" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{location_name}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="17">
+				<textField pattern="#,##0.###;(#,##0.###-)">
+					<reportElement x="131" y="0" width="62" height="16" uuid="fc0cf391-899d-4b54-9039-32c8184361b3">
+						<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+						<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					</reportElement>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font isBold="true"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{manpower1}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.###;(#,##0.###-)">
+					<reportElement x="260" y="0" width="62" height="16" uuid="e15c334f-98ad-479b-9338-7ce8718def87">
+						<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+					</reportElement>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font isBold="true"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{net_total_previous1}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.###;(#,##0.###-)">
+					<reportElement x="322" y="0" width="80" height="16" uuid="2a196bed-b873-4e54-8d86-68d14cb047a0">
+						<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+					</reportElement>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font isBold="true"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{current_manpower1}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.###;(#,##0.###-)">
+					<reportElement x="402" y="0" width="80" height="16" uuid="8b8e028f-7662-494f-b860-95aa6cd51f97">
+						<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+					</reportElement>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font isBold="true"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{current_gross_amount1}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.###;(#,##0.###-)">
+					<reportElement x="482" y="0" width="80" height="16" uuid="cf98f044-eb0a-4bcd-abe7-e6607ec2e9fa">
+						<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+					</reportElement>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font isBold="true"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{current_additional_amount1}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.###;(#,##0.###-)">
+					<reportElement x="562" y="0" width="80" height="16" uuid="ac5f8f7f-917f-4336-8363-ae4b2555e5ac">
+						<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+					</reportElement>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font isBold="true"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{current_deduction_amount1}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.###;(#,##0.###-)">
+					<reportElement x="642" y="0" width="80" height="16" uuid="7fec6640-2797-4f93-929c-b0c42c950a59">
+						<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+					</reportElement>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font isBold="true"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{current_netpayable1}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.###;(#,##0.###)">
+					<reportElement x="722" y="0" width="80" height="16" uuid="31aa00f2-c392-4b55-8b6a-fb404f371b54">
+						<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+					</reportElement>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font isBold="true"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{comparative_amount1}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="0" y="0" width="130" height="16" uuid="c6f2a4b9-8a86-43d3-8608-ad68b1e68f41"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[Sub-Total Amount :]]></text>
+				</staticText>
+				<textField pattern="#,##0.###;(#,##0.###-)">
+					<reportElement x="193" y="0" width="67" height="16" uuid="831a4799-ddb8-4fab-a6a3-f731e63aba56">
+						<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+					</reportElement>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font isBold="true"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{gross_previous1}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="55" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="1" width="902" height="20" uuid="35aac8ff-0554-4113-b9b7-310d41835f23"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="15" isBold="true"/>
+					<paragraph leftIndent="3"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{company_name}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="21" width="902" height="16" uuid="6879df32-4c78-4109-be85-1a2a87f3e403"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12"/>
+					<paragraph leftIndent="3"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{address}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="37" width="902" height="17" uuid="688b0da5-9c96-4c1f-a778-7a91d4d7e47b">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+					<paragraph leftIndent="3"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{title}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="46" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="130" height="44" uuid="e31b3c39-add5-4e99-a0c9-a7883f801788">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="36357963-4dbb-4aed-95a9-a376ea2f1751"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[Section Name]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="131" y="20" width="62" height="24" uuid="ba96ecaf-17a8-46e8-a102-54c2feba02fe">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9bad6cb8-4a0f-452a-93ff-93e0acafe1e9"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Manpower]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="260" y="20" width="62" height="24" uuid="5b7958d4-2ff1-48b6-b5dc-f0a91ac6a431">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="4818458b-ffb5-4cd7-bf0e-66485eeae24f"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Net Payable Amt.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="322" y="20" width="80" height="24" uuid="c658cb7e-654a-4bb3-a5eb-8c635b599fc3">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="eb474746-799d-4fc6-a7bb-147f3793a04c"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Manpower]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="402" y="20" width="80" height="24" uuid="daedd36f-ac75-4da5-99b9-e0048558a39a">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e966ae98-e6d1-486a-9ecc-7943ff3e5d3f"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Gross Amount]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="482" y="20" width="80" height="24" uuid="342a9cc8-b753-458e-986e-d6a451a583d5">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3668f212-fb81-4d2f-8f6e-32104289e908"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Additional Amount]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="562" y="20" width="80" height="24" uuid="aca0360a-159d-4241-ac52-0a01a1197747">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d1bbe03f-3308-4a78-8831-3d904a1b3406"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Deduction Amount]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="642" y="20" width="80" height="24" uuid="68f0f485-6c14-42fa-975a-47e9b9ef26b0">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="b0eea8d4-de1e-4fa6-bd1f-670bedb2804f"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Net Payable Amt.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="722" y="0" width="80" height="44" uuid="a55e78fe-b480-4220-91dc-d537e77d454a">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="de0e7e63-29b7-42d9-81dd-eb7e76268fbd"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Comparative Amount]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="131" y="0" width="191" height="20" uuid="de1eb95e-50d2-4c5d-aab8-91672b7aace2"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{year_month_previous}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="322" y="0" width="400" height="20" uuid="94fcb536-a3ce-4911-8062-a3367966d0f9">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{year_month_current}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="193" y="20" width="67" height="24" uuid="d58cd321-bee2-4dbb-a63e-a9fa67484f48">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="4818458b-ffb5-4cd7-bf0e-66485eeae24f"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Gross Amount]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="802" y="0" width="100" height="44" uuid="8fca0ede-2766-414e-a7e4-4db7e9574137">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="de0e7e63-29b7-42d9-81dd-eb7e76268fbd"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Remarks]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="19" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="130" height="16" printWhenGroupChanges="location_name" uuid="839a61dd-1aa1-4e67-9c85-8dfef31756c4">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="36357963-4dbb-4aed-95a9-a376ea2f1751"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{section_name}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.###;(#,##0.###-)">
+				<reportElement x="131" y="0" width="62" height="16" printWhenGroupChanges="location_name" uuid="7cdc44f4-4379-4e61-99c9-8d511e84b2f2">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9bad6cb8-4a0f-452a-93ff-93e0acafe1e9"/>
+					<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="9"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{manpower}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.###;(#,##0.###-)">
+				<reportElement x="260" y="0" width="62" height="16" printWhenGroupChanges="location_name" uuid="c128e955-ea10-4b4d-a0a4-869aa5f78ac8">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="4818458b-ffb5-4cd7-bf0e-66485eeae24f"/>
+					<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="9"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{net_total_previous}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.###;(#,##0.###-)">
+				<reportElement x="322" y="0" width="80" height="16" printWhenGroupChanges="location_name" uuid="442ed6ca-e3d4-4dcb-aa58-b81b963a9d4b">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="eb474746-799d-4fc6-a7bb-147f3793a04c"/>
+					<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="9"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{current_manpower}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.###;(#,##0.###-)">
+				<reportElement x="402" y="0" width="80" height="16" printWhenGroupChanges="location_name" uuid="29bd524c-5971-4e94-994d-85e9824b7f51">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e966ae98-e6d1-486a-9ecc-7943ff3e5d3f"/>
+					<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="9"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{current_gross_amount}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.###;(#,##0.###-)">
+				<reportElement x="482" y="0" width="80" height="16" printWhenGroupChanges="location_name" uuid="2ba1c7d3-7ea2-45ab-86ec-605b43bcd6c2">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3668f212-fb81-4d2f-8f6e-32104289e908"/>
+					<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="9"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{current_additional_amount}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.###;(#,##0.###-)">
+				<reportElement x="562" y="0" width="80" height="16" printWhenGroupChanges="location_name" uuid="6f4889b7-b3bd-48a5-9f24-9b45278095b4">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d1bbe03f-3308-4a78-8831-3d904a1b3406"/>
+					<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="9"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{current_deduction_amount}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.###;(#,##0.###-)">
+				<reportElement x="642" y="0" width="80" height="16" printWhenGroupChanges="location_name" uuid="53398737-fee0-4d58-a458-88d73a2a9971">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="b0eea8d4-de1e-4fa6-bd1f-670bedb2804f"/>
+					<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="9"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{current_netpayable}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.###;(#,##0.###)">
+				<reportElement x="722" y="0" width="80" height="16" printWhenGroupChanges="location_name" uuid="96416ef4-ffbf-498a-8881-bb60e96d84fb">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="de0e7e63-29b7-42d9-81dd-eb7e76268fbd"/>
+					<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="9"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{comparative_amount}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="0" y="16" width="902" height="1" uuid="4b53cc5a-0003-4105-94aa-b6fa12053d92"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineStyle="Solid"/>
+				</graphicElement>
+			</line>
+			<textField pattern="#,##0.###;(#,##0.###-)">
+				<reportElement x="193" y="0" width="67" height="17" uuid="e447885c-4183-457b-8be2-cb5c470cae23">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d48b18b4-0dda-4ba6-a7c2-0f23196d45b9"/>
+					<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="9"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{gross_previous}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="15" splitType="Stretch">
+			<textField>
+				<reportElement x="434" y="0" width="80" height="14" uuid="ef9b55ea-d213-4b44-b36c-b1e4909719a1"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="514" y="0" width="68" height="14" uuid="a072cabb-273c-44bd-82a2-a803d88790d1"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="584" y="0" width="80" height="14" uuid="8ebc49bd-7903-47cf-8f15-f21c77dd4a15"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Print Date:]]></text>
+			</staticText>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="664" y="0" width="68" height="14" uuid="7b74cf56-e7b8-44a8-b513-b1ff3b795a38"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<textField pattern="h.mm a">
+				<reportElement x="734" y="0" width="68" height="14" uuid="81cf5742-fe24-4c94-8052-002feb3eba98"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="160" splitType="Stretch">
+			<textField pattern="#,##0.###;(#,##0.###-)">
+				<reportElement x="131" y="0" width="62" height="30" uuid="de842fb2-ebc2-4722-a3e6-a468f2606a7e">
+					<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{manpower2}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.###;(#,##0.###-)">
+				<reportElement x="260" y="0" width="62" height="30" uuid="74c1ed10-53af-49da-b708-4918a689f101">
+					<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{net_total_previous2}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.###;(#,##0.###-)">
+				<reportElement x="322" y="0" width="80" height="30" uuid="d597540f-2eef-4ab5-8450-6a77a33cd7b6">
+					<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{current_manpower2}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.###;(#,##0.###-)">
+				<reportElement x="402" y="0" width="80" height="30" uuid="7d554ae7-7a8f-4c8e-bebe-ced6455cdc9f">
+					<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{current_gross_amount2}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.###;(#,##0.###-)">
+				<reportElement x="482" y="0" width="80" height="30" uuid="02eeb72c-81ec-43c5-bfbc-a4b6bb1f8f99">
+					<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{current_additional_amount2}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.###;(#,##0.###-)">
+				<reportElement x="562" y="0" width="80" height="30" uuid="4a13c243-e65f-408d-9fe0-b298e931576d">
+					<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{current_deduction_amount2}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.###;(#,##0.###-)">
+				<reportElement x="642" y="0" width="80" height="30" uuid="ba3a9573-12ec-4508-9ec2-44d707efb601">
+					<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{current_netpayable2}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.###;(#,##0.###)">
+				<reportElement x="722" y="0" width="80" height="30" uuid="13950f77-8c2a-4595-a89a-f6fba681daf9">
+					<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{comparative_amount2}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="286" y="139" width="74" height="15" uuid="35e9ab43-e455-496f-9b9d-79f0266801ac"/>
+				<box topPadding="2">
+					<topPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Manager(A&F)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="96" y="140" width="65" height="15" uuid="8a84592d-c32d-40d8-a2c1-58633cd6b23a"/>
+				<box topPadding="2">
+					<topPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Sr.Ex(A&F)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="820" y="139" width="81" height="15" uuid="b20b3a0f-31c6-4fd6-8e0e-a8f2d405a859"/>
+				<box topPadding="2">
+					<topPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="7"/>
+				</textElement>
+				<text><![CDATA[Managing Director]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="190" y="139" width="75" height="15" uuid="9ce0f5a7-faa5-4d1c-88a6-aa5ab8d73237"/>
+				<box topPadding="2">
+					<topPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Audit]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="457" y="139" width="73" height="15" uuid="43d65d7c-d89d-459d-bb31-4a2dc9dee0b2"/>
+				<box topPadding="2">
+					<topPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[HO(HR & Admin)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="0" width="130" height="30" uuid="e09a11e6-2c0b-4ca8-ae0e-1218047b3a77"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total Amount :]]></text>
+			</staticText>
+			<textField pattern="#,##0.###;(#,##0.###-)">
+				<reportElement x="193" y="0" width="67" height="30" uuid="a365f921-126d-4df4-a522-0ecc0ede577c">
+					<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{gross_previous2}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="730" y="139" width="68" height="15" uuid="5b783ce2-896b-4fd9-b617-779ea30675af"/>
+				<box topPadding="2">
+					<topPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="7"/>
+				</textElement>
+				<text><![CDATA[DDM]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="638" y="139" width="68" height="15" uuid="33ea0287-23d1-4001-9ff5-0c648b30cb56"/>
+				<box topPadding="2">
+					<topPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="7"/>
+				</textElement>
+				<text><![CDATA[CFO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="546" y="139" width="68" height="15" uuid="e867128d-b4cb-4bd9-ace8-228b196c91f2"/>
+				<box topPadding="2">
+					<topPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="7"/>
+				</textElement>
+				<text><![CDATA[D.G.M(A/C)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="371" y="139" width="73" height="15" uuid="0a345423-afcd-4ef8-b1de-820bbb4e3975"/>
+				<box topPadding="2">
+					<topPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Director (Factory)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="10" y="140" width="65" height="15" uuid="040a00b6-dc29-4fc3-bc24-ad6fcb2f6177"/>
+				<box topPadding="2">
+					<topPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Prepared by-HR]]></text>
+			</staticText>
+		</band>
+	</summary>
+</jasperReport>

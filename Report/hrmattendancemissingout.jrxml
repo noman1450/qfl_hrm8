@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.20.0.final using JasperReports Library version 6.2.2  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="hrmattendancemissingout" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="9438248a-295f-40af-a669-de9baf60f08d">
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="company_name" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="address" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="title" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="condition_parameter" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT 
+    CONCAT(b.employee_name, ' | ', c.employee_code) AS employee_name,
+    e.depertment_name,
+    a.punch_date,
+    a.punch_time,
+    ee.alis
+FROM
+    hrm_attendance_raw_data a
+        JOIN
+    hrm_employee b ON a.hrm_employee_id = b.id 
+        JOIN
+    hrm_employee_job_info c ON b.id = c.hrm_employee_id
+        AND a.hrm_location_id = c.hrm_location_id
+        AND c.id IN (SELECT 
+            MAX(id)
+        FROM
+            hrm_employee_job_info
+        GROUP BY hrm_employee_id)
+        AND a.is_new = 1
+        AND a.valid = 1
+        JOIN
+    hrm_location d ON c.hrm_location_id = d.id
+        JOIN
+    hrm_depertment e ON c.hrm_depertment_id = e.id
+		JOIN
+    hrm_designation ee ON c.hrm_designation_id = ee.id	
+ 
+Group By    e.depertment_name,
+    a.punch_date,
+    a.punch_time,
+    ee.alis,
+b.employee_name,
+c.employee_code
+Order bY e.depertment_name,b.employee_name]]>
+	</queryString>
+	<field name="employee_name" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="depertment_name" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="punch_date" class="java.sql.Date">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="punch_time" class="java.sql.Time">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="alis" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<group name="employee_id">
+		<groupExpression><![CDATA[]]></groupExpression>
+	</group>
+	<group name="department_name">
+		<groupExpression><![CDATA[$F{depertment_name}]]></groupExpression>
+		<groupHeader>
+			<band height="23">
+				<staticText>
+					<reportElement mode="Opaque" x="253" y="-20" width="67" height="17" backcolor="#CCCCCC" uuid="e1fdc48f-7769-4e49-a551-c96fde4c0872"/>
+					<box>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+						<paragraph leftIndent="2"/>
+					</textElement>
+					<text><![CDATA[Punch Date]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Opaque" x="322" y="-20" width="66" height="17" backcolor="#CCCCCC" uuid="82016f96-784a-4b6c-a887-467edf1a9f00"/>
+					<box>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+						<paragraph leftIndent="2"/>
+					</textElement>
+					<text><![CDATA[Punch Time]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Opaque" x="2" y="-20" width="29" height="17" backcolor="#CCCCCC" uuid="15d05834-d6a7-48f2-ab9a-ebf86497a480"/>
+					<box>
+						<rightPen lineWidth="0.5" lineColor="#333333"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+						<paragraph leftIndent="2"/>
+					</textElement>
+					<text><![CDATA[SL]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Opaque" x="390" y="-20" width="103" height="17" backcolor="#CCCCCC" uuid="932b4891-8b58-4805-9678-a233e91b95b0"/>
+					<box>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+						<paragraph leftIndent="2"/>
+					</textElement>
+					<text><![CDATA[Assign Sift Name]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Opaque" x="185" y="-20" width="68" height="17" backcolor="#CCCCCC" uuid="e634483f-9883-40f6-bed8-e7e3b0c68173"/>
+					<box>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+						<paragraph leftIndent="2"/>
+					</textElement>
+					<text><![CDATA[Designation]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Opaque" x="32" y="-20" width="153" height="17" backcolor="#CCCCCC" uuid="b3767662-c419-41ad-8437-78984f242f43"/>
+					<box>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+						<paragraph leftIndent="2"/>
+					</textElement>
+					<text><![CDATA[Employee Name]]></text>
+				</staticText>
+				<textField>
+					<reportElement x="2" y="3" width="486" height="20" uuid="becb165d-f0ee-4586-a91b-e84219834191"/>
+					<textFieldExpression><![CDATA[$F{depertment_name}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="26"/>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="85" splitType="Stretch">
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="479" y="26" width="78" height="15" uuid="927bc2ef-71db-4be0-b723-43354ca9319e"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<textField pattern="h.mm a">
+				<reportElement x="479" y="41" width="78" height="15" uuid="c8085e7e-2f31-45e1-a32b-5ce73696ef13"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="2" y="2" width="377" height="20" uuid="daf5c93d-5979-4433-a047-1d2a4f085d5c"/>
+				<textElement verticalAlignment="Middle">
+					<font size="15" isBold="true"/>
+					<paragraph leftIndent="3"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{company_name}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="437" y="26" width="42" height="15" uuid="5eb923a5-0840-4040-a5dc-8891d9c00351"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Print Date]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="2" y="38" width="452" height="20" uuid="cea068cd-334d-4393-8237-630a7fd0d619"/>
+				<textElement verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+					<paragraph leftIndent="3"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{title}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="437" y="41" width="42" height="15" uuid="486dbb1b-d88c-492b-aabb-2f758fb6d2fc"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Print Time]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="2" y="22" width="377" height="16" uuid="c3bea008-98c2-4aa1-b466-1ac969babdfa"/>
+				<textElement verticalAlignment="Middle">
+					<paragraph leftIndent="3"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{address}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band height="18" splitType="Stretch">
+			<textField>
+				<reportElement x="32" y="2" width="153" height="16" uuid="9985093d-2dd0-4f3a-a47f-88acea8ad51e"/>
+				<textFieldExpression><![CDATA[$F{employee_name}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="185" y="2" width="68" height="14" uuid="1b844274-7ad6-482d-81ac-561b8e9cd6ea"/>
+				<textFieldExpression><![CDATA[$F{alis}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="253" y="2" width="69" height="14" uuid="99d2b30d-0965-4802-96af-8373e038a5f7"/>
+				<textFieldExpression><![CDATA[$F{punch_date}]]></textFieldExpression>
+			</textField>
+			<textField pattern="HH.mm.ss">
+				<reportElement x="322" y="0" width="66" height="16" uuid="40b9897b-5fe0-4e90-bcaa-7bf51d9c48b3"/>
+				<textFieldExpression><![CDATA[$F{punch_time}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="2" y="1" width="29" height="16" uuid="cabb6d9b-6e5c-4f6e-a63d-7b0d2093e0d3"/>
+				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band/>
+	</pageFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>

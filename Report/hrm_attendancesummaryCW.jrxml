@@ -1,0 +1,500 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.20.0.final using JasperReports Library version 6.5.1  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="hrm_attendancesummary" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="9438248a-295f-40af-a669-de9baf60f08d">
+	<property name="ireport.zoom" value="3.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="176"/>
+	<parameter name="company_name" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="address" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="title" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="condition_parameter" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="date_range" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT bb.employee_name,b.employee_code,d.location_name,e.depertment_name,f.alis as designation_name,i.category_name,j.section_name,f.priority,
+SUM(a.Absent+a.Present+a.Leavess+a.halfDayleave+a.OSD+a.Late+a.Friday+a.Holiday+a.withoutpayleave+a.withoutpayhalfdayleavewithoutpay
++a.HolidayAgainstLeave+a.QuarterDayLeave+a.withoutpayQuarterDayLeave+a.EarlyOut) as total_days,
+SUM(a.Present+a.Leavess+a.halfDayleave+a.OSD+a.Late+a.Friday+a.Holiday+a.EarlyOut+
+a.HolidayAgainstLeave+a.QuarterDayLeave+(a.withoutpayhalfdayleavewithoutpay/2)+
+(a.withoutpayQuarterDayLeave*.75))
+ as payable_days,
+SUM(a.Absent) as Absent,(SUM(a.Present)+sum(a.halfDayleave*.50)+sum(a.QuarterDayLeave*.75)+sum(a.withoutpayhalfdayleavewithoutpay*.50)+sum(a.withoutpayQuarterDayLeave*.75)) as Present,SUM(a.Late) as Late,SUM(a.OSD) as OSD,SUM(a.Friday) as Friday,
+SUM(a.Holiday) as Holiday,SUM(a.HolidayAgainstLeave) as HolidayAgainstLeave,
+SUM((a.Leavess)+(a.halfDayleave/2)+(a.QuarterDayLeave/4)) as withPayLeaves,
+SUM((a.withoutpayleave)+(a.withoutpayhalfdayleavewithoutpay/2)+(a.withoutpayQuarterDayLeave/4)) as withoutPayLeaves,
+SUM(a.EarlyOut) as EarlyOut
+
+FROM
+(SELECT 
+	a.hrm_employee_id,
+    case when a.attendance_status = 1 THEN count(a.id) ELSE 0 END Absent,
+    case when a.attendance_status = 2 THEN count(a.id) ELSE 0 END Present,
+    case when a.attendance_status = 3 THEN count(a.id) ELSE 0 END Leavess,
+    case when a.attendance_status = 4 THEN count(a.id) ELSE 0 END halfDayleave,
+    case when a.attendance_status = 5 THEN count(a.id) ELSE 0 END OSD,
+    case when a.attendance_status = 6 THEN count(a.id) ELSE 0 END Late,
+    case when a.attendance_status = 7 AND a.in_time>'00:00:00'  THEN count(a.id) ELSE 0 END Friday,
+    case when a.attendance_status = 8 AND a.in_time>'00:00:00' THEN count(a.id) ELSE 0 END Holiday,   
+	case when a.attendance_status = 9 THEN count(a.id) ELSE 0 END withoutpayleave,
+    case when a.attendance_status = 10 THEN count(a.id) ELSE 0 END withoutpayhalfdayleavewithoutpay,
+    case when a.attendance_status = 11 THEN count(a.id) ELSE 0 END HolidayAgainstLeave,
+    case when a.attendance_status = 12 THEN count(a.id) ELSE 0 END QuarterDayLeave, 
+    case when a.attendance_status = 13 THEN count(a.id) ELSE 0 END withoutpayQuarterDayLeave,   
+    case when a.attendance_status = 14 THEN count(a.id) ELSE 0 END EarlyOut   
+FROM
+    hrm_attendance a 
+    JOIN hrm_employee_job_info b ON a.hrm_employee_id=b.hrm_employee_id 
+ $P!{date_range}
+ $P!{condition_parameter}
+GROUP BY a.hrm_employee_id,a.attendance_status,a.in_time) a
+JOIN hrm_employee bb On a.hrm_employee_id=bb.id
+JOIN hrm_employee_job_info b On bb.id=b.hrm_employee_id
+Join hrm_location d On b.hrm_location_id=d.id
+JOIN hrm_depertment e On b.hrm_depertment_id=e.id
+Join hrm_designation f On b.hrm_designation_id=f.id
+Join hrm_employee_joining g on b.hrm_employee_id=g.hrm_employee_id
+Join hrm_employment_status h On b.hrm_employment_status_id=h.id
+Join hrm_category i on b.hrm_category_id=i.id
+Join hrm_section j on b.hrm_section_id=j.id
+ $P!{condition_parameter}
+GROUP BY bb.employee_name,b.employee_code,d.location_name,e.depertment_name,f.alis,i.category_name,j.section_name,f.priority
+having SUM(a.Present+a.Leavess+a.halfDayleave+a.OSD+a.Late+a.Friday+a.Holiday+
+a.HolidayAgainstLeave+a.QuarterDayLeave+(a.withoutpayhalfdayleavewithoutpay/2)+
+(a.withoutpayQuarterDayLeave*.75))>0
+Order By j.section_name,f.priority,b.employee_code]]>
+	</queryString>
+	<field name="employee_name" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="employee_code" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="location_name" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="depertment_name" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="designation_name" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="category_name" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="section_name" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="total_days" class="java.math.BigDecimal"/>
+	<field name="payable_days" class="java.math.BigDecimal"/>
+	<field name="Absent" class="java.math.BigDecimal"/>
+	<field name="Present" class="java.math.BigDecimal"/>
+	<field name="Late" class="java.math.BigDecimal"/>
+	<field name="OSD" class="java.math.BigDecimal"/>
+	<field name="Friday" class="java.math.BigDecimal"/>
+	<field name="Holiday" class="java.math.BigDecimal"/>
+	<field name="HolidayAgainstLeave" class="java.math.BigDecimal"/>
+	<field name="withPayLeaves" class="java.math.BigDecimal"/>
+	<field name="EarlyOut" class="java.math.BigDecimal"/>
+	<field name="withoutPayLeaves" class="java.math.BigDecimal"/>
+	<group name="section_name">
+		<groupExpression><![CDATA[$F{section_name}]]></groupExpression>
+		<groupHeader>
+			<band height="22">
+				<textField>
+					<reportElement x="4" y="2" width="395" height="17" uuid="cccea6f0-cf04-4a60-b050-df242e603060"/>
+					<textElement verticalAlignment="Middle">
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{section_name}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="15">
+				<textField>
+					<reportElement x="49" y="0" width="38" height="15" uuid="24b14efa-da5d-4198-ab91-70e9efc4199d"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle"/>
+					<textFieldExpression><![CDATA[$V{section_name_COUNT}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="66" splitType="Stretch">
+			<textField>
+				<reportElement x="641" y="5" width="42" height="15" uuid="d1740e47-d108-4888-9ab5-9b2646e71f83"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="683" y="5" width="29" height="15" uuid="cf8bc805-f0a2-42a4-be37-1d46d7ef4447"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="650" y="20" width="78" height="15" uuid="1e04cdb9-6f76-44ea-8a6b-2e9580ab4765"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<textField pattern="h.mm a">
+				<reportElement x="650" y="35" width="78" height="15" uuid="9bbd0927-1651-4e96-8d52-a528a5719383"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="0" width="377" height="20" uuid="686c0060-65bc-4d17-aa29-24011c2bd7c8"/>
+				<textElement verticalAlignment="Middle">
+					<font size="15" isBold="true"/>
+					<paragraph leftIndent="3"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{company_name}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="20" width="377" height="16" uuid="aa27e13a-e093-4006-b3e5-2c4a6a48aecb"/>
+				<textElement verticalAlignment="Middle">
+					<paragraph leftIndent="3"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{address}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="36" width="600" height="20" uuid="1b94d2e6-11cf-4812-b2ab-c421198849a5"/>
+				<textElement verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+					<paragraph leftIndent="3"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{title}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="608" y="20" width="42" height="15" uuid="aa7f5f4e-9ace-45ca-947d-ad02c0fd54ac"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Print Date]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="608" y="35" width="42" height="15" uuid="0eea85b7-e4bf-4c48-bb2f-7162eca25393"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Print Time]]></text>
+			</staticText>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="24" splitType="Stretch">
+			<staticText>
+				<reportElement mode="Opaque" x="30" y="2" width="103" height="17" backcolor="#CCCCCC" uuid="600314c6-b98c-4a83-80ac-0978e3f5e54b"/>
+				<box>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[Employee Name]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="134" y="2" width="82" height="17" backcolor="#CCCCCC" uuid="a8348786-8ba2-4a06-baa6-6134c7d495d1"/>
+				<box>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[Designation]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="217" y="2" width="61" height="17" backcolor="#CCCCCC" uuid="f45dc1be-359a-404a-a8e3-b87550c12005"/>
+				<box>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[Card No]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="279" y="2" width="84" height="17" backcolor="#CCCCCC" uuid="57867f9f-141a-47c9-b654-4bf50d7dfc91"/>
+				<box>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[Present]]></text>
+			</staticText>
+			<line>
+				<reportElement x="0" y="0" width="768" height="1" uuid="742e49a0-a4db-47eb-851f-30735235b113"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineColor="#333333"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="0" y="19" width="768" height="1" uuid="58f32f14-43ff-4454-9c02-cd5943286422"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineColor="#333333"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="2" width="29" height="17" backcolor="#CCCCCC" uuid="d98b6756-eeec-4e10-8ac6-3992082b4b9e"/>
+				<box>
+					<rightPen lineWidth="0.5" lineColor="#333333"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[SL]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="549" y="2" width="39" height="17" backcolor="#CCCCCC" uuid="d1623fa6-952a-46ce-9ff5-01781ac35d82"/>
+				<box>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[Leave]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="365" y="2" width="34" height="17" backcolor="#CCCCCC" uuid="95d606aa-b3bb-42af-9eac-8b0245fdae2f"/>
+				<box>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[Late]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="517" y="2" width="29" height="17" backcolor="#CCCCCC" uuid="bb237bff-91f9-4cb3-9436-2f5c0078f46d"/>
+				<box>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[A/L]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="430" y="2" width="36" height="17" backcolor="#CCCCCC" uuid="02f420ee-4c61-4695-89f7-760ea8f1acb1"/>
+				<box>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[Friday Present]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="468" y="2" width="47" height="17" backcolor="#CCCCCC" uuid="75b92cb4-5a4c-48f8-a1e3-611d140aac17"/>
+				<box>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[Holiday Present]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="401" y="2" width="27" height="17" backcolor="#CCCCCC" uuid="af0c326c-4ba9-41ec-bc0d-2aed3614f3b2"/>
+				<box>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[OSD]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="693" y="2" width="75" height="17" backcolor="#CCCCCC" uuid="1dedd338-6187-49a6-a589-c977d99f4222"/>
+				<box>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[Total Payble]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="641" y="2" width="50" height="17" forecolor="#FC1B17" backcolor="#CCCCCC" uuid="83705af8-eb0d-4574-8517-945ba454ed3e"/>
+				<box>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[Leave (without Pay)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="589" y="2" width="50" height="17" backcolor="#CCCCCC" uuid="8331c13d-06db-4b0b-8ad8-831d970fc119"/>
+				<box>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[Early Out]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="18" splitType="Stretch">
+			<textField>
+				<reportElement x="30" y="0" width="103" height="15" uuid="e329f4a9-1a69-4ab6-aabb-5d190159f00e"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{employee_name}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement positionType="FixRelativeToBottom" x="0" y="15" width="768" height="1" uuid="e02b55fb-f505-4ecc-9a32-15cade979a8e"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineColor="#999999"/>
+				</graphicElement>
+			</line>
+			<textField>
+				<reportElement x="134" y="0" width="82" height="15" uuid="e1372548-677f-4212-98f0-0585c63683bd"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{designation_name}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0.00">
+				<reportElement x="279" y="0" width="84" height="15" uuid="f2f03795-eab7-43c8-8110-3a93a8b0b54c"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Present}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="364" y="0" width="35" height="15" uuid="7e0d895c-bf0a-43c3-b9f7-b3248c957aa0"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Late}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="400" y="0" width="28" height="15" uuid="86b788ca-e77d-4325-98f1-1bb66e83d4b8"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{OSD}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="217" y="0" width="62" height="15" uuid="277d4480-96be-43a0-9d1c-e94d571087a3"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{employee_code}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="4" y="0" width="26" height="15" uuid="90ff5862-da63-4d21-a05d-8553c3a0998d"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="430" y="0" width="36" height="15" uuid="6babefef-b816-451e-922c-7b0f9d20a815"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Friday}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="468" y="0" width="47" height="15" uuid="82e0d1f5-1b44-4943-aae3-d1f4e1e50cb7"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Holiday}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="517" y="0" width="29" height="15" uuid="cd250835-1d7a-4e0d-bd02-c611b49c3de7"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{HolidayAgainstLeave}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0.00">
+				<reportElement x="549" y="0" width="39" height="15" uuid="dccca7e6-615d-4f34-98ed-b368a143e283"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{withPayLeaves}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0.00">
+				<reportElement x="641" y="0" width="50" height="15" forecolor="#FC1B17" uuid="de64c7cf-3c07-4a90-8128-353f9dab80c5"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{withoutPayLeaves}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0.00">
+				<reportElement x="693" y="0" width="75" height="15" uuid="b3fce089-45a4-4b38-8e44-a2222c361b3b"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{payable_days}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="588" y="0" width="52" height="15" uuid="334fb491-5c41-4126-b8e5-1977febfeaa2"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{EarlyOut}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="17">
+			<staticText>
+				<reportElement x="0" y="0" width="555" height="16" uuid="c4b1f6f2-b196-4216-843e-f6fc4b3e5c85"/>
+				<textElement textAlignment="Center">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Software Generated Report || Design & Developed By : i-infotech Business Solution, www.i-infotechsolution.com]]></text>
+			</staticText>
+		</band>
+	</pageFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>

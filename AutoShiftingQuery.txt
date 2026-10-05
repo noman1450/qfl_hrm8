@@ -1,0 +1,74 @@
+
+// Employee Shift Find out
+
+SELECT
+    SUBTIME(c.start_time, '1:00:00'), c.start_time
+FROM
+    hrm_employee_shift_auto a
+        JOIN
+    hrm_employee_job_info b ON a.hrm_employee_job_info_id = b.id
+        AND b.employee_activity = 1
+        AND b.hrm_employee_id = 15
+        AND '2022-12-19' BETWEEN a.start_date AND IFNULL(a.end_date, CURDATE())
+        JOIN
+    hrm_shift c ON a.hrm_shift_id = c.id;
+
+   ===============// Employee Shift Find out======================
+
+
+
+
+
+//  Allowcate Shift Query
+
+
+SELECT
+    a.hrm_shift_id, a.start_date, a.end_date, a.valid, a.hrm_employee_job_info_id, a.users_id, a.comment, CURDATE() as created_at, CURDATE() as updated_at
+FROM
+    hrm_employee_shift_auto a
+        JOIN
+    hrm_employee_job_info b ON a.hrm_employee_job_info_id = b.id
+        AND b.employee_activity = 1
+        AND b.hrm_employee_id in (15,16,17,18,20)
+        AND '2022-12-19' BETWEEN a.start_date AND IFNULL(a.end_date, CURDATE())
+        JOIN
+    hrm_shift c ON a.hrm_shift_id = c.id
+        JOIN
+    (SELECT
+      min(punch_time) as punch_time, hrm_employee_id
+    FROM
+        hrm_attendance_raw_data
+    WHERE
+        hrm_employee_id in (15,16,17,18,20)
+            AND punch_date = CURDATE()
+            group by hrm_employee_id
+   ) aa ON b.hrm_employee_id = aa.hrm_employee_id
+        AND aa.punch_time BETWEEN SUBTIME(c.start_time, '1:00:00') AND c.end_time;
+
+
+//  Allocate Shift Query
+
+
+
+............... INSERT QUERY**
+INSERT INTO hrm_employee_shift_auto (hrm_shift_id, start_date, end_date, valid, hrm_employee_job_info_id, users_id, comment, created_at, updated_at)
+SELECT 
+    a.hrm_shift_id,
+    '2023-07-25' AS start_date,
+    NULL AS end_date,
+    1 AS valid,
+    a.hrm_employee_job_info_id,
+    1 AS users_id,
+    '' AS comment,
+    '2023-07-25 06:49:13' AS created_at,
+    '2023-07-25 06:49:13' AS updated_at
+FROM
+    hrm_employee_shift a
+        JOIN
+    hrm_employee_job_info b ON a.hrm_employee_job_info_id = b.id
+        AND b.hrm_location_id = 1
+        AND b.employee_activity = 1
+GROUP BY a.hrm_shift_id , a.hrm_employee_job_info_id
+ORDER BY a.hrm_employee_job_info_id
+............... INSERT QUERY**
+

@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="hrm_kpi_mark_deduct_subreport" language="groovy" pageWidth="290" pageHeight="802" columnWidth="290" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="e503f0e8-a35e-41a7-bb4c-5a878f27f6f2">
+	<property name="ireport.zoom" value="2.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="id" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT 
+    a.activity_date, a.point, b.file_type_name
+FROM
+    hrm_kpi_employee_mark_deduct a
+        JOIN
+    hrm_file_type b ON a.hrm_file_type_id = b.id
+        AND a.hrm_kpi_employee_master_id = $P{id}
+ORDER BY b.id]]>
+	</queryString>
+	<field name="activity_date" class="java.sql.Date">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="point" class="java.lang.Double">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="file_type_name" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<variable name="actual_amount_1" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[]]></variableExpression>
+	</variable>
+	<variable name="point_1" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{point}]]></variableExpression>
+	</variable>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="36" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="15" width="68" height="20" uuid="5396ab5e-9202-413c-8780-55defe510bc3"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Activity Date]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="68" y="15" width="173" height="20" uuid="c0d84867-f31a-4ecc-98b8-6467853775fa"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[Deduction Name]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="241" y="15" width="49" height="20" uuid="ae6e3034-d866-4457-8b4c-1f8284256df5"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Point(s)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="1" width="290" height="14" forecolor="#E41B1B" uuid="2df80abf-d933-4810-950d-298603ce6563"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true" isItalic="true" isUnderline="true"/>
+				</textElement>
+				<text><![CDATA[Deduction Point(s) Details]]></text>
+			</staticText>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band height="23" splitType="Stretch">
+			<line>
+				<reportElement x="0" y="22" width="290" height="1" forecolor="#DADADA" uuid="66744e99-ccf8-4ed9-b920-1abc6d0b72f3"/>
+			</line>
+			<staticText>
+				<reportElement x="237" y="1" width="4" height="19" uuid="8d7f05ec-01ee-444a-aa87-f41620497282"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="0" y="0" width="68" height="20" uuid="87133763-c962-4dc7-a23b-59f573230e61"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{activity_date}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="68" y="0" width="169" height="20" uuid="73dc258e-a922-4f32-86c8-d9a9e937653b"/>
+				<textElement verticalAlignment="Middle">
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{file_type_name}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0.00">
+				<reportElement x="241" y="0" width="49" height="20" uuid="49fb0277-eebb-40b7-85cd-b684bc70e927"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{point}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="22" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="1" width="237" height="20" uuid="dda9e7df-f42f-4089-93bb-86d554567f4a"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total Deduct Point]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="237" y="1" width="4" height="19" uuid="d85ca5bb-5e9d-4480-96f4-625095c8ce86"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+			<textField pattern="###0.00">
+				<reportElement x="241" y="1" width="49" height="20" uuid="3a18570e-9204-4f37-ab17-3c5e8ddf6d88"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{point_1}]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

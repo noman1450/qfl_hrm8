@@ -1,0 +1,444 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.20.0.final using JasperReports Library version 6.2.2  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="hrm_monthly_ot_top_sheet" language="groovy" pageWidth="635" pageHeight="595" columnWidth="595" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="9438248a-295f-40af-a669-de9baf60f08d">
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="company_name" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="address" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="title" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="condition_parameter" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="condition_parameter1" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT 
+    aa.category_name,
+    SUM(aa.count) AS count,
+    SUM(aa.gross_salary) AS gross_salary,
+    SUM(aa.basic_salary) AS basic_salary,
+    SUM(aa.net_overtime) AS net_overtime,
+    SUM(aa.total_amount) AS total_amount,
+    SUM(aa.last_month_amount) AS last_month_amount
+FROM
+    (SELECT 
+        e.category_name,
+            COUNT(a.id) AS count,
+            SUM(b.gross_salary) AS gross_salary,
+            SUM(b.basic_salary) AS basic_salary,
+         SUM((b.net_overtime * b.rate) / b.actual_ot_rate) as net_overtime,
+            ROUND( SUM((b.net_overtime * b.rate)+b.addition_amt-b.deduction_amt)) AS total_amount,
+            0 AS last_month_amount
+    FROM
+        hrm_ot_process_master a
+    JOIN hrm_ot_process_details b ON a.id = b.hrm_ot_process_master_id
+        AND a.process_status <> 0
+    JOIN hrm_employee_job_info c ON b.hrm_employee_job_info_id = c.id
+     $P!{condition_parameter} 
+    JOIN hrm_employee d ON c.hrm_employee_id = d.id
+    JOIN hrm_category e ON c.hrm_category_id = e.id
+    GROUP BY e.id UNION ALL SELECT 
+        e.category_name,
+            0 AS count,
+            0 AS gross_salary,
+            0 AS basic_salary,
+            0 AS net_overtime,
+            0 AS total_amount,
+            ROUND( SUM((b.net_overtime * b.rate)+b.addition_amt-b.deduction_amt)) AS last_month_amount
+    FROM
+        hrm_ot_process_master a
+    JOIN hrm_ot_process_details b ON a.id = b.hrm_ot_process_master_id
+        AND a.process_status <> 0
+    JOIN hrm_employee_job_info c ON b.hrm_employee_job_info_id = c.id
+     $P!{condition_parameter1} 
+    JOIN hrm_employee d ON c.hrm_employee_id = d.id
+    JOIN hrm_category e ON c.hrm_category_id = e.id
+    GROUP BY e.id) aa
+GROUP BY aa.category_name]]>
+	</queryString>
+	<field name="category_name" class="java.lang.String"/>
+	<field name="count" class="java.math.BigDecimal"/>
+	<field name="gross_salary" class="java.lang.Double"/>
+	<field name="basic_salary" class="java.lang.Double"/>
+	<field name="net_overtime" class="java.lang.Double"/>
+	<field name="total_amount" class="java.lang.Double"/>
+	<field name="last_month_amount" class="java.lang.Double"/>
+	<variable name="count1" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{count}]]></variableExpression>
+	</variable>
+	<variable name="gross_salary1" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{gross_salary}]]></variableExpression>
+	</variable>
+	<variable name="basic_salary1" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{basic_salary}]]></variableExpression>
+	</variable>
+	<variable name="net_overtime1" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{net_overtime}]]></variableExpression>
+	</variable>
+	<variable name="total_amount1" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{total_amount}]]></variableExpression>
+	</variable>
+	<variable name="last_month_amount1" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{last_month_amount}]]></variableExpression>
+	</variable>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="65" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="595" height="20" uuid="686c0060-65bc-4d17-aa29-24011c2bd7c8"/>
+				<textElement verticalAlignment="Middle">
+					<font size="15" isBold="true"/>
+					<paragraph leftIndent="3"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{company_name}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="20" width="595" height="16" uuid="aa27e13a-e093-4006-b3e5-2c4a6a48aecb"/>
+				<textElement verticalAlignment="Middle">
+					<paragraph leftIndent="3"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{address}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="36" width="595" height="20" uuid="1b94d2e6-11cf-4812-b2ab-c421198849a5"/>
+				<textElement verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+					<paragraph leftIndent="3"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{title}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="23" splitType="Stretch">
+			<staticText>
+				<reportElement mode="Opaque" x="41" y="3" width="127" height="17" backcolor="#CCCCCC" uuid="600314c6-b98c-4a83-80ac-0978e3f5e54b"/>
+				<box>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+					<paragraph leftIndent="3"/>
+				</textElement>
+				<text><![CDATA[Category Name]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="170" y="3" width="49" height="17" backcolor="#CCCCCC" uuid="a8348786-8ba2-4a06-baa6-6134c7d495d1"/>
+				<box>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[No of Employee]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="290" y="3" width="70" height="17" backcolor="#CCCCCC" uuid="f45dc1be-359a-404a-a8e3-b87550c12005"/>
+				<box>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[Basic]]></text>
+			</staticText>
+			<line>
+				<reportElement x="0" y="1" width="595" height="1" uuid="742e49a0-a4db-47eb-851f-30735235b113"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineColor="#333333"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="3" width="41" height="17" backcolor="#CCCCCC" uuid="d98b6756-eeec-4e10-8ac6-3992082b4b9e"/>
+				<box>
+					<rightPen lineWidth="0.5" lineColor="#333333"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[SL]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="219" y="3" width="71" height="17" backcolor="#CCCCCC" uuid="28c46517-5d86-4d20-80dd-87165e9eabdc"/>
+				<box>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[Gross]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="430" y="3" width="79" height="17" backcolor="#CCCCCC" uuid="3b048044-3479-4941-adbe-acc9c1fd7f39"/>
+				<box>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[Total Amount]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="360" y="3" width="70" height="17" backcolor="#CCCCCC" uuid="354dd6de-3386-4bec-bc93-fb47f151b7ba"/>
+				<box>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[Hours]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="510" y="3" width="85" height="17" backcolor="#CCCCCC" uuid="1013fad0-7b7d-4c0d-b5d3-618e58fd55d1"/>
+				<box>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[Previous Month Amount]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="27" splitType="Stretch">
+			<line>
+				<reportElement x="0" y="20" width="595" height="1" uuid="4b52969f-c497-4522-b47d-43dda05afdf1"/>
+				<graphicElement>
+					<pen lineWidth="0.25" lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<textField>
+				<reportElement x="0" y="0" width="39" height="18" uuid="1e642ba6-c576-4171-be17-68a206570c63"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="&#xA;SansSerif" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="40" y="0" width="128" height="18" uuid="871af29d-96ba-4fdb-b0be-748f8841c093"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="&#xA;SansSerif" size="9"/>
+					<paragraph leftIndent="3"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{category_name}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="168" y="0" width="51" height="18" uuid="c85f8431-deea-47d8-8f10-cbdb29495a5d"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="&#xA;SansSerif" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{count}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,###.###;(#,###.###-)">
+				<reportElement x="219" y="0" width="71" height="18" uuid="349bcfc5-a3e2-458c-97c6-5bf3f37d328d"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="&#xA;SansSerif" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{gross_salary}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,###.###;(#,###.###-)">
+				<reportElement x="290" y="0" width="70" height="18" uuid="a46964eb-89c6-4dd6-94be-629d8aff45fc"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="&#xA;SansSerif" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{basic_salary}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,###.###;(#,###.###-)">
+				<reportElement x="430" y="0" width="79" height="18" uuid="b7a7ed4a-299b-4d9f-ab13-b91b1dc7bfbe"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="&#xA;SansSerif" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{total_amount}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,###.###;(#,###.###-)">
+				<reportElement x="509" y="0" width="86" height="18" uuid="f54c0fdf-7c95-40fa-a03d-e36ac8576651"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="&#xA;SansSerif" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{last_month_amount}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,###.###;(#,###.###-)">
+				<reportElement x="360" y="0" width="70" height="18" uuid="8b13e665-b379-402a-9e4d-8dce1a5d7c39"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="&#xA;SansSerif" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{net_overtime}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="33">
+			<staticText>
+				<reportElement x="0" y="16" width="595" height="16" uuid="c4b1f6f2-b196-4216-843e-f6fc4b3e5c85"/>
+				<textElement textAlignment="Center">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Software Generated Report || Design & Developed By : i-infotech Business Solution, www.i-infotechsolution.com]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="133" y="-1" width="49" height="15" uuid="4f44bc4b-ad04-4e1a-870e-ab918cd06976"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Print Date]]></text>
+			</staticText>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="183" y="-1" width="90" height="15" uuid="b81dcfe5-9ea1-4e60-82f9-25d04671ba46"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<textField pattern="h.mm a">
+				<reportElement x="273" y="-1" width="93" height="15" uuid="9aa0b483-dcf0-453e-89cf-70d7fde0c64b"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="367" y="-1" width="92" height="15" uuid="e566f78f-7b27-4550-b74a-49ccc1380989"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="461" y="-1" width="134" height="15" uuid="5b39e2f2-0f13-43c4-9ecb-50be01499661"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="154">
+			<staticText>
+				<reportElement x="0" y="0" width="166" height="21" uuid="2f1bb5c3-1adb-431d-ab2d-169193b8c5b5"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[TOTAL]]></text>
+			</staticText>
+			<textField pattern="#,###.###;(#,###.###-)">
+				<reportElement x="166" y="0" width="52" height="20" uuid="10b10dcc-955b-41c8-b247-f5771c488efb"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{count1}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,###.###;(#,###.###-)">
+				<reportElement x="219" y="0" width="71" height="20" uuid="6690e986-058b-44f6-b86f-6426f6673578"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{gross_salary1}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,###.###;(#,###.###-)">
+				<reportElement x="290" y="0" width="70" height="20" uuid="bd2eacff-2903-45df-9b31-61259b27e453"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{basic_salary1}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,###.###;(#,###.###-)">
+				<reportElement x="360" y="0" width="70" height="20" uuid="5bd1e929-019b-49e7-a097-03e652950a64"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{net_overtime1}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,###.###;(#,###.###-)">
+				<reportElement x="430" y="0" width="79" height="20" uuid="5d44c24e-c011-4c33-aff3-1121863232a7"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{total_amount1}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,###.###;(#,###.###-)">
+				<reportElement x="510" y="0" width="84" height="20" uuid="c8a9be17-934a-4ba3-87c0-d577f8349d0b"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{last_month_amount1}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="115" width="70" height="20" uuid="902beda1-ea48-4f66-837c-a821b2eeadfa"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Prepared By ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="180" y="115" width="70" height="20" uuid="ce7806b7-8d85-495f-8523-af8713f69f13"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Checked By ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="345" y="115" width="70" height="20" uuid="e2a5f280-2341-4d39-85b8-4ffd337f8747"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Verified By ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="517" y="115" width="70" height="20" uuid="d27106d2-05cb-4d31-a1c3-819dd459ea6a"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Approved By ]]></text>
+			</staticText>
+		</band>
+	</summary>
+</jasperReport>

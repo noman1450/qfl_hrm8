@@ -1,0 +1,1 @@
+<embed src="{{ asset($applicant->attachment) }}" style="width: 100%" height="600px" />

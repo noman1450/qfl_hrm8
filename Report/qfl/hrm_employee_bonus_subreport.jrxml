@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.16.0.final using JasperReports Library version 6.4.0  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="hrm_employee_bonus_subreport" language="groovy" pageWidth="170" pageHeight="842" columnWidth="130" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="22933b49-9bd5-415b-9ede-e76da4ba5bf1">
+	<property name="ireport.zoom" value="2.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="QFL_SERVER"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="203"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="792"/>
+	<parameter name="condition_parameter" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT 
+    SUM(a.bonus_amount) as net_total,
+    a.payment_mode,
+    IF(a.payment_mode=1,'CASH',(SELECT short_name FROM hrm_bank where a.hrm_bank_id=hrm_bank.id)) as payment_mode_name
+
+FROM
+    hrm_employee_bonus_master aa
+        JOIN
+    hrm_employee_bonus a ON aa.id = a.hrm_employee_bonus_master_id
+        AND aa.is_valid = 1
+        AND a.is_valid = 1
+        JOIN
+    hrm_employee_job_info b ON a.hrm_employee_job_info_id = b.id
+        JOIN
+    hrm_employee c ON b.hrm_employee_id = c.id
+        JOIN
+    hrm_depertment d ON b.hrm_depertment_id = d.id
+        JOIN
+    hrm_location e ON b.hrm_location_id = e.id
+        JOIN
+    hrm_designation f ON b.hrm_designation_id = f.id
+        JOIN
+    hrm_section g ON b.hrm_section_id = g.id
+		JOIN
+	hrm_employee_joining h ON c.id=h.hrm_employee_id
+
+GROUP BY a.payment_mode,a.hrm_bank_id]]>
+	</queryString>
+	<field name="net_total" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="net_total"/>
+		<property name="com.jaspersoft.studio.field.label" value="net_total"/>
+	</field>
+	<field name="payment_mode" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="payment_mode"/>
+		<property name="com.jaspersoft.studio.field.label" value="payment_mode"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="hrm_employee_bonus"/>
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="payment_mode_name" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="payment_mode_name"/>
+		<property name="com.jaspersoft.studio.field.label" value="payment_mode_name"/>
+	</field>
+	<variable name="net_total_1" class="java.lang.Double" resetType="Column" calculation="Sum">
+		<variableExpression><![CDATA[$F{net_total}]]></variableExpression>
+	</variable>
+	<variable name="net_total_2" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{net_total}]]></variableExpression>
+	</variable>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band splitType="Stretch"/>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band height="24" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="1" width="51" height="20" uuid="781e2b6a-06d2-4c7e-879e-0a432b8e187d"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{payment_mode_name}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0">
+				<reportElement x="51" y="1" width="79" height="20" uuid="2238993e-bc93-45af-80a1-64902b141ab5"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{net_total}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="0" y="21" width="130" height="1" uuid="106ac63c-fc23-45e4-8e3c-815ce8b6c476"/>
+			</line>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="22" splitType="Stretch">
+			<textField pattern="#,##0">
+				<reportElement x="51" y="1" width="79" height="20" uuid="ab82cf64-bc34-4751-97ab-d00e913c0ce4"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{net_total_2}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="1" width="51" height="20" uuid="7c405c67-6177-4374-9767-9c642347ed6d"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total :]]></text>
+			</staticText>
+		</band>
+	</summary>
+</jasperReport>

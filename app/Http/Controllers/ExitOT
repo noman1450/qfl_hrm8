@@ -1,0 +1,48 @@
+
+//Excit OT LIMIT
+
+SELECT 
+    a.hrm_employee_id,
+    a.eligible_ot_hour,
+    c.overtime_time,
+    a.apply_date
+FROM
+    hrm_eligible_ot_employee a
+        JOIN
+    hrm_employee_job_info b ON a.hrm_employee_id = b.hrm_employee_id
+        AND a.isActive = 1
+        AND b.hrm_location_id = 2
+        AND a.apply_date = '2022-11-01'
+        AND b.overtime_status = 1
+        JOIN
+    hrm_attendance c ON b.hrm_employee_id = c.hrm_employee_id
+        AND c.punche_date = a.apply_date
+        AND b.hrm_location_id = c.hrm_location_id
+        AND DATE_ADD(a.eligible_ot_hour, INTERVAL 30 MINUTE)<c.overtime_time
+GROUP BY a.hrm_employee_id
+
+==============================================================================================================
+
+
+//
+
+
+SELECT 
+    a.hrm_employee_id,
+    a.eligible_ot_hour,
+    c.overtime_time,
+    a.apply_date
+FROM
+    hrm_eligible_ot_employee a
+        JOIN
+    hrm_employee_job_info b ON a.hrm_employee_id = b.hrm_employee_id
+        AND a.isActive = 1
+        AND b.hrm_location_id = 2
+        AND a.apply_date = '2022-11-01'
+        AND b.overtime_status = 1
+        JOIN
+    hrm_attendance c ON b.hrm_employee_id = c.hrm_employee_id
+        AND c.punche_date = a.apply_date
+        AND b.hrm_location_id = c.hrm_location_id
+        AND a.eligible_ot_hour<c.overtime_time
+GROUP BY a.hrm_employee_id

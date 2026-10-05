@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="hrm_salary_subreport" language="groovy" pageWidth="170" pageHeight="842" columnWidth="130" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="22933b49-9bd5-415b-9ede-e76da4ba5bf1">
+	<property name="ireport.zoom" value="2.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="year_id" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="hrm_month_id" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="condition_parameter" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT SUM(aa.basic_salary+aa.medical_allowance+aa.house_rent+others_addition-aa.PF-aa.TDS-aa.others_deduction-aa.loan_advance-aa.attendance_deduction) as
+net_total,aa.payment_mode,aa.payment_mode_name
+FROM
+(SELECT
+	e.id,
+    concat(e.employee_name,' | ',a.employee_code) as employee_name,
+    f.depertment_name,
+    g.alis as designation_name,
+    aa.accounts_code,
+    e.tin,
+    h.joining_date,
+    h.confirmation_date,
+    aa.day_of_month,
+    aa.total_present,
+    (aa.day_of_month - aa.total_present) AS absent,
+    IF(d.id = 1,
+        SUM(b.actual_amount),
+        0) AS basic_salary,
+    IF(d.id = 4,
+        SUM(b.actual_amount),
+        0) AS medical_allowance,
+	   IF(d.id = 5,
+        SUM(b.actual_amount),
+        0) AS house_rent,
+		     IF(d.id = 14,
+        SUM(b.actual_amount),
+        0) AS others_addition,
+          IF(d.id = 3,
+        SUM(b.actual_amount),
+        0) AS attendance_deduction,
+       IF(d.id = 6,
+        SUM(b.actual_amount),
+        0) AS PF,
+	     IF(d.id = 7,
+        SUM(b.actual_amount),
+        0) AS TDS,
+		     IF(d.id = 15,
+        SUM(b.actual_amount),
+        0) AS others_deduction,
+	     IF(d.id = 2,
+        SUM(b.actual_amount),
+        0) AS loan_advance,
+        
+    aa.payment_mode,
+    aa.account_no,
+    g.priority,
+    i.section_name,
+    i.id as section_id,
+    a.employee_code,
+    IF(aa.payment_mode=1,'CASH',(SELECT short_name FROM hrm_bank where aa.hrm_bank_id=hrm_bank.id)) as payment_mode_name
+FROM
+    pay_register aa
+        JOIN
+    hrm_employee_job_info a ON aa.hrm_employee_job_info_id = a.id
+        AND aa.year_id = $P{year_id}
+        AND aa.hrm_month_id = $P{hrm_month_id}
+        JOIN
+    pay_register_details b ON aa.id = b.pay_register_id
+        JOIN
+    hrm_salary_head c ON b.hrm_salary_head_id = c.id
+        JOIN
+    hrm_salary_head_group d ON c.hrm_salary_head_group_id = d.id
+        JOIN
+    hrm_employee e ON a.hrm_employee_id = e.id
+        JOIN
+    hrm_depertment f ON a.hrm_depertment_id = f.id
+        JOIN
+    hrm_designation g ON a.hrm_designation_id = g.id
+        JOIN
+    hrm_employee_joining h ON a.hrm_employee_id = h.hrm_employee_id
+        JOIN
+    hrm_section i ON a.hrm_section_id = i.id
+$P!{condition_parameter}
+GROUP BY e.id,e.employee_name,a.employee_code,f.depertment_name, g.alis, aa.accounts_code, e.tin, h.joining_date, h.confirmation_date, aa.day_of_month, aa.total_present,aa.day_of_month,aa.total_present,d.id,  aa.payment_mode, aa.account_no, g.priority, i.section_name, i.id) aa
+GROUP BY aa.payment_mode,aa.payment_mode_name
+ORDER BY aa.payment_mode
+]]>
+	</queryString>
+	<field name="net_total" class="java.lang.Double"/>
+	<field name="payment_mode" class="java.lang.Integer">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="payment_mode_name" class="java.lang.String"/>
+	<variable name="net_total_1" class="java.lang.Double" resetType="Column" calculation="Sum">
+		<variableExpression><![CDATA[$F{net_total}]]></variableExpression>
+	</variable>
+	<variable name="net_total_2" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{net_total}]]></variableExpression>
+	</variable>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band splitType="Stretch"/>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band height="24" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="1" width="51" height="20" uuid="781e2b6a-06d2-4c7e-879e-0a432b8e187d"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{payment_mode_name}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0">
+				<reportElement x="51" y="1" width="79" height="20" uuid="2238993e-bc93-45af-80a1-64902b141ab5"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{net_total}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="0" y="21" width="130" height="1" uuid="106ac63c-fc23-45e4-8e3c-815ce8b6c476"/>
+			</line>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="22" splitType="Stretch">
+			<textField pattern="#,##0">
+				<reportElement x="51" y="1" width="79" height="20" uuid="ab82cf64-bc34-4751-97ab-d00e913c0ce4"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{net_total_2}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="1" width="51" height="20" uuid="7c405c67-6177-4374-9767-9c642347ed6d"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total :]]></text>
+			</staticText>
+		</band>
+	</summary>
+</jasperReport>

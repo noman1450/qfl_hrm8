@@ -1,0 +1,389 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="hrm_compare_salary_report" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="9438248a-295f-40af-a669-de9baf60f08d">
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="company_name" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="address" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="title" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="previous_parameter" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="current_parameter" class="java.lang.String"/>
+	<parameter name="parameter" class="java.lang.String"/>
+	<parameter name="previous_month_name" class="java.lang.String"/>
+	<parameter name="current_month_name" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT
+    c.depertment_name,sum(((aa.addition-bb.deduction)*d.by_bank_percent/100)) as Bank_Net_Pay_pre,sum(((aa.addition-bb.deduction)*(100-d.by_bank_percent)/100)) as Cash_Net_Pay_pre,sum(((cc.addition-dd.deduction)*d.by_bank_percent/100)) as Bank_Net_Pay_Cur,sum(((cc.addition-dd.deduction)*(100-d.by_bank_percent)/100)) as Cash_Net_Pay_Cur
+FROM
+    hrm_employee a
+        JOIN
+    hrm_employee_job_info b ON a.id = b.hrm_employee_id AND b.employee_activity=1
+        JOIN
+	hrm_depertment c ON b.hrm_depertment_id=c.id
+		JOIN
+	hrm_employee_salary d ON d.hrm_employee_job_info_id=b.id
+        JOIN
+    (SELECT
+        SUM(b.actual_amount) AS addition, a.hrm_employee_job_info_id
+    FROM
+        pay_register a
+    JOIN pay_register_details b ON a.id = b.pay_register_id AND a.salary_genarate_type<>0
+    JOIN hrm_salary_head c ON b.hrm_salary_head_id = c.id
+    JOIN hrm_salary_head_group d ON c.hrm_salary_head_group_id = d.id
+        AND d.generate_type = 1
+        $P!{previous_parameter}
+        Group By a.hrm_employee_job_info_id) aa ON aa.hrm_employee_job_info_id = b.id
+        JOIN
+    (SELECT
+        SUM(e.actual_amount) AS deduction,
+            a.hrm_employee_job_info_id
+    FROM
+        pay_register a
+    JOIN pay_register_details e ON a.id = e.pay_register_id AND a.salary_genarate_type<>0
+    JOIN hrm_salary_head f ON e.hrm_salary_head_id = f.id
+    JOIN hrm_salary_head_group g ON f.hrm_salary_head_group_id = g.id
+        AND g.generate_type = 2
+	$P!{previous_parameter}
+        Group By a.hrm_employee_job_info_id) bb ON bb.hrm_employee_job_info_id = b.id
+	  Left  JOIN
+    (SELECT
+        SUM(b.actual_amount) AS addition, a.hrm_employee_job_info_id
+    FROM
+        pay_register a
+    JOIN pay_register_details b ON a.id = b.pay_register_id AND a.salary_genarate_type<>0
+    JOIN hrm_salary_head c ON b.hrm_salary_head_id = c.id
+    JOIN hrm_salary_head_group d ON c.hrm_salary_head_group_id = d.id
+        AND d.generate_type = 1
+	$P!{current_parameter}
+        Group By a.hrm_employee_job_info_id) cc ON cc.hrm_employee_job_info_id = b.id
+        Left  JOIN
+    (SELECT
+        SUM(e.actual_amount) AS deduction,
+            a.hrm_employee_job_info_id
+    FROM
+        pay_register a
+    JOIN pay_register_details e ON a.id = e.pay_register_id AND a.salary_genarate_type<>0
+    JOIN hrm_salary_head f ON e.hrm_salary_head_id = f.id
+    JOIN hrm_salary_head_group g ON f.hrm_salary_head_group_id = g.id
+        AND g.generate_type = 2
+	$P!{current_parameter}
+        Group By a.hrm_employee_job_info_id) dd ON dd.hrm_employee_job_info_id = b.id
+    Group by c.id]]>
+	</queryString>
+	<field name="depertment_name" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="Bank_Net_Pay_pre" class="java.lang.Double"/>
+	<field name="Cash_Net_Pay_pre" class="java.lang.Double"/>
+	<field name="Bank_Net_Pay_Cur" class="java.lang.Double"/>
+	<field name="Cash_Net_Pay_Cur" class="java.lang.Double"/>
+	<variable name="Bank_Net_Pay_pre_1" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{Bank_Net_Pay_pre}]]></variableExpression>
+	</variable>
+	<variable name="Cash_Net_Pay_pre_1" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{Cash_Net_Pay_pre}]]></variableExpression>
+	</variable>
+	<variable name="Bank_Net_Pay_Cur_1" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{Bank_Net_Pay_Cur}]]></variableExpression>
+	</variable>
+	<variable name="Cash_Net_Pay_Cur_1" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{Cash_Net_Pay_Cur}]]></variableExpression>
+	</variable>
+	<variable name="previous_month_total" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{Bank_Net_Pay_pre}+$F{Cash_Net_Pay_pre}]]></variableExpression>
+	</variable>
+	<variable name="current_month_total" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{Bank_Net_Pay_Cur}+$F{Cash_Net_Pay_Cur}]]></variableExpression>
+	</variable>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="66" splitType="Stretch">
+			<textField>
+				<reportElement x="406" y="9" width="42" height="15" uuid="d1740e47-d108-4888-9ab5-9b2646e71f83"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="447" y="9" width="29" height="15" uuid="cf8bc805-f0a2-42a4-be37-1d46d7ef4447"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="412" y="24" width="78" height="15" uuid="1e04cdb9-6f76-44ea-8a6b-2e9580ab4765"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<textField pattern="h.mm a">
+				<reportElement x="412" y="39" width="78" height="15" uuid="9bbd0927-1651-4e96-8d52-a528a5719383"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="0" width="279" height="20" uuid="686c0060-65bc-4d17-aa29-24011c2bd7c8"/>
+				<textElement verticalAlignment="Middle">
+					<font size="15" isBold="true"/>
+					<paragraph leftIndent="3"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{company_name}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="20" width="279" height="16" uuid="aa27e13a-e093-4006-b3e5-2c4a6a48aecb"/>
+				<textElement verticalAlignment="Middle">
+					<paragraph leftIndent="3"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{address}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="36" width="354" height="20" uuid="1b94d2e6-11cf-4812-b2ab-c421198849a5"/>
+				<textElement verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+					<paragraph leftIndent="3"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{title}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="370" y="24" width="42" height="15" uuid="aa7f5f4e-9ace-45ca-947d-ad02c0fd54ac"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Print Date]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="370" y="39" width="42" height="15" uuid="0eea85b7-e4bf-4c48-bb2f-7162eca25393"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Print Time]]></text>
+			</staticText>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="31" splitType="Stretch">
+			<staticText>
+				<reportElement mode="Opaque" x="2" y="2" width="157" height="27" backcolor="#CCCCCC" uuid="600314c6-b98c-4a83-80ac-0978e3f5e54b"/>
+				<box>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[Name of Department]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="160" y="17" width="75" height="12" backcolor="#CCCCCC" uuid="a8348786-8ba2-4a06-baa6-6134c7d495d1"/>
+				<box>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="8" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[Bank]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="394" y="17" width="82" height="12" backcolor="#CCCCCC" uuid="f45dc1be-359a-404a-a8e3-b87550c12005"/>
+				<box>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="8" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[Cash]]></text>
+			</staticText>
+			<line>
+				<reportElement x="0" y="1" width="555" height="1" uuid="742e49a0-a4db-47eb-851f-30735235b113"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineColor="#333333"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="0" y="30" width="555" height="1" uuid="58f32f14-43ff-4454-9c02-cd5943286422"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineColor="#333333"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement mode="Opaque" x="235" y="17" width="82" height="12" backcolor="#CCCCCC" uuid="0b34200a-de45-47c2-b827-6558669b5c16"/>
+				<box>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="8" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[Cash]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="317" y="17" width="77" height="12" backcolor="#CCCCCC" uuid="e5b0471a-a9e1-4ca1-bba7-aaabb28fe376"/>
+				<box>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="8" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[Bank]]></text>
+			</staticText>
+			<textField>
+				<reportElement mode="Opaque" x="160" y="2" width="157" height="15" uuid="68dbdc8c-0bc2-4f35-899d-dc4f5ac3f2aa"/>
+				<box rightPadding="3">
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{previous_month_name}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Opaque" x="318" y="2" width="158" height="15" uuid="28370263-c75b-4d46-999c-19f6132477ef"/>
+				<box>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{current_month_name}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement mode="Opaque" x="477" y="2" width="78" height="28" backcolor="#CCCCCC" uuid="ac7a4af8-abe3-4897-ba5c-1ec1799a8477"/>
+				<box>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[Remarks]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="18" splitType="Stretch">
+			<line>
+				<reportElement x="0" y="16" width="477" height="1" uuid="4b52969f-c497-4522-b47d-43dda05afdf1"/>
+				<graphicElement>
+					<pen lineWidth="0.25" lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<textField>
+				<reportElement x="2" y="0" width="158" height="17" uuid="0caf2a8a-bba1-41c2-92eb-8a83b2c7c7e8"/>
+				<textFieldExpression><![CDATA[$F{depertment_name}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0">
+				<reportElement x="161" y="0" width="73" height="16" uuid="a764e73b-40cb-4bb8-8cf9-769733f331ba"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$F{Bank_Net_Pay_pre}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0">
+				<reportElement x="238" y="0" width="79" height="16" uuid="6029ebb5-fe13-43c2-9b44-6212c1831b60"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$F{Cash_Net_Pay_pre}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0" isBlankWhenNull="true">
+				<reportElement x="318" y="0" width="76" height="16" uuid="41fe162a-4887-43ea-8719-d3aebce2e26b"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$F{Bank_Net_Pay_Cur}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0" isBlankWhenNull="true">
+				<reportElement x="396" y="0" width="81" height="16" uuid="f4ce8ada-5d91-4aca-b767-6bf2d205646c"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$F{Cash_Net_Pay_Cur}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="17">
+			<staticText>
+				<reportElement x="0" y="0" width="555" height="16" uuid="c4b1f6f2-b196-4216-843e-f6fc4b3e5c85"/>
+				<textElement textAlignment="Center">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Software Generated Report || Design & Developed By : i-infotech Business Solution, www.i-infotech.biz]]></text>
+			</staticText>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="47">
+			<textField pattern="###0">
+				<reportElement x="162" y="1" width="76" height="20" uuid="9e1000de-c762-4bd2-8fa5-c846c53f07fd"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$V{Bank_Net_Pay_pre_1}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0">
+				<reportElement x="239" y="1" width="79" height="20" uuid="dffa2d28-cb3c-4a9d-8275-5343473dbe39"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$V{Cash_Net_Pay_pre_1}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0" isBlankWhenNull="true">
+				<reportElement x="318" y="1" width="78" height="20" uuid="44022c40-ae87-4fea-aa24-4f4513a3a088"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$V{Bank_Net_Pay_Cur_1}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0" isBlankWhenNull="true">
+				<reportElement x="397" y="1" width="80" height="20" uuid="d1c11236-f8c3-48c3-87ee-5f6ec759fc8b"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$V{Cash_Net_Pay_Cur_1}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0">
+				<reportElement x="235" y="24" width="84" height="20" uuid="bfd7da44-2cb3-4436-b928-16c5516ea308"/>
+				<textElement textAlignment="Right">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{previous_month_total}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="96" y="2" width="52" height="15" uuid="d442d976-d7c7-4803-b514-dd7925c7264b"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Sub Total]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="173" y="26" width="56" height="15" uuid="8eae06f3-6c4b-4815-8640-92f5d9c6987a"/>
+				<textElement>
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Grand Total]]></text>
+			</staticText>
+			<textField pattern="###0" isBlankWhenNull="true">
+				<reportElement x="394" y="23" width="83" height="20" uuid="db6973a3-85d4-4064-80e5-d97cccaff04a"/>
+				<textElement textAlignment="Right">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{current_month_total}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="0" y="23" width="555" height="1" uuid="a7d5f194-25cd-4b76-a025-62919765dc41"/>
+				<graphicElement>
+					<pen lineWidth="0.25" lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+		</band>
+	</summary>
+</jasperReport>

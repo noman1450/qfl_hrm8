@@ -1,0 +1,51 @@
+{
+   "name": "QFL HRM 8",
+   "host": "27.147.217.131",
+   "protocol": "sftp",
+   "port": 22,
+   "username": "root",
+   "password": "BnYvcGSdPd5+KvWBVAA+1Q==",
+   "remotePath": "/var/www/hrm/",
+   "uploadOnSave": false,
+   "useTempFile": false,
+   "openSsh": false
+}
+
+{
+  "name": "QBL GROUP SERVER",
+  "host": "27.147.217.132",
+  "protocol": "sftp",
+  "port": 22,
+  "username": "qgroup",
+  "password": "ZvNlmzArhdmTfYMB+fPlqg==",
+  "remotePath": "/var/www/docker_projects/hrm_8",
+  "uploadOnSave": false,
+  "useTempFile": false,
+  "openSsh": false
+}
+
+{
+  "name": "QFL HRM ",
+  "host": "27.147.217.131",
+  "protocol": "sftp",
+  "port": 22,
+  "username": "root",
+  "password": "BnYvcGSdPd5+KvWBVAA+1Q==",
+  "remotePath": "/var/www/hrm/",
+  "uploadOnSave": false,
+  "useTempFile": false,
+  "openSsh": false
+}
+
+{
+   "name": "AMG HRM",
+   "host": "143.198.90.234",
+   "protocol": "sftp",
+   "port": 22,
+   "username": "root",
+   "password": "ibs@digital789Ocean",
+   "remotePath": "/var/www/amghrm/",
+   "uploadOnSave": false,
+   "useTempFile": false,
+   "openSsh": false
+}

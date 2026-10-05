@@ -1,0 +1,550 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="hrm_leave_application_form" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="670d4491-1802-49f5-bbb1-cb7656e4901c">
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="136"/>
+	<parameter name="company_name" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="address" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="title" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="id" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT
+                                b.id,
+                                a.id as leave_app_id,
+                                b.employee_name,
+                                e.depertment_name,
+                                f.designation_name,
+                                a.applied,
+                                c.leave_type,
+                                (CASE
+                                WHEN a.duration=1 THEN '.50'
+                                WHEN a.duration=3 THEN '.25'
+                                ELSE (DATEDIFF(a.date_to,a.date_from)+1)
+                                END)  as days,
+                                a.comment,
+                                if(a.payment_mode=1,'Full Pay','No Pay') as payment_mode,
+                                a.date_from,
+                                a.date_to,
+                                (CASE
+                                WHEN g.action_type=1 THEN 'Approved'
+                                WHEN g.action_type=2 THEN 'Reject'
+                                ELSE 'Pending'
+                                END)  as leave_status,
+                                h.name as approved_person
+
+                            FROM hrm_leave_application a
+                            JOIN hrm_employee b on b.id=a.hrm_employee_id and b.active_status=1 AND a.id=$P{id}
+                            JOIN hrm_employee_leave_type c On a.hrm_employee_leave_type_id=c.id
+                            JOIN hrm_employee_job_info d On a.hrm_employee_id=d.hrm_employee_id and d.employee_activity=1
+                            JOIN hrm_depertment e ON d.hrm_depertment_id=e.id
+                            JOIN hrm_designation f ON d.hrm_designation_id=f.id
+                            JOIN hrm_leave_approve g ON g.hrm_leave_application_id=a.id
+                            JOIN users h ON g.users_id=h.id]]>
+	</queryString>
+	<field name="id" class="java.lang.Integer">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="leave_app_id" class="java.lang.Integer"/>
+	<field name="employee_name" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="depertment_name" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="designation_name" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="applied" class="java.sql.Date">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="leave_type" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="days" class="java.lang.String"/>
+	<field name="comment" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="payment_mode" class="java.lang.String">
+		<fieldDescription><![CDATA[1 for cash
+2 for bank]]></fieldDescription>
+	</field>
+	<field name="date_from" class="java.sql.Date">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="date_to" class="java.sql.Date">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="leave_status" class="java.lang.String">
+		<fieldDescription><![CDATA[1 for Company Policy
+2 for Holiday Against Leave]]></fieldDescription>
+	</field>
+	<field name="approved_person" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="67" splitType="Stretch">
+			<textField>
+				<reportElement x="2" y="0" width="553" height="20" uuid="9ed28908-ef5f-4c38-9380-558ce61704d3"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="15" isBold="true"/>
+					<paragraph leftIndent="3"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{company_name}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="2" y="20" width="553" height="16" uuid="0bf6747d-007a-42d0-ae42-303bdd5f2776"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<paragraph leftIndent="3"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{address}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="2" y="39" width="553" height="20" uuid="e049d6c3-c7d8-4dfb-a87f-b85adfc63987"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+					<paragraph leftIndent="3"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{title}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="595" splitType="Stretch">
+			<staticText>
+				<reportElement x="2" y="13" width="40" height="20" uuid="a8110804-40b9-436e-a6b8-205ed304ef46"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="false"/>
+				</textElement>
+				<text><![CDATA[Sl. No]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="393" y="13" width="36" height="20" uuid="c124ffa9-7a5e-4b58-84f2-381fd1fc5d6d"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="false"/>
+				</textElement>
+				<text><![CDATA[Date]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="45" y="73" width="62" height="20" uuid="05674241-6828-498d-9fe8-90cfd5583730"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="false"/>
+				</textElement>
+				<text><![CDATA[Name]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="45" y="95" width="62" height="20" uuid="a9eacf6a-c33c-4fb8-989c-190a3c720442"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="false"/>
+				</textElement>
+				<text><![CDATA[Designation]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="356" y="95" width="63" height="20" uuid="7530d4a2-72a0-430a-bd3f-830adbbe06a9"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="false"/>
+				</textElement>
+				<text><![CDATA[Department]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="45" y="144" width="91" height="20" uuid="4604bedd-f464-41e2-bb93-d6dbbcd0367c"/>
+				<textElement verticalAlignment="Middle"/>
+				<text><![CDATA[Leave period from]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="209" y="144" width="22" height="20" uuid="02c67d91-9b1e-4634-a462-bf93584996a2"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[to]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="345" y="144" width="36" height="20" uuid="b174f425-7034-46e0-9eab-c84b55184405"/>
+				<textElement verticalAlignment="Middle"/>
+				<text><![CDATA[Days]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="45" y="171" width="92" height="20" uuid="f97c4e97-f0b4-476f-8a69-acaab86238b1"/>
+				<textElement verticalAlignment="Middle"/>
+				<text><![CDATA[Purpose of Leave]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="45" y="204" width="118" height="20" uuid="9078c4f3-2c80-4942-9401-4394ca9271a8"/>
+				<textElement verticalAlignment="Middle"/>
+				<text><![CDATA[Relief relieve's  Name]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="274" y="204" width="91" height="20" uuid="6477eb2f-fbfd-41de-b25b-fb0e703e0c8d"/>
+				<textElement verticalAlignment="Middle"/>
+				<text><![CDATA[Designation]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="274" y="235" width="91" height="20" uuid="6a40d545-8ecb-4091-8275-6fd689729017"/>
+				<text><![CDATA[Signature]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="45" y="268" width="167" height="20" uuid="4524e719-3f43-4d0a-826d-3f1b95227907"/>
+				<textElement verticalAlignment="Middle"/>
+				<text><![CDATA[Recomended for leave approval]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="50" y="313" width="122" height="20" uuid="ed4eb1cb-5602-4988-9448-66cfe9a43d1e"/>
+				<textElement verticalAlignment="Middle"/>
+				<text><![CDATA[Signature]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="50" y="337" width="151" height="20" uuid="f5fd3888-e480-4bf8-8616-fac253bf0550"/>
+				<textElement verticalAlignment="Middle"/>
+				<text><![CDATA[Department Head /Section Head]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="296" y="333" width="122" height="20" uuid="e4c70954-6567-473a-9355-2386e685fa99"/>
+				<textElement verticalAlignment="Middle"/>
+				<text><![CDATA[Applicant's Signature]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="194" y="364" width="176" height="20" uuid="6e784590-b376-43a2-8147-4196dcfa67b1"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[FOR OFFICIAL USE ONLY]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="52" y="400" width="105" height="20" uuid="f94ee335-53d5-4c1a-a339-8de2811174eb"/>
+				<textElement verticalAlignment="Middle"/>
+				<text><![CDATA[Leave Application is]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="52" y="466" width="93" height="20" uuid="db56c341-d2ac-43fb-aa8a-1f431aabfa04"/>
+				<textElement verticalAlignment="Middle"/>
+				<text><![CDATA[Signature]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="52" y="426" width="93" height="20" uuid="090976cb-8ac0-466a-8317-b92aa2687071"/>
+				<textElement verticalAlignment="Middle"/>
+				<text><![CDATA[Name]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="52" y="446" width="93" height="20" uuid="10965b7b-952c-4a11-b60c-309507e84595"/>
+				<textElement verticalAlignment="Middle"/>
+				<text><![CDATA[Designation]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="52" y="508" width="226" height="20" uuid="6e9d44a1-dd6c-4606-a72c-8982fa8dc6a3"/>
+				<textElement verticalAlignment="Middle"/>
+				<text><![CDATA[Payment Status of Leave(For Accounts Dept.)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="52" y="538" width="93" height="20" uuid="15df56c8-75a8-4aa0-9bee-d31f56329a24"/>
+				<textElement verticalAlignment="Middle"/>
+				<text><![CDATA[Recorded By]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="342" y="559" width="51" height="20" uuid="0ac2f0f8-5667-411c-ab15-ced95f1da002"/>
+				<textElement verticalAlignment="Middle"/>
+				<text><![CDATA[Signature]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="52" y="559" width="93" height="20" uuid="39e3a4e6-86d0-461e-a7d6-62609a152830"/>
+				<textElement verticalAlignment="Middle"/>
+				<text><![CDATA[Date]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="73" width="42" height="20" uuid="3576f019-9c7b-4857-bd34-6085796699a0"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[1.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="2" y="144" width="40" height="20" uuid="faa4b4e9-299d-461b-9430-1363196a42b1"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[2.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="2" y="171" width="40" height="20" uuid="6a7bd272-01e4-4367-906e-8ca7d8efaeed"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[3.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="2" y="204" width="40" height="20" uuid="f1d1d717-b3b3-47ea-a7c4-6e753fefa453"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[4.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="2" y="268" width="40" height="20" uuid="5e2ffbd1-76ad-4bae-b358-8e89a1c07e0a"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[5.]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="117" y="75" width="157" height="20" uuid="c861a1b6-0c96-4fcb-b3a3-0400f02a2216"/>
+				<box>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed"/>
+				</box>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{employee_name}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="424" y="95" width="116" height="20" uuid="cd510de4-f11e-4121-96d4-7662d7004f6f"/>
+				<box>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed"/>
+				</box>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{depertment_name}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="117" y="95" width="157" height="20" uuid="d9981c70-ba68-4bc8-b357-2bdcd0686efd"/>
+				<box>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed"/>
+				</box>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{designation_name}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="143" y="144" width="66" height="20" uuid="aea9aa38-6910-4629-a9b2-9da17b8767e4"/>
+				<box>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed"/>
+				</box>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{date_from}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="231" y="144" width="60" height="20" uuid="bf003033-d9a7-44ec-ad01-2b8ad70aff54"/>
+				<box>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed"/>
+				</box>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{date_to}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="306" y="144" width="31" height="20" uuid="fa049e92-47fb-4348-8d48-17d2e89bb4fa"/>
+				<box>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{days}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="144" y="172" width="100" height="20" uuid="29759758-03d3-469b-8e01-135fe169ea5b"/>
+				<box>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed"/>
+				</box>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{leave_type}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="440" y="13" width="100" height="20" uuid="4d5da556-f91b-4519-8986-e1af45d32d34"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{applied}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="157" y="400" width="100" height="20" uuid="92531b29-7ac3-4188-b97e-4361669abeb6"/>
+				<box>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed"/>
+				</box>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{leave_status}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="158" y="427" width="100" height="20" uuid="1568bb3c-2bbc-433d-bee6-bf7409d5fda6"/>
+				<box>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed"/>
+				</box>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{approved_person}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="290" y="508" width="100" height="20" uuid="7397dd4a-d746-4433-b1db-77fe3190535c"/>
+				<box>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed"/>
+				</box>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{payment_mode}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="291" y="144" width="13" height="20" uuid="1c469feb-4322-499a-8afc-fc26cce6a63f"/>
+				<textElement verticalAlignment="Middle"/>
+				<text><![CDATA[=(]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="338" y="144" width="5" height="20" uuid="6dd0ccc3-a33e-4bf6-a316-0274ee08a806"/>
+				<textElement verticalAlignment="Middle"/>
+				<text><![CDATA[)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="112" y="73" width="3" height="20" uuid="5d882a7d-a2b3-48f4-9c50-d7f3874e2702"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="112" y="95" width="3" height="20" uuid="5e5acff3-8733-4db0-a648-969a85f544fd"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="419" y="95" width="3" height="20" uuid="ce6a835e-8a4c-4ba4-9cb2-6beb34dd02f8"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="429" y="13" width="3" height="20" uuid="998c8189-8f22-485e-989e-746cca911972"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="2" y="400" width="40" height="20" uuid="301eabd1-366b-4f60-b9a3-865fb46590fd"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[6.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="2" y="508" width="40" height="20" uuid="06cd24ce-3d17-4a99-a3a8-9a26f75cccac"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[7.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="137" y="171" width="3" height="20" uuid="05904cef-33d6-4428-aebb-9f3b44fb2e31"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="163" y="204" width="3" height="20" uuid="c53aceac-27ea-476a-b2a5-a16d2a294aef"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="278" y="508" width="3" height="20" uuid="0d8b8cf1-e4e3-490b-8510-96578a2ce205"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="136" y="144" width="3" height="20" uuid="c5ca5147-39fe-4692-81da-efa0bb3180d8"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="365" y="204" width="3" height="20" uuid="a2a7bf62-053e-4879-b372-ef72a1349ee4"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="365" y="235" width="3" height="20" uuid="6de76272-10d1-48fd-936c-58a86242f089"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="145" y="425" width="3" height="20" uuid="77c6fe1a-ed92-4e29-8544-3c6532e9d19a"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="145" y="446" width="3" height="20" uuid="8443a4e5-7c1c-4b82-a2f6-dd66e48df10e"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="145" y="466" width="3" height="20" uuid="2a5ecb7f-c919-48b3-9cc1-801d64f012bc"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="145" y="538" width="3" height="20" uuid="9e736e90-3be7-41e9-bdc6-591b448a0c81"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="146" y="559" width="3" height="20" uuid="0dfdd04a-2723-45e8-b3fa-afcfd2bc8d5e"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="393" y="559" width="3" height="20" uuid="7969601a-6e8e-431b-8468-d468272648e7"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="145" y="400" width="3" height="20" uuid="f32215db-2b1a-401f-87cc-380c460bced9"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band splitType="Stretch"/>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>

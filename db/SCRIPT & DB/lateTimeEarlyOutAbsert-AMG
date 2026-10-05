@@ -1,0 +1,33 @@
+Alter table hrm_location add column allow_late_minutes int default 0;
+Alter table hrm_location add column allow_late_days int default 0;
+Alter table hrm_location add column is_eo_punishment int default 0;
+
+
+
+CREATE OR REPLACE VIEW vw_employee_late_summary AS
+SELECT
+    hrm_employee_id,
+    COUNT(id) AS latedays,
+    ROUND(SUM(TIME_TO_SEC(late_time)) / 60) AS late_time,
+    MONTH(punche_date) AS hrm_month_id,
+    YEAR(punche_date) AS year_id
+FROM hrm_attendance
+WHERE
+    (
+        (
+            YEAR(punche_date) = YEAR(CURDATE())
+            AND MONTH(punche_date) = MONTH(CURDATE())
+        )
+        OR
+        (
+            YEAR(punche_date) = YEAR(DATE_SUB(CURDATE(), INTERVAL 1 MONTH))
+            AND MONTH(punche_date) = MONTH(DATE_SUB(CURDATE(), INTERVAL 1 MONTH))
+        )
+    )
+    AND hrm_location_id = 6
+    AND attendance_status = 6
+GROUP BY
+    hrm_employee_id,
+    YEAR(punche_date),
+    MONTH(punche_date); 
+

@@ -1,0 +1,506 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.16.0.final using JasperReports Library version 6.13.0  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="hrm_kpi_employee_summary" language="groovy" pageWidth="790" pageHeight="842" columnWidth="750" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="12525be8-a4c6-45d8-94dd-0b4b2bd74cca">
+	<property name="ireport.zoom" value="2.0"/>
+	<property name="ireport.x" value="543"/>
+	<property name="ireport.y" value="0"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="HRM Local Database"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="673"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="316"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="253"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="741"/>
+	<parameter name="title" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="address" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="company_name" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="condition_parameter" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="date_range" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT  
+    a.id,
+    c.employee_name,
+    b.employee_code,
+    d.depertment_name,
+    f.joining_date,
+    f.confirmation_date,
+    if(f.confirmation_date<aa.start_date,CONCAT(
+	TIMESTAMPDIFF(YEAR,
+	aa.start_date,
+	DATE_ADD(aa.end_date, INTERVAL 1 DAY)),' y(s) ',
+	MOD(TIMESTAMPDIFF(MONTH,
+	aa.start_date,
+	DATE_ADD(aa.end_date, INTERVAL 1 DAY)),
+	12),' m(s)'),
+    CONCAT(
+	TIMESTAMPDIFF(YEAR,
+	f.confirmation_date,
+	DATE_ADD(aa.end_date, INTERVAL 1 DAY)),' y(s) ',
+	MOD(TIMESTAMPDIFF(MONTH,
+	f.confirmation_date,
+	DATE_ADD(aa.end_date, INTERVAL 1 DAY)),
+	12),' m(s)')) as evaluate_date,
+    e.alis AS designation_name,
+    	CONCAT(
+	TIMESTAMPDIFF(YEAR,
+	f.confirmation_date,
+	aa.end_date),' y(s) ',
+	MOD(TIMESTAMPDIFF(MONTH,
+	f.confirmation_date,
+	aa.end_date),
+	12),' m(s)') as service_length,
+    (SELECT MAX(promotion_date) FROM hrm_last_promotion  WHERE hrm_last_promotion.hrm_employee_id=c.id AND hrm_last_promotion.promotion_date<aa.end_date) as last_promotion_date,
+    CONCAT(g.increment_amount,
+            g.increment_amount_type) AS increment_amount,
+    g.total_point,
+    g.deduct_point,
+    SUM(g.total_point - g.deduct_point) AS net_point,
+    g.promotion_status,
+    e.priority,
+    b.basic_salary,
+
+ IF(g.increment_amount_type='%', b.basic_salary+ (b.basic_salary*g.increment_amount*.01)*(IF(f.confirmation_date<aa.start_date,(TIMESTAMPDIFF(MONTH, aa.start_date, DATE_ADD(aa.end_date, INTERVAL 1 DAY))),(TIMESTAMPDIFF(MONTH, f.confirmation_date, DATE_ADD(aa.end_date, INTERVAL 1 DAY))) )/ (TIMESTAMPDIFF(MONTH, aa.start_date, DATE_ADD(aa.end_date, INTERVAL 1 DAY))))  ,b.basic_salary+(g.increment_amount)*(IF(f.confirmation_date<aa.start_date,(TIMESTAMPDIFF(MONTH, aa.start_date, DATE_ADD(aa.end_date, INTERVAL 1 DAY))),(TIMESTAMPDIFF(MONTH, f.confirmation_date, DATE_ADD(aa.end_date, INTERVAL 1 DAY))) )/ (TIMESTAMPDIFF(MONTH, aa.start_date, DATE_ADD(aa.end_date, INTERVAL 1 DAY))))) as increment_salary
+FROM
+    hrm_kpi_employee_master a
+        JOIN
+    hrm_kpi_assesment_date aa ON a.hrm_kpi_assesment_date_id = aa.id
+        AND a.status = 2
+        JOIN
+    hrm_kpi_assesment_year bb ON aa.hrm_kpi_assesment_year_id = bb.id
+        JOIN
+    hrm_employee_job_info b ON a.hrm_employee_job_info_id = b.id
+        AND a.valid = 1
+        JOIN
+    hrm_employee c ON b.hrm_employee_id = c.id
+        JOIN
+    hrm_depertment d ON b.hrm_depertment_id = d.id
+        JOIN
+    hrm_designation e ON b.hrm_designation_id = e.id
+        JOIN
+    hrm_employee_joining f ON c.id = f.hrm_employee_id
+        JOIN
+    hrm_kpi_employee_final_summary g ON a.id = g.hrm_kpi_employee_master_id
+GROUP BY a.id , c.employee_name , b.employee_code , d.depertment_name , e.alis ,  g.increment_amount , g.increment_amount_type , g.total_point , g.deduct_point , g.promotion_status,f.joining_date,f.confirmation_date,e.priority, b.basic_salary
+ORDER BY d.depertment_name,e.priority]]>
+	</queryString>
+	<field name="id" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="id"/>
+		<property name="com.jaspersoft.studio.field.label" value="id"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="hrm_kpi_employee_master"/>
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="employee_name" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="employee_name"/>
+		<property name="com.jaspersoft.studio.field.label" value="employee_name"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="hrm_employee"/>
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="employee_code" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="employee_code"/>
+		<property name="com.jaspersoft.studio.field.label" value="employee_code"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="hrm_employee_job_info"/>
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="depertment_name" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="depertment_name"/>
+		<property name="com.jaspersoft.studio.field.label" value="depertment_name"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="hrm_depertment"/>
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="joining_date" class="java.sql.Date">
+		<property name="com.jaspersoft.studio.field.name" value="joining_date"/>
+		<property name="com.jaspersoft.studio.field.label" value="joining_date"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="hrm_employee_joining"/>
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="confirmation_date" class="java.sql.Date">
+		<property name="com.jaspersoft.studio.field.name" value="confirmation_date"/>
+		<property name="com.jaspersoft.studio.field.label" value="confirmation_date"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="hrm_employee_joining"/>
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="evaluate_date" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="evaluate_date"/>
+		<property name="com.jaspersoft.studio.field.label" value="evaluate_date"/>
+	</field>
+	<field name="designation_name" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="alis"/>
+		<property name="com.jaspersoft.studio.field.label" value="designation_name"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="hrm_designation"/>
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="service_length" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="service_length"/>
+		<property name="com.jaspersoft.studio.field.label" value="service_length"/>
+	</field>
+	<field name="last_promotion_date" class="java.sql.Date">
+		<property name="com.jaspersoft.studio.field.name" value="last_promotion_date"/>
+		<property name="com.jaspersoft.studio.field.label" value="last_promotion_date"/>
+	</field>
+	<field name="increment_amount" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="increment_amount"/>
+		<property name="com.jaspersoft.studio.field.label" value="increment_amount"/>
+	</field>
+	<field name="total_point" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="total_point"/>
+		<property name="com.jaspersoft.studio.field.label" value="total_point"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="hrm_kpi_employee_final_summary"/>
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="deduct_point" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="deduct_point"/>
+		<property name="com.jaspersoft.studio.field.label" value="deduct_point"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="hrm_kpi_employee_final_summary"/>
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="net_point" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="net_point"/>
+		<property name="com.jaspersoft.studio.field.label" value="net_point"/>
+	</field>
+	<field name="promotion_status" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="promotion_status"/>
+		<property name="com.jaspersoft.studio.field.label" value="promotion_status"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="hrm_kpi_employee_final_summary"/>
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="priority" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="priority"/>
+		<property name="com.jaspersoft.studio.field.label" value="priority"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="hrm_designation"/>
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="basic_salary" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="basic_salary"/>
+		<property name="com.jaspersoft.studio.field.label" value="basic_salary"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="hrm_employee_job_info"/>
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="increment_salary" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="increment_salary"/>
+		<property name="com.jaspersoft.studio.field.label" value="increment_salary"/>
+	</field>
+	<group name="department_name">
+		<groupExpression><![CDATA[$F{depertment_name}]]></groupExpression>
+		<groupHeader>
+			<band height="28">
+				<textField>
+					<reportElement mode="Opaque" x="0" y="0" width="750" height="15" backcolor="#DEDFE1" uuid="5bffddd8-0e4d-4632-a0bf-8098b4d0cb55"/>
+					<textElement verticalAlignment="Middle">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{depertment_name}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="22"/>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="331" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="1" width="750" height="20" uuid="4138463f-d2b6-4cf1-bb94-6ff9ce5740e1"/>
+				<textElement verticalAlignment="Middle">
+					<font size="15" isBold="true"/>
+					<paragraph leftIndent="3"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{company_name}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="21" width="750" height="16" uuid="6aa8690e-7c57-4e74-b3f7-86d1a98c707d"/>
+				<textElement verticalAlignment="Middle">
+					<paragraph leftIndent="3"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{address}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="37" width="750" height="16" uuid="d80a6b9a-de72-4dc1-983a-a6ed387a0736"/>
+				<textElement verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+					<paragraph leftIndent="3"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{title}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="53" width="750" height="16" uuid="407b86df-5ef7-4de6-9561-51cf13caa59f"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{date_range}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement mode="Opaque" x="687" y="72" width="62" height="17" backcolor="#FCFCFC" uuid="786c1e30-7fdb-4ca0-8f03-aebac57b4348"/>
+				<box>
+					<rightPen lineWidth="0.5" lineColor="#333333"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[After Increment]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="631" y="72" width="55" height="17" backcolor="#FCFCFC" uuid="35a79a94-6ada-49c2-a706-1b1b89edb8de"/>
+				<box>
+					<rightPen lineWidth="0.5" lineColor="#333333"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[Present Salary]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="586" y="72" width="43" height="17" backcolor="#FCFCFC" uuid="4976da01-f177-4d31-8b3c-89c6f9fa0e28"/>
+				<box>
+					<rightPen lineWidth="0.5" lineColor="#333333"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[Increment Percent]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="541" y="72" width="44" height="17" backcolor="#FCFCFC" uuid="b65b02f6-57fc-461a-b0cf-e85a60548d2c"/>
+				<box>
+					<rightPen lineWidth="0.5" lineColor="#333333"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[Promotion]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="504" y="72" width="36" height="17" backcolor="#FCFCFC" uuid="4339a015-e1c0-4a61-bc70-66804498f22b"/>
+				<box>
+					<rightPen lineWidth="0.5" lineColor="#333333"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[Point]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="456" y="72" width="47" height="17" backcolor="#FCFCFC" uuid="da6569d6-6c8d-42e1-af07-231260664813"/>
+				<box>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[Last Promotion]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="387" y="72" width="68" height="17" backcolor="#FCFCFC" uuid="d44d41cc-a909-4856-86c0-09ea0bec2f0b"/>
+				<box>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[Evaluate For]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="324" y="72" width="63" height="17" backcolor="#FCFCFC" uuid="d3e10699-4e19-42b3-b87f-72ff7d740c3b"/>
+				<box>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[Job Duration]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="259" y="72" width="63" height="17" backcolor="#FCFCFC" uuid="fd45644b-2752-4759-8d3f-bd148a31ea11"/>
+				<box>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[Confirmation]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="195" y="72" width="63" height="17" backcolor="#FCFCFC" uuid="907faf70-5046-4e4a-af89-b8e730379d81"/>
+				<box>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[Joining Date]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="136" y="72" width="58" height="17" backcolor="#FCFCFC" uuid="b42756e9-ef04-485e-997b-cc9fe64f6184"/>
+				<box>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[Designation]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="31" y="72" width="103" height="17" backcolor="#FCFCFC" uuid="fdb020de-0c01-4dab-985a-1d08fdc69765"/>
+				<box>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[Employee Name]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="1" y="72" width="30" height="17" backcolor="#FCFCFC" uuid="f3315f11-222b-408f-8218-74e2ac25abe3"/>
+				<box>
+					<rightPen lineWidth="0.5" lineColor="#333333"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[SL]]></text>
+			</staticText>
+			<subreport>
+				<reportElement x="0" y="100" width="200" height="200" uuid="9532d0be-9918-47fe-9331-2cc65b6d401c"/>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA["/home/ibs/JaspersoftWorkspace/MyReports/SubReports.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band height="22" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="2" width="30" height="15" uuid="980ecc0f-09d3-466a-8859-a41528baa09f"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="30" y="2" width="104" height="15" uuid="58281a10-0f1e-49ff-b691-8fcb8226cf6c"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{employee_name}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="134" y="2" width="60" height="15" uuid="e36b5869-f210-47d0-8fca-c81eeca4641e"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{designation_name}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="322" y="2" width="65" height="15" uuid="88fab277-3fef-43f5-ae49-8d633ce3ac70"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{service_length}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement x="455" y="2" width="49" height="15" uuid="b19a1705-1fc5-4c6c-b151-7dbcf43f1246"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{last_promotion_date}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0.00">
+				<reportElement x="504" y="2" width="37" height="15" uuid="6331f2b1-f121-467c-8653-8e95b27a2f66"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{net_point}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="585" y="2" width="44" height="15" uuid="a43cf095-8afb-4664-878b-a20da625aa32"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{increment_amount}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="541" y="2" width="44" height="15" uuid="e3633025-05ed-47be-9d4a-4f58c1d82c62"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{promotion_status}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="194" y="2" width="63" height="15" uuid="bca81705-9387-405c-8c82-1b97bf6a3556"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{joining_date}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="387" y="2" width="68" height="15" uuid="3f2d17de-ced9-402b-87ea-4fc2694d180c"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{evaluate_date}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="257" y="2" width="65" height="15" uuid="177fbb21-a31c-46ac-88ee-e0fd9495bb2d"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{confirmation_date}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0">
+				<reportElement x="629" y="2" width="57" height="15" uuid="d7dfc0d7-1828-413b-83ed-c27b060c364a"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{basic_salary}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0">
+				<reportElement x="686" y="2" width="65" height="15" uuid="7688a2a1-eaa0-48ad-ac1a-44fbc5728c56"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{increment_salary}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="17" splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="219" splitType="Stretch">
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+		</band>
+	</summary>
+</jasperReport>

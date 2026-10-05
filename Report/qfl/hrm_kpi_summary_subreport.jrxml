@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.16.0.final using JasperReports Library version 6.13.0  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="hrm_kpi_summary_subreport" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="4f99efb0-0114-4927-8d3d-d2078ff42b0b">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="HRM Local Database"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<queryString>
+		<![CDATA[SELECT  
+    h.id,
+    CONCAT(h.number_from,'-',h.number_to) as increment_range,
+    count(a.id) as NoOfEmployee,
+    CONCAT(h.increment_amount, IF(h.increment_amount_type=1,'%','Tk.')) as increment_amount,
+    ROUND(SUM(b.basic_salary)) as present_gross_salary,
+    ROUND(SUM(b.basic_salary*h.increment_amount*.01)) as increment_salary,
+    ROUND(SUM(b.basic_salary+(b.basic_salary*h.increment_amount*.01))) as total_increment_salary
+
+FROM
+    hrm_kpi_employee_master a
+        JOIN
+    hrm_kpi_assesment_date aa ON a.hrm_kpi_assesment_date_id = aa.id
+        AND a.status = 2
+        JOIN
+    hrm_kpi_assesment_year bb ON aa.hrm_kpi_assesment_year_id = bb.id
+        JOIN
+    hrm_employee_job_info b ON a.hrm_employee_job_info_id = b.id
+        AND a.valid = 1
+        JOIN
+    hrm_employee c ON b.hrm_employee_id = c.id
+        JOIN
+    hrm_depertment d ON b.hrm_depertment_id = d.id
+        JOIN
+    hrm_designation e ON b.hrm_designation_id = e.id
+        JOIN
+    hrm_employee_joining f ON c.id = f.hrm_employee_id
+        JOIN
+    hrm_kpi_employee_final_summary g ON a.id = g.hrm_kpi_employee_master_id
+		JOIN
+	hrm_kpi_increment_range h ON g.hrm_kpi_increment_range_id = h.id
+GROUP BY h.id]]>
+	</queryString>
+	<field name="id" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="id"/>
+		<property name="com.jaspersoft.studio.field.label" value="id"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="hrm_kpi_increment_range"/>
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="increment_range" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="increment_range"/>
+		<property name="com.jaspersoft.studio.field.label" value="increment_range"/>
+	</field>
+	<field name="NoOfEmployee" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.name" value="NoOfEmployee"/>
+		<property name="com.jaspersoft.studio.field.label" value="NoOfEmployee"/>
+	</field>
+	<field name="increment_amount" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="increment_amount"/>
+		<property name="com.jaspersoft.studio.field.label" value="increment_amount"/>
+	</field>
+	<field name="present_gross_salary" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="present_gross_salary"/>
+		<property name="com.jaspersoft.studio.field.label" value="present_gross_salary"/>
+	</field>
+	<field name="increment_salary" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="increment_salary"/>
+		<property name="com.jaspersoft.studio.field.label" value="increment_salary"/>
+	</field>
+	<field name="total_increment_salary" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="total_increment_salary"/>
+		<property name="com.jaspersoft.studio.field.label" value="total_increment_salary"/>
+	</field>
+	<variable name="NoOfEmployee1" class="java.lang.Long" calculation="Sum">
+		<variableExpression><![CDATA[$F{NoOfEmployee}]]></variableExpression>
+	</variable>
+	<variable name="present_gross_salary1" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{present_gross_salary}]]></variableExpression>
+	</variable>
+	<variable name="increment_salary1" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{increment_salary}]]></variableExpression>
+	</variable>
+	<variable name="total_increment_salary1" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{total_increment_salary}]]></variableExpression>
+	</variable>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band splitType="Stretch"/>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="31" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="100" height="31" uuid="2297e984-d437-4774-a472-68fa9e9b268d">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="db21ac05-0676-4c56-a941-d716e63d24f9"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Increment Range]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="100" y="0" width="100" height="31" uuid="fde22e96-65ff-40e5-a36f-4aec303d3333">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="98cb91c5-c9f5-4790-9b58-e36bb0e60f86"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[No. of Employees]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="200" y="0" width="70" height="31" uuid="fd6d81d0-4027-4be6-a6e6-48829d403877">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e912861e-f1ab-48fb-b3a1-20c67c8d5494"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[increment Percentanges]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="270" y="0" width="100" height="31" uuid="89359ef8-2d56-42fe-9712-9e5f5f6db7e3">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3506be8e-e4af-44b2-9504-6c60d804ade6"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Present Gross Salary]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="460" y="0" width="90" height="31" uuid="50bbd965-4031-4c71-a786-12aa9c694c72">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e5dbc30e-1391-4dc0-95ef-94ccab58d03a"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total Increment Salary]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="370" y="0" width="90" height="31" uuid="810bd851-a3fc-4d82-be99-12f59e126af4">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="18804377-e174-4558-9462-21132fab91b4"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Increment Salary]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="24" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="1" width="100" height="20" uuid="61b628c2-f8c0-430e-a727-df7f09dd8511">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="db21ac05-0676-4c56-a941-d716e63d24f9"/>
+				</reportElement>
+				<box>
+					<leftPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{increment_range}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="100" y="1" width="100" height="20" uuid="eea66104-bd5a-4998-8b96-352da77e34c4">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="98cb91c5-c9f5-4790-9b58-e36bb0e60f86"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{NoOfEmployee}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="200" y="1" width="70" height="20" uuid="9f148f1f-4580-41bf-a1a7-dcc2756ae790">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e912861e-f1ab-48fb-b3a1-20c67c8d5494"/>
+				</reportElement>
+				<box>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{increment_amount}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="270" y="1" width="100" height="20" uuid="cf774451-e6a3-4b9f-b2d5-cea416d10a86">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3506be8e-e4af-44b2-9504-6c60d804ade6"/>
+					<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+				</reportElement>
+				<box>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{present_gross_salary}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="460" y="1" width="90" height="20" uuid="784f1cf6-7417-4aab-a4d9-dc0abfc3a727">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e5dbc30e-1391-4dc0-95ef-94ccab58d03a"/>
+					<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+				</reportElement>
+				<box>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{total_increment_salary}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="370" y="1" width="90" height="20" uuid="f84eeab2-6ca9-4a21-bf32-8953f5c5d548">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="18804377-e174-4558-9462-21132fab91b4"/>
+					<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+				</reportElement>
+				<box>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{increment_salary}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="0" y="21" width="549" height="1" uuid="faa134f7-1067-4f22-8fae-90c8103bbd65"/>
+			</line>
+		</band>
+	</detail>
+	<summary>
+		<band height="21" splitType="Stretch">
+			<textField>
+				<reportElement x="100" y="0" width="100" height="18" uuid="13e284a3-8a46-40ff-bf08-4a8f9c5859b8">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<bottomPen lineWidth="1.5" lineStyle="Double"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$V{NoOfEmployee1}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="269" y="0" width="100" height="18" uuid="c7be8749-7377-4ef2-98f7-b2ed1b152f62">
+					<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<bottomPen lineWidth="1.5" lineStyle="Double"/>
+				</box>
+				<textElement textAlignment="Right">
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{present_gross_salary1}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="370" y="0" width="90" height="18" uuid="d3bfb377-e4f2-4058-af6c-844809489a3f">
+					<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<bottomPen lineWidth="1.5" lineStyle="Double"/>
+				</box>
+				<textElement textAlignment="Right">
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{increment_salary1}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="462" y="0" width="88" height="18" uuid="a822746d-7d02-4083-b9e8-9ea713043af1">
+					<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<bottomPen lineWidth="1.5" lineStyle="Double"/>
+				</box>
+				<textElement textAlignment="Right">
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{total_increment_salary1}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="0" width="100" height="18" uuid="4c2305ed-f2e6-40ae-9ec8-4e0b91dc91f8">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Top">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total:]]></text>
+			</staticText>
+		</band>
+	</summary>
+</jasperReport>

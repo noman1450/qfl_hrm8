@@ -1,0 +1,8 @@
+** Dashbaord Controller (1 Places) DashboardController
+** TransferAndPromotion Controller (2 Places) TransferAndPromotionController
+** SalaryIncrement Controller (1 Places With Loops) SalaryIncrementController
+
+	As same type related issues so it will common panel for function is better decision.
+
+
+* EKhane main issue : Management 15th january decison nilo Employee will be promoted from 1st January 2025 so previous  day gulo jehutu ager job info diye process haoche New job info start from 15th january onuzaye activity run holeo employee shift a problem theke jabe bcs employee shift new job info diye 15 tarikh theke chalu haoche . 

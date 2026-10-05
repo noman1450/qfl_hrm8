@@ -1,0 +1,786 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.20.6.final using JasperReports Library version 6.0.2  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="salary_top_sheet" language="groovy" pageWidth="1100" pageHeight="612" orientation="Landscape" columnWidth="1060" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="36b1473f-49e6-459b-99c8-ec39db2e1308">
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="Crosstab Data Text" hTextAlign="Center" hImageAlign="Center"/>
+	<parameter name="hrm_month_id" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="year_id" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="address" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="company_name" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="title" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="condition_parameter" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="pf_condition_parameter" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT
+    e.id,
+    e.priority,
+    e.category_name,
+    f.location_name,
+    f.location_type,
+    COUNT(DISTINCT a.id) AS noOfEmployee,
+    IF(aa.payment_mode = 1,
+        'Cash',
+        h.short_name) bank_name,
+    1 AS group_status,
+    (IFNULL((SELECT 
+                    SUM(aaa.actual_amount)
+                FROM
+                    pay_register_details aaa
+                        JOIN
+                    hrm_salary_head bb ON aaa.hrm_salary_head_id = bb.id
+                        JOIN
+                    hrm_salary_head_group cc ON bb.hrm_salary_head_group_id = cc.id
+                        AND cc.generate_type = 1 AND bb.apply_for=1
+                WHERE
+                    aaa.pay_register_id = aa.id),0)-IFNULL((SELECT 
+                    SUM(aaa.actual_amount)
+                FROM
+                    pay_register_details aaa
+                        JOIN
+                    hrm_salary_head bb ON aaa.hrm_salary_head_id = bb.id
+                        JOIN
+                    hrm_salary_head_group cc ON bb.hrm_salary_head_group_id = cc.id
+                        AND cc.generate_type = 2 AND bb.apply_for=1
+                WHERE
+                    aaa.pay_register_id = aa.id),0)) as amount
+FROM
+    pay_register aa
+        JOIN
+    hrm_employee_job_info a ON aa.hrm_employee_job_info_id = a.id AND aa.apply_for=1
+        AND aa.year_id = $P{year_id}
+        AND aa.hrm_month_id = $P{hrm_month_id}
+	$P!{condition_parameter}
+        JOIN
+    pay_register_details b ON aa.id = b.pay_register_id
+        JOIN
+    hrm_salary_head c ON b.hrm_salary_head_id = c.id
+        JOIN
+    hrm_salary_head_group d ON c.hrm_salary_head_group_id = d.id AND c.apply_for=1
+        JOIN
+    hrm_category e ON a.hrm_category_id = e.id
+        JOIN
+    hrm_location f ON aa.hrm_location_id = f.id AND f.location_type in (1,2)
+       LEFT JOIN
+    hrm_bank h ON aa.hrm_bank_id = h.id
+GROUP BY aa.id,e.id ,e.priority, e.category_name , f.location_name , aa.payment_mode , h.short_name 
+UNION ALL SELECT
+    e.id,
+    e.priority,
+    e.category_name,
+    f.location_name,
+    f.location_type,
+    0 AS noOfEmployee,
+    d.group_name,
+    2 AS group_status,
+    SUM(b.actual_amount)
+FROM
+    pay_register aa
+        JOIN
+    hrm_employee_job_info a ON aa.hrm_employee_job_info_id = a.id AND aa.apply_for=1
+        AND aa.year_id = $P{year_id}
+        AND aa.hrm_month_id = $P{hrm_month_id}
+            $P!{condition_parameter}
+        JOIN
+    pay_register_details b ON aa.id = b.pay_register_id
+        JOIN
+    hrm_salary_head c ON b.hrm_salary_head_id = c.id
+        JOIN
+    hrm_salary_head_group d ON c.hrm_salary_head_group_id = d.id AND c.apply_for=1
+        AND d.generate_type = 2
+        JOIN
+    hrm_category e ON a.hrm_category_id = e.id
+        JOIN
+    hrm_location f ON aa.hrm_location_id = f.id AND f.location_type in (1,2)
+        LEFT JOIN
+    hrm_bank h ON aa.hrm_bank_id = h.id
+GROUP BY aa.id,e.id ,e.priority, e.category_name , f.location_name , h.short_name , d.group_name
+
+UNION ALL
+SELECT
+    e.id,
+     17 as priority,
+    'Depot Personnel' as category_name,
+    'Depot' as location_name,
+    2 AS location_type,
+    COUNT(DISTINCT a.id) AS noOfEmployee,
+    IF(aa.payment_mode = 1,
+        'Cash',
+        h.short_name) bank_name,
+    1 AS group_status,
+    (IFNULL((SELECT 
+                    SUM(aaa.actual_amount)
+                FROM
+                    pay_register_details aaa
+                        JOIN
+                    hrm_salary_head bb ON aaa.hrm_salary_head_id = bb.id
+                        JOIN
+                    hrm_salary_head_group cc ON bb.hrm_salary_head_group_id = cc.id
+                        AND cc.generate_type = 1 AND bb.apply_for=1
+                WHERE
+                    aaa.pay_register_id = aa.id),0)-IFNULL((SELECT 
+                    SUM(aaa.actual_amount)
+                FROM
+                    pay_register_details aaa
+                        JOIN
+                    hrm_salary_head bb ON aaa.hrm_salary_head_id = bb.id
+                        JOIN
+                    hrm_salary_head_group cc ON bb.hrm_salary_head_group_id = cc.id
+                        AND cc.generate_type = 2 AND bb.apply_for=1
+                WHERE
+                    aaa.pay_register_id = aa.id),0)) as amount
+FROM
+    pay_register aa
+        JOIN
+    hrm_employee_job_info a ON aa.hrm_employee_job_info_id = a.id AND aa.apply_for=1
+        AND aa.year_id = $P{year_id}
+        AND aa.hrm_month_id = $P{hrm_month_id}
+	$P!{condition_parameter}
+        JOIN
+    pay_register_details b ON aa.id = b.pay_register_id
+        JOIN
+    hrm_salary_head c ON b.hrm_salary_head_id = c.id
+        JOIN
+    hrm_salary_head_group d ON c.hrm_salary_head_group_id = d.id AND c.apply_for=1
+        JOIN
+    hrm_category e ON a.hrm_category_id = e.id
+        JOIN
+    hrm_location f ON aa.hrm_location_id = f.id AND f.location_type in (3)
+       LEFT JOIN
+    hrm_bank h ON aa.hrm_bank_id = h.id
+GROUP BY aa.id,e.id ,aa.payment_mode , h.short_name 
+UNION ALL SELECT 
+    e.id,
+    17 as priority,
+    'Depot Personnel' as category_name,
+    'Depot' as location_name,
+    2 as location_type,
+    0 AS noOfEmployee,
+    d.group_name,
+    2 AS group_status,
+    SUM(b.actual_amount)
+FROM
+    pay_register aa
+        JOIN
+    hrm_employee_job_info a ON aa.hrm_employee_job_info_id = a.id AND aa.apply_for=1
+        AND aa.year_id = $P{year_id}
+        AND aa.hrm_month_id = $P{hrm_month_id}
+            $P!{condition_parameter}
+        JOIN
+    pay_register_details b ON aa.id = b.pay_register_id
+        JOIN
+    hrm_salary_head c ON b.hrm_salary_head_id = c.id
+        JOIN
+    hrm_salary_head_group d ON c.hrm_salary_head_group_id = d.id AND c.apply_for=1
+        AND d.generate_type = 2
+        JOIN
+    hrm_category e ON a.hrm_category_id = e.id
+        JOIN
+    hrm_location f ON aa.hrm_location_id = f.id AND f.location_type in (3)
+        LEFT JOIN
+    hrm_bank h ON aa.hrm_bank_id = h.id
+GROUP BY aa.id,e.id, h.short_name , d.group_name
+UNION ALL
+SELECT
+     e.id,
+     19 as priority,
+    'Casual Worker*' as category_name,
+    f.location_name,
+    f.location_type,
+    COUNT(DISTINCT a.id) AS noOfEmployee,
+    IF(aa.payment_mode = 1,
+        'Cash',
+        h.short_name) bank_name,
+    1 AS group_status,
+    (IFNULL((SELECT ((m.amount*m.total_present)+n.due_adjust) 
+    FROM  pay_register m JOIN pay_register_cw n ON m.id=n.pay_register_id where m.apply_for=3 AND m.id = aa.id),0)-IFNULL(( SELECT adv_adjust FROM  pay_register_cw where  pay_register_cw.pay_register_id = aa.id ),0)) as amount
+FROM
+    pay_register aa
+        JOIN
+    hrm_employee_job_info a ON aa.hrm_employee_job_info_id = a.id  AND aa.apply_for=3
+         AND aa.year_id = $P{year_id}
+        AND aa.hrm_month_id = $P{hrm_month_id}
+            $P!{condition_parameter}
+		JOIN
+    pay_register_cw bb ON aa.id=bb.pay_register_id
+        JOIN
+    hrm_category e ON a.hrm_category_id = e.id
+        JOIN
+    hrm_location f ON aa.hrm_location_id = f.id 
+       LEFT JOIN
+    hrm_bank h ON aa.hrm_bank_id = h.id
+GROUP BY aa.id,e.id ,aa.payment_mode , h.short_name ,f.location_name
+UNION ALL
+SELECT
+    e.id,
+    19 as priority,
+    'Casual Worker*' as category_name,
+    f.location_name,
+    f.location_type,
+    0 AS noOfEmployee,
+    (SELECT group_name FROM hrm_salary_head_group where id=2) group_name,
+    2 AS group_status,
+    SUM(bb.adv_adjust)
+FROM
+    pay_register aa
+        JOIN
+    hrm_employee_job_info a ON aa.hrm_employee_job_info_id = a.id  AND aa.apply_for=3
+        AND aa.year_id = $P{year_id}
+        AND aa.hrm_month_id = $P{hrm_month_id}
+            $P!{condition_parameter}
+		JOIN
+	pay_register_cw bb ON aa.id=bb.pay_register_id
+        JOIN
+    hrm_category e ON a.hrm_category_id = e.id
+        JOIN
+    hrm_location f ON aa.hrm_location_id = f.id 
+        LEFT JOIN
+    hrm_bank h ON aa.hrm_bank_id = h.id
+GROUP BY aa.id,e.id, h.short_name,f.location_name
+$P!{pf_condition_parameter}]]>
+	</queryString>
+	<field name="id" class="java.lang.Integer"/>
+	<field name="priority" class="java.math.BigInteger"/>
+	<field name="category_name" class="java.lang.String"/>
+	<field name="location_name" class="java.lang.String"/>
+	<field name="location_type" class="java.math.BigInteger"/>
+	<field name="noOfEmployee" class="java.lang.Long"/>
+	<field name="bank_name" class="java.lang.String"/>
+	<field name="group_status" class="java.lang.Long"/>
+	<field name="amount" class="java.lang.Double"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="60" splitType="Stretch">
+			<textField>
+				<reportElement x="2" y="23" width="804" height="16" uuid="af0766e3-ca64-40ee-8431-a90270bcdf29"/>
+				<textElement verticalAlignment="Middle">
+					<font size="12"/>
+					<paragraph leftIndent="3"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{address}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="828" y="3" width="42" height="20" uuid="f346d9f1-e2dd-448a-ad8e-9b5f598d1967"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="873" y="3" width="29" height="20" uuid="566ad8dd-783d-4534-818f-8bf395f41de3"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField pattern="h.mm a">
+				<reportElement x="869" y="39" width="78" height="20" uuid="e2b9b8b7-91e1-46a4-b2ee-651afe8cf986"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="827" y="23" width="42" height="16" uuid="793bb145-1f39-45fe-83fc-b792495e3962"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Print Date]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="827" y="39" width="42" height="20" uuid="748b00a2-d5cd-4d7d-87c3-8d545911a0e0"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Print Time]]></text>
+			</staticText>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="869" y="23" width="78" height="16" uuid="4d737343-1eed-4540-a7f4-5c089fb3fb26"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="2" y="3" width="804" height="20" uuid="08dcbade-f9e0-4657-9a7c-5aab8a3c7009"/>
+				<textElement verticalAlignment="Middle">
+					<font size="15" isBold="true"/>
+					<paragraph leftIndent="3"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{company_name}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="1" y="39" width="805" height="20" uuid="360a4d8d-ffad-4dc4-8f11-103492d3dadc"/>
+				<textElement verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+					<paragraph leftIndent="3"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{title}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band splitType="Stretch"/>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="158" splitType="Stretch">
+			<staticText>
+				<reportElement x="30" y="120" width="170" height="30" uuid="541ae336-32c2-4225-838d-d3e4571a5781"/>
+				<box>
+					<topPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Admin]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="290" y="120" width="170" height="30" uuid="689ab33f-036a-45ba-a0fb-4b299a075d1a"/>
+				<box>
+					<topPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Accounts]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="530" y="120" width="170" height="30" uuid="6e477e71-907c-4b7b-b5c3-5137f8141356"/>
+				<box>
+					<topPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Audit]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="797" y="120" width="170" height="30" uuid="db355bdb-5880-4b3c-96d3-49e5c28385f1"/>
+				<box>
+					<topPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Approved By]]></text>
+			</staticText>
+		</band>
+	</pageFooter>
+	<lastPageFooter>
+		<band height="1"/>
+	</lastPageFooter>
+	<summary>
+		<band height="200" splitType="Stretch">
+			<crosstab>
+				<reportElement x="0" y="0" width="1100" height="197" uuid="ea5a1ca3-95dd-41e4-88c7-544831b0ee27">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<crosstabHeaderCell>
+					<cellContents>
+						<textField>
+							<reportElement style="Crosstab Data Text" mode="Transparent" x="0" y="0" width="149" height="14" backcolor="#FEFEFE" uuid="c397088f-c11d-4dee-ae54-5e98edeb876f"/>
+							<box>
+								<pen lineWidth="0.75"/>
+								<topPen lineWidth="0.75"/>
+								<leftPen lineWidth="0.75"/>
+								<bottomPen lineWidth="0.75"/>
+								<rightPen lineWidth="0.75"/>
+							</box>
+							<textElement textAlignment="Left" verticalAlignment="Middle">
+								<font size="6"/>
+								<paragraph leftIndent="2"/>
+							</textElement>
+							<textFieldExpression><![CDATA["Category Name"]]></textFieldExpression>
+						</textField>
+						<textField>
+							<reportElement style="Crosstab Data Text" mode="Transparent" x="149" y="0" width="38" height="14" backcolor="#FEFEFE" uuid="8d22a0e2-89db-46d0-95bb-35965dc0af20"/>
+							<box>
+								<pen lineWidth="0.75"/>
+								<topPen lineWidth="0.75"/>
+								<leftPen lineWidth="0.75"/>
+								<bottomPen lineWidth="0.75"/>
+								<rightPen lineWidth="0.75"/>
+							</box>
+							<textElement verticalAlignment="Middle">
+								<font size="6"/>
+							</textElement>
+							<textFieldExpression><![CDATA["No of Emp."]]></textFieldExpression>
+						</textField>
+					</cellContents>
+				</crosstabHeaderCell>
+				<rowGroup name="location_name" width="0" totalPosition="End">
+					<bucket class="java.lang.String">
+						<bucketExpression><![CDATA[$F{location_name}]]></bucketExpression>
+					</bucket>
+					<crosstabRowHeader>
+						<cellContents backcolor="#F0F8FF" mode="Opaque">
+							<box>
+								<pen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+							</box>
+						</cellContents>
+					</crosstabRowHeader>
+					<crosstabTotalRowHeader>
+						<cellContents backcolor="#005FB3" mode="Transparent">
+							<box>
+								<pen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+							</box>
+							<staticText>
+								<reportElement x="0" y="0" width="149" height="12" forecolor="#000000" uuid="62b0e8a1-0dc3-4079-8e97-a738194fdf9b"/>
+								<textElement verticalAlignment="Middle">
+									<font size="8" isBold="true"/>
+									<paragraph leftIndent="2"/>
+								</textElement>
+								<text><![CDATA[Total]]></text>
+							</staticText>
+							<textField>
+								<reportElement style="Crosstab Data Text" x="149" y="0" width="38" height="12" uuid="fa659e6d-f657-4d9c-b38c-f24d64732efc"/>
+								<textElement verticalAlignment="Middle">
+									<font size="8" isBold="true"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$V{NoOfEmployee}]]></textFieldExpression>
+							</textField>
+						</cellContents>
+					</crosstabTotalRowHeader>
+				</rowGroup>
+				<rowGroup name="category_name" width="187" totalPosition="End">
+					<bucket class="java.lang.String">
+						<bucketExpression><![CDATA[$F{category_name}]]></bucketExpression>
+						<orderByExpression><![CDATA[$V{prioritys}]]></orderByExpression>
+					</bucket>
+					<crosstabRowHeader>
+						<cellContents backcolor="#F0F8FF" mode="Opaque">
+							<box>
+								<pen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+							</box>
+							<textField>
+								<reportElement style="Crosstab Data Text" mode="Transparent" x="14" y="0" width="135" height="14" backcolor="#FEFEFE" uuid="3a41712a-43a5-48ca-8236-6bb06ec472a2"/>
+								<box>
+									<pen lineWidth="0.75"/>
+									<topPen lineWidth="0.75"/>
+									<leftPen lineWidth="0.75"/>
+									<bottomPen lineWidth="0.75"/>
+									<rightPen lineWidth="0.75"/>
+								</box>
+								<textElement textAlignment="Left" verticalAlignment="Middle">
+									<font size="7"/>
+									<paragraph leftIndent="2"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$V{category_name}]]></textFieldExpression>
+							</textField>
+							<textField pattern="#,##0">
+								<reportElement style="Crosstab Data Text" mode="Transparent" x="149" y="0" width="38" height="14" backcolor="#FEFEFE" uuid="78edbe21-76ef-4cc3-b26d-6fd5fd855112"/>
+								<box>
+									<pen lineWidth="0.75"/>
+									<topPen lineWidth="0.75"/>
+									<leftPen lineWidth="0.75"/>
+									<bottomPen lineWidth="0.75"/>
+									<rightPen lineWidth="0.75"/>
+								</box>
+								<textElement verticalAlignment="Middle">
+									<font size="7"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$V{NoOfEmployee}]]></textFieldExpression>
+							</textField>
+							<textField>
+								<reportElement style="Crosstab Data Text" mode="Transparent" x="0" y="0" width="14" height="14" forecolor="#141414" backcolor="#FEFEFE" uuid="4beaebec-ae58-4f61-8a1d-820fa69ae8d2"/>
+								<box>
+									<pen lineWidth="0.75"/>
+									<topPen lineWidth="0.75"/>
+									<leftPen lineWidth="0.75"/>
+									<bottomPen lineWidth="0.75"/>
+									<rightPen lineWidth="0.75"/>
+								</box>
+								<textElement verticalAlignment="Middle">
+									<font size="7"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$V{ROW_COUNT}]]></textFieldExpression>
+							</textField>
+						</cellContents>
+					</crosstabRowHeader>
+					<crosstabTotalRowHeader>
+						<cellContents backcolor="#E8DFDF" mode="Opaque">
+							<box>
+								<pen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+							</box>
+							<textField>
+								<reportElement style="Crosstab Data Text" mode="Transparent" x="0" y="0" width="149" height="12" backcolor="#E2E2E2" uuid="e8b6e638-1c89-4530-9008-ea6125b7fb99"/>
+								<box>
+									<pen lineWidth="0.75"/>
+									<topPen lineWidth="0.75"/>
+									<leftPen lineWidth="0.75"/>
+									<bottomPen lineWidth="0.75"/>
+									<rightPen lineWidth="0.75"/>
+								</box>
+								<textElement textAlignment="Left" verticalAlignment="Middle">
+									<font size="7" isBold="true"/>
+									<paragraph leftIndent="2"/>
+								</textElement>
+								<textFieldExpression><![CDATA["Total "+$V{location_name}]]></textFieldExpression>
+							</textField>
+							<textField pattern="#,##0">
+								<reportElement style="Crosstab Data Text" mode="Opaque" x="149" y="0" width="38" height="12" backcolor="#E2E2E2" uuid="07fd78ee-3f85-428d-a85c-fa558cf792cb"/>
+								<box>
+									<pen lineWidth="0.75"/>
+									<topPen lineWidth="0.75"/>
+									<leftPen lineWidth="0.75"/>
+									<bottomPen lineWidth="0.75"/>
+									<rightPen lineWidth="0.75"/>
+								</box>
+								<textElement verticalAlignment="Middle">
+									<font size="7" isBold="true"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$V{NoOfEmployee}]]></textFieldExpression>
+							</textField>
+						</cellContents>
+					</crosstabTotalRowHeader>
+				</rowGroup>
+				<columnGroup name="group_status" height="0" totalPosition="End">
+					<bucket class="java.lang.Long">
+						<bucketExpression><![CDATA[$F{group_status}]]></bucketExpression>
+					</bucket>
+					<crosstabColumnHeader>
+						<cellContents backcolor="#F0F8FF" mode="Opaque">
+							<box>
+								<pen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+							</box>
+						</cellContents>
+					</crosstabColumnHeader>
+					<crosstabTotalColumnHeader>
+						<cellContents backcolor="#005FB3" mode="Transparent">
+							<box>
+								<pen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+							</box>
+							<staticText>
+								<reportElement style="Crosstab Data Text" mode="Transparent" x="0" y="0" width="71" height="14" backcolor="#FEFEFE" uuid="4e930d21-1a3a-488c-8164-c70f2049e9d7"/>
+								<box>
+									<pen lineWidth="0.75"/>
+									<topPen lineWidth="0.75"/>
+									<leftPen lineWidth="0.75"/>
+									<bottomPen lineWidth="0.75"/>
+									<rightPen lineWidth="0.75"/>
+								</box>
+								<textElement verticalAlignment="Middle">
+									<font size="6"/>
+								</textElement>
+								<text><![CDATA[Total]]></text>
+							</staticText>
+						</cellContents>
+					</crosstabTotalColumnHeader>
+				</columnGroup>
+				<columnGroup name="bank_name" height="14" totalPosition="End">
+					<bucket class="java.lang.String">
+						<bucketExpression><![CDATA[$F{bank_name}]]></bucketExpression>
+					</bucket>
+					<crosstabColumnHeader>
+						<cellContents backcolor="#F0F8FF" mode="Opaque">
+							<box>
+								<pen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+							</box>
+							<textField>
+								<reportElement style="Crosstab Data Text" mode="Transparent" x="0" y="0" width="68" height="14" backcolor="#FEFEFE" uuid="9c12b5a0-16ad-4c7b-ac46-20fc1fd91f33"/>
+								<box>
+									<pen lineWidth="0.75"/>
+									<topPen lineWidth="0.75"/>
+									<leftPen lineWidth="0.75"/>
+									<bottomPen lineWidth="0.75"/>
+									<rightPen lineWidth="0.75"/>
+								</box>
+								<textElement verticalAlignment="Middle">
+									<font size="6"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$V{bank_name}]]></textFieldExpression>
+							</textField>
+						</cellContents>
+					</crosstabColumnHeader>
+					<crosstabTotalColumnHeader>
+						<cellContents backcolor="#BFE1FF" mode="Opaque">
+							<box>
+								<pen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+							</box>
+						</cellContents>
+					</crosstabTotalColumnHeader>
+				</columnGroup>
+				<measure name="amountMeasure" class="java.lang.Double" calculation="Sum">
+					<measureExpression><![CDATA[$F{amount}]]></measureExpression>
+				</measure>
+				<measure name="NoOfEmployee" class="java.math.BigDecimal" calculation="Sum">
+					<measureExpression><![CDATA[$F{noOfEmployee}]]></measureExpression>
+				</measure>
+				<measure name="heder_name" class="java.lang.String" calculation="Count">
+					<measureExpression><![CDATA["Category Name"]]></measureExpression>
+				</measure>
+				<measure name="count" class="java.lang.String">
+					<measureExpression><![CDATA["No of Emp"]]></measureExpression>
+				</measure>
+				<measure name="location_type" class="java.lang.Integer">
+					<measureExpression><![CDATA[$F{location_type}]]></measureExpression>
+				</measure>
+				<measure name="prioritys" class="java.math.BigInteger">
+					<measureExpression><![CDATA[$F{priority}]]></measureExpression>
+				</measure>
+				<crosstabCell width="68" height="14">
+					<cellContents>
+						<box>
+							<pen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+						</box>
+						<textField pattern="#,##0">
+							<reportElement style="Crosstab Data Text" mode="Transparent" x="0" y="0" width="68" height="14" backcolor="#FEFEFE" uuid="0bfac7fc-f865-4e41-927a-3989dbd290a0"/>
+							<box>
+								<pen lineWidth="0.75"/>
+								<topPen lineWidth="0.75"/>
+								<leftPen lineWidth="0.75"/>
+								<bottomPen lineWidth="0.75"/>
+								<rightPen lineWidth="0.75"/>
+							</box>
+							<textElement verticalAlignment="Middle">
+								<font size="7"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$V{amountMeasure}]]></textFieldExpression>
+						</textField>
+					</cellContents>
+				</crosstabCell>
+				<crosstabCell width="68" height="12" rowTotalGroup="location_name">
+					<cellContents backcolor="#005FB3" mode="Transparent">
+						<box>
+							<pen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+						</box>
+						<textField pattern="#,##0">
+							<reportElement style="Crosstab Data Text" x="0" y="0" width="68" height="12" forecolor="#000000" uuid="0c1a4431-8229-474f-8be9-e44c7a5563cb"/>
+							<textElement verticalAlignment="Middle">
+								<font size="8" isBold="true"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$V{amountMeasure}]]></textFieldExpression>
+						</textField>
+					</cellContents>
+				</crosstabCell>
+				<crosstabCell width="71" height="14" columnTotalGroup="group_status">
+					<cellContents backcolor="#005FB3" mode="Transparent">
+						<box>
+							<pen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+						</box>
+						<textField pattern="#,##0">
+							<reportElement style="Crosstab Data Text" mode="Transparent" x="0" y="0" width="71" height="14" forecolor="#000000" backcolor="#FEFEFE" uuid="7e9ff092-c60e-4779-a100-571d15c34abf"/>
+							<box>
+								<pen lineWidth="0.75"/>
+								<topPen lineWidth="0.75"/>
+								<leftPen lineWidth="0.75"/>
+								<bottomPen lineWidth="0.75"/>
+								<rightPen lineWidth="0.75"/>
+							</box>
+							<textElement verticalAlignment="Middle">
+								<font size="7" isBold="true"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$V{amountMeasure}]]></textFieldExpression>
+						</textField>
+					</cellContents>
+				</crosstabCell>
+				<crosstabCell width="71" height="12" rowTotalGroup="location_name" columnTotalGroup="group_status">
+					<cellContents backcolor="#005FB3" mode="Transparent">
+						<box>
+							<pen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+						</box>
+						<textField pattern="#,##0">
+							<reportElement style="Crosstab Data Text" x="0" y="0" width="71" height="12" forecolor="#000000" uuid="e2386f58-6adf-4f80-b734-0868160ad222"/>
+							<textElement verticalAlignment="Middle">
+								<font size="8" isBold="true"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$V{amountMeasure}]]></textFieldExpression>
+						</textField>
+					</cellContents>
+				</crosstabCell>
+				<crosstabCell width="0" height="14" columnTotalGroup="bank_name">
+					<cellContents backcolor="#BFE1FF" mode="Opaque">
+						<box>
+							<pen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+						</box>
+					</cellContents>
+				</crosstabCell>
+				<crosstabCell width="0" height="12" rowTotalGroup="location_name" columnTotalGroup="bank_name">
+					<cellContents backcolor="#005FB3" mode="Opaque">
+						<box>
+							<pen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+						</box>
+					</cellContents>
+				</crosstabCell>
+				<crosstabCell width="68" height="12" rowTotalGroup="category_name">
+					<cellContents backcolor="#E8DFDF" mode="Opaque">
+						<box>
+							<pen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+						</box>
+						<textField pattern="#,##0">
+							<reportElement style="Crosstab Data Text" mode="Opaque" x="0" y="0" width="68" height="12" backcolor="#E2E2E2" uuid="cca818c7-e8f1-45bc-8064-499b0b87e03c"/>
+							<box>
+								<pen lineWidth="0.75"/>
+								<topPen lineWidth="0.75"/>
+								<leftPen lineWidth="0.75"/>
+								<bottomPen lineWidth="0.75"/>
+								<rightPen lineWidth="0.75"/>
+							</box>
+							<textElement verticalAlignment="Middle">
+								<font size="7" isBold="true"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$V{amountMeasure}]]></textFieldExpression>
+						</textField>
+					</cellContents>
+				</crosstabCell>
+				<crosstabCell width="71" height="12" rowTotalGroup="category_name" columnTotalGroup="group_status">
+					<cellContents backcolor="#E8DFDF" mode="Opaque">
+						<box>
+							<pen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+						</box>
+						<textField pattern="#,##0">
+							<reportElement style="Crosstab Data Text" mode="Opaque" x="0" y="0" width="71" height="12" forecolor="#000000" backcolor="#E2E2E2" uuid="68cac377-d9d4-4065-9f5b-e9c804dec4a4"/>
+							<box>
+								<pen lineWidth="0.75"/>
+								<topPen lineWidth="0.75"/>
+								<leftPen lineWidth="0.75"/>
+								<bottomPen lineWidth="0.75"/>
+								<rightPen lineWidth="0.75"/>
+							</box>
+							<textElement verticalAlignment="Middle">
+								<font size="7" isBold="true"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$V{amountMeasure}]]></textFieldExpression>
+						</textField>
+					</cellContents>
+				</crosstabCell>
+				<crosstabCell width="0" height="12" rowTotalGroup="category_name" columnTotalGroup="bank_name">
+					<cellContents backcolor="#BFE1FF" mode="Opaque">
+						<box>
+							<pen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+						</box>
+					</cellContents>
+				</crosstabCell>
+			</crosstab>
+		</band>
+	</summary>
+	<noData>
+		<band/>
+	</noData>
+</jasperReport>

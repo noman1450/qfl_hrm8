@@ -1,0 +1,721 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.20.0.final using JasperReports Library version 6.5.1  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="job_card_report" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="12525be8-a4c6-45d8-94dd-0b4b2bd74cca">
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="111"/>
+	<parameter name="title" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="address" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="company_name" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="condition_parameter" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="subquery_parameter" class="java.lang.String"/>
+	<parameter name="condition_parameter_1" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT 
+    a.hrm_employee_id,
+    Concat(ifnull(c.employee_name,'') ,'  |  ', ifnull(b.employee_code,'')) as employee_name,
+    d.depertment_name,
+    e.designation_name,
+    f.confirmation_date,
+    a.punche_date,
+    a.in_time,
+    a.out_time,
+    a.early_out_time,
+    a.late_time,   
+     STR_TO_DATE(a.overtime_time,"%H:%i:%s") AS overtime_time,
+    g.alies as attendance_status,
+     CONCAT(ifnull(aa.comment,'') , ifnull(a.comment,'')) as comment ,
+    absent.absent,
+    present.present,
+    allLeave.allLeave,
+    late.late,
+    Friday.Friday,
+    Holiday.Holiday,
+    HalfDayLeave.halfday,
+    totalovertime.totalovertime,
+    totallatetime.totallatetime,
+    quarterday.quarterday,
+    EarlyOut.EarlyOut
+    
+FROM
+    hrm_attendance a
+        JOIN
+    hrm_employee_job_info b ON a.hrm_employee_id = b.hrm_employee_id 
+ AND b.id in (SELECT max(id) FROM hrm_employee_job_info Group By hrm_employee_id) 
+        JOIN
+    hrm_employee c ON b.hrm_employee_id = c.id
+        JOIN
+    hrm_depertment d ON b.hrm_depertment_id=d.id
+        JOIN
+    hrm_designation e ON b.hrm_designation_id=e.id
+        JOIN
+    hrm_employee_joining f ON b.hrm_employee_id=f.hrm_employee_id
+       JOIN 
+hrm_attendance_status g ON g.id=a.attendance_status
+$P!{condition_parameter}
+
+LEFT JOIN
+     (SELECT Count(id) as absent,hrm_employee_id FROM hrm_attendance WHERE attendance_status in (1) $P!{subquery_parameter}  group by hrm_employee_id)  absent
+     ON a.hrm_employee_id=absent.hrm_employee_id
+ 
+LEFT JOIN
+     (SELECT Count(id) as EarlyOut,hrm_employee_id FROM hrm_attendance WHERE attendance_status in (14) $P!{subquery_parameter}  group by hrm_employee_id)  EarlyOut
+     ON a.hrm_employee_id=absent.hrm_employee_id    
+     
+LEFT JOIN
+    (SELECT Count(id) as present,hrm_employee_id FROM hrm_attendance WHERE attendance_status in(2,5) $P!{subquery_parameter}  group by hrm_employee_id)  present
+    ON a.hrm_employee_id=present.hrm_employee_id
+LEFT JOIN
+    (SELECT Count(id) as allLeave,hrm_employee_id FROM hrm_attendance WHERE attendance_status in(3,9,11) $P!{subquery_parameter}  group by hrm_employee_id) as allLeave
+    ON a.hrm_employee_id=allLeave.hrm_employee_id
+LEFT JOIN
+
+    (SELECT Count(id) as late,hrm_employee_id FROM hrm_attendance WHERE attendance_status in(6) $P!{subquery_parameter}  group by hrm_employee_id)  late
+    ON a.hrm_employee_id=late.hrm_employee_id
+LEFT JOIN 
+    (SELECT Count(id) as Friday,hrm_employee_id FROM hrm_attendance WHERE attendance_status in(7) AND in_time>'00:00:00'  $P!{subquery_parameter}  group by hrm_employee_id)  Friday
+ ON a.hrm_employee_id=Friday.hrm_employee_id
+LEFT JOIN
+    (SELECT Count(id) as Holiday,hrm_employee_id  FROM hrm_attendance WHERE attendance_status in(8) AND in_time>'00:00:00'  $P!{subquery_parameter}  group by hrm_employee_id)  Holiday
+ON  a.hrm_employee_id=Holiday.hrm_employee_id
+LEFT JOIN
+    (SELECT Count(id) as halfday,hrm_employee_id FROM hrm_attendance WHERE attendance_status in(4,10) $P!{subquery_parameter}  group by hrm_employee_id)  HalfDayLeave
+ON  a.hrm_employee_id=HalfDayLeave.hrm_employee_id
+LEFT JOIN
+    (SELECT Count(id) as quarterday,hrm_employee_id FROM hrm_attendance WHERE attendance_status in(12,13) $P!{subquery_parameter}  group by hrm_employee_id)  quarterday
+ON  a.hrm_employee_id=quarterday.hrm_employee_id
+LEFT JOIN    
+   ((SELECT TIME_FORMAT(SEC_TO_TIME( SUM(TIME_TO_SEC(overtime_time))),'%H:%i') AS totalovertime,hrm_employee_id FROM hrm_attendance WHERE hrm_employee_id  <> ''  $P!{subquery_parameter}  group by hrm_employee_id))  totalovertime
+ON  a.hrm_employee_id=totalovertime.hrm_employee_id
+LEFT JOIN    
+   ((SELECT TIME_FORMAT(SEC_TO_TIME( SUM(TIME_TO_SEC(late_time))),'%H:%i') AS totallatetime,hrm_employee_id  FROM hrm_attendance WHERE hrm_employee_id  <> ''   $P!{subquery_parameter}  group by hrm_employee_id))  totallatetime
+   ON   a.hrm_employee_id=totallatetime.hrm_employee_id
+Left JOIN 
+(SELECT 
+  DISTINCT  a.hrm_employee_id, a.punch_date,c.comment,b.id as job_id
+FROM
+    hrm_attendance_raw_data a
+        JOIN
+    hrm_employee_job_info b ON a.hrm_employee_id = b.hrm_employee_id
+        AND a.data_from = 2
+$P!{condition_parameter_1} 
+        JOIN
+    hrm_attendance_comment c ON a.id = c.hrm_attendance_raw_data_id
+    GROUP BY a.hrm_employee_id, a.punch_date) aa ON a.hrm_employee_id=aa.hrm_employee_id AND aa.punch_date=a.punche_date 
+order by  a.hrm_employee_id,a.punche_date]]>
+	</queryString>
+	<field name="hrm_employee_id" class="java.lang.Integer">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="employee_name" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="depertment_name" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="designation_name" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="confirmation_date" class="java.sql.Date">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="punche_date" class="java.sql.Date">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="in_time" class="java.sql.Time">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="out_time" class="java.sql.Time">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="early_out_time" class="java.sql.Time">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="late_time" class="java.sql.Time">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="overtime_time" class="java.sql.Time">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="attendance_status" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="absent" class="java.lang.Long"/>
+	<field name="present" class="java.lang.Long"/>
+	<field name="allLeave" class="java.lang.Long"/>
+	<field name="late" class="java.lang.Long"/>
+	<field name="Friday" class="java.lang.Long"/>
+	<field name="Holiday" class="java.lang.Long"/>
+	<field name="HalfDayLeave" class="java.math.BigDecimal"/>
+	<field name="totalovertime" class="java.lang.String"/>
+	<field name="totallatetime" class="java.lang.String"/>
+	<field name="quarterday" class="java.lang.String"/>
+	<field name="halfday" class="java.lang.String"/>
+	<field name="EarlyOut" class="java.lang.String"/>
+	<field name="comment" class="java.lang.String"/>
+	<variable name="overtime_time_1" class="java.lang.Integer" resetType="Page" calculation="Count">
+		<variableExpression><![CDATA[$F{overtime_time}]]></variableExpression>
+	</variable>
+	<variable name="overtime_time_2" class="java.lang.Integer" calculation="Count">
+		<variableExpression><![CDATA[$F{overtime_time}]]></variableExpression>
+	</variable>
+	<variable name="overtime_time_3" class="java.lang.Integer" calculation="Count">
+		<variableExpression><![CDATA[$F{overtime_time}]]></variableExpression>
+	</variable>
+	<group name="employee_name" isStartNewPage="true">
+		<groupExpression><![CDATA[$F{hrm_employee_id}]]></groupExpression>
+		<groupHeader>
+			<band height="232">
+				<textField>
+					<reportElement x="75" y="82" width="244" height="15" uuid="0e220ac9-2689-44d9-bca2-9e40d626f6f4"/>
+					<textElement verticalAlignment="Middle"/>
+					<textFieldExpression><![CDATA[$F{employee_name}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="418" y="82" width="133" height="15" uuid="4b35eae2-0701-455d-89a0-be9e7259812e"/>
+					<textElement verticalAlignment="Middle"/>
+					<textFieldExpression><![CDATA[$F{depertment_name}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="75" y="100" width="244" height="15" uuid="917ad8f5-c75a-4bdb-8a5a-d4eedbc6f949"/>
+					<textElement verticalAlignment="Middle"/>
+					<textFieldExpression><![CDATA[$F{designation_name}]]></textFieldExpression>
+				</textField>
+				<textField pattern="dd-MMM-yyyy">
+					<reportElement x="418" y="99" width="134" height="13" uuid="07096d66-1c7d-4430-aba8-5703ebc6758b"/>
+					<textElement verticalAlignment="Middle"/>
+					<textFieldExpression><![CDATA[$F{confirmation_date}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="2" y="82" width="68" height="15" uuid="338e64fd-7d2d-4c77-9138-ad7d017b2bbc"/>
+					<textElement verticalAlignment="Middle">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Name]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="336" y="82" width="72" height="15" uuid="a0523de5-3cdc-4e77-bae9-10d074a27482"/>
+					<textElement verticalAlignment="Middle">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Department]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="2" y="100" width="68" height="15" uuid="55bf7afb-9b70-4324-8c0a-3477d759a48c"/>
+					<textElement verticalAlignment="Middle">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Designation]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="336" y="99" width="74" height="15" uuid="25d25d37-2983-4fd0-bdea-e4c86c669bbc"/>
+					<textElement verticalAlignment="Middle">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Job Confirm Date]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="70" y="82" width="5" height="15" uuid="032a0d1b-2be6-4891-ade0-c8f254657e0e"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[:]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="413" y="82" width="5" height="15" uuid="896cf3fc-7047-42d4-ae23-ed737cee4679"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[:]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="70" y="100" width="5" height="15" uuid="511dfbce-d5da-4321-bff0-1822b6cf005b"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[:]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="413" y="99" width="5" height="15" uuid="d5770b78-27e3-453a-8eb9-092576f2ef69"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[:]]></text>
+				</staticText>
+				<textField isBlankWhenNull="true">
+					<reportElement x="91" y="126" width="28" height="13" uuid="8467fa95-11b7-4f8c-85db-121b25024296"/>
+					<textElement verticalAlignment="Middle"/>
+					<textFieldExpression><![CDATA[$F{present}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="91" y="142" width="28" height="15" uuid="6dbbd637-6958-4788-b654-d0e892dac082"/>
+					<textElement verticalAlignment="Middle"/>
+					<textFieldExpression><![CDATA[$F{Friday}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="91" y="159" width="28" height="15" uuid="01a27630-ddd2-43b4-861f-3d42a0089adc"/>
+					<textElement verticalAlignment="Middle"/>
+					<textFieldExpression><![CDATA[$F{Holiday}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="424" y="177" width="36" height="15" uuid="9cc85098-561e-4ce5-aabe-0e17d191239e"/>
+					<textElement verticalAlignment="Middle"/>
+					<textFieldExpression><![CDATA[$F{late}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="424" y="160" width="36" height="15" uuid="d571704e-c480-419b-a000-a8a5b0174af4"/>
+					<textElement verticalAlignment="Middle"/>
+					<textFieldExpression><![CDATA[$F{allLeave}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="2" y="126" width="77" height="15" uuid="19ae465e-f49c-43e2-a30e-70e9ebc361aa"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Present ]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="3" y="142" width="77" height="15" uuid="e0375989-f3f9-4f61-9827-08feb1d4321d"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Weekly off ]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="4" y="159" width="75" height="15" uuid="f21d9ac8-4369-412c-b9a1-58f5e36d5bae"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Holiday]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="335" y="177" width="75" height="15" uuid="180b2902-64f6-4a35-8aa9-e5e442707474"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Total Late ]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="335" y="125" width="75" height="15" uuid="315cc58c-5b3c-4ee0-baf2-ba17308a9a15"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Over Time Hours]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="335" y="143" width="75" height="15" uuid="214b1f43-69d0-4780-9c7d-99d32ee1d14f"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Total Late Hours]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="335" y="160" width="75" height="15" uuid="9e436047-9394-40cb-982c-178a4410e5b4"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Leave ]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="79" y="142" width="5" height="15" uuid="9a5560f1-7606-4105-a6b4-2e86d842e4ef"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[:]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="79" y="125" width="5" height="15" uuid="9483387e-2640-45ae-a5ab-d8f351d32236"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[:]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="79" y="159" width="5" height="15" uuid="50f83fb5-ca1e-447b-a6ff-d44ef95abc41"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[:]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="413" y="143" width="5" height="15" uuid="c86bf6c8-2871-41f9-8e08-747eb8fe88f7"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[:]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="413" y="160" width="5" height="15" uuid="686ea5fa-b233-42c9-be8b-c6c3f2a4a0e5"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[:]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="413" y="125" width="5" height="15" uuid="14b24cae-9043-4206-a60d-ae8cd9ead003"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[:]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="413" y="177" width="5" height="15" uuid="94166f5e-3abb-4ce8-9655-33c49935ce48"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[:]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="120" y="125" width="31" height="15" uuid="ad553575-6868-44c2-8023-456be129eb1a"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Day(s)]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="120" y="143" width="31" height="15" uuid="e1d968bb-91d5-47df-b5cc-f89aef0bc3d7"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Day(s)]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="120" y="160" width="31" height="15" uuid="3ab73ea6-9de7-445f-bf10-cb11009c035d"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Day(s)]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="461" y="160" width="31" height="15" uuid="b832573b-0c27-4c96-ab6c-e74de117aeb8"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Day(s)]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="461" y="176" width="31" height="15" uuid="3dedb043-e112-4b44-be4c-93fee6ef564d"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Day(s)]]></text>
+				</staticText>
+				<textField pattern="HH.mm" isBlankWhenNull="true">
+					<reportElement x="425" y="126" width="100" height="17" uuid="9e652288-6408-4e97-abce-3b3593dae97a"/>
+					<textFieldExpression><![CDATA[$F{totalovertime}]]></textFieldExpression>
+				</textField>
+				<textField pattern="HH.mm" isBlankWhenNull="true">
+					<reportElement x="425" y="145" width="100" height="13" uuid="2ab04a29-4d41-4171-8a8b-eb6b3881a8c3"/>
+					<textFieldExpression><![CDATA[$F{totallatetime}]]></textFieldExpression>
+				</textField>
+				<line>
+					<reportElement x="0" y="121" width="551" height="1" uuid="01e87891-6083-439e-b3b4-65b1b823d4a7"/>
+					<graphicElement>
+						<pen lineWidth="0.5"/>
+					</graphicElement>
+				</line>
+				<staticText>
+					<reportElement x="0" y="212" width="100" height="17" uuid="06891e23-b5c4-446a-ad20-112e628ac9f9"/>
+					<textElement textAlignment="Center">
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[Date]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="102" y="212" width="66" height="17" uuid="656ad002-6be1-49cd-a8e9-3c22be1accb1"/>
+					<textElement textAlignment="Center">
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[In Time]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="168" y="212" width="74" height="17" uuid="95d37c44-a327-4074-9bca-41b444d3de38"/>
+					<textElement textAlignment="Center">
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[Out Time]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="242" y="213" width="68" height="17" uuid="29d5cd5b-56c7-48df-b62b-468d9c3f19c8"/>
+					<textElement textAlignment="Center">
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[Late Time]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="312" y="212" width="69" height="17" uuid="47c03feb-3011-4fa4-9325-ffc5d5e66ade"/>
+					<textElement textAlignment="Center">
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[Overtime Time]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="384" y="211" width="44" height="17" uuid="f57549f3-9258-4162-aee7-064ba74c96cd"/>
+					<textElement textAlignment="Center">
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[Status]]></text>
+				</staticText>
+				<line>
+					<reportElement x="2" y="230" width="551" height="1" uuid="8e8f895b-a112-4221-a337-8a76b272bfc8"/>
+					<graphicElement>
+						<pen lineWidth="0.5"/>
+					</graphicElement>
+				</line>
+				<textField>
+					<reportElement x="1" y="4" width="377" height="20" uuid="19319fde-72d9-449d-9c10-7781465c697c"/>
+					<textElement verticalAlignment="Middle">
+						<font size="15" isBold="true"/>
+						<paragraph leftIndent="3"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$P{company_name}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="401" y="22" width="42" height="15" uuid="6c93bb11-0e04-4ded-9b37-76c7af6eabb9"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<text><![CDATA[Print Date]]></text>
+				</staticText>
+				<textField evaluationTime="Report">
+					<reportElement x="444" y="4" width="29" height="15" uuid="b7bda8e4-a9b8-45c8-9a63-d29492660f0b"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="1" y="45" width="427" height="20" uuid="e79b6a8c-73a1-4841-9ce5-d2251dd7dc3e"/>
+					<textElement verticalAlignment="Middle">
+						<font size="10" isBold="true"/>
+						<paragraph leftIndent="3"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$P{title}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="2" y="26" width="377" height="16" uuid="afce9d30-a6ec-4083-8284-b3f5973f3ec1"/>
+					<textElement verticalAlignment="Middle">
+						<paragraph leftIndent="3"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$P{address}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="401" y="4" width="42" height="15" uuid="163cbfe6-d535-4f28-82f7-a2584600f985"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+				</textField>
+				<textField pattern="h.mm a">
+					<reportElement x="492" y="22" width="57" height="15" uuid="88df1acb-0fb7-4025-8431-19ec93e10609"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+				</textField>
+				<textField pattern="dd/MM/yyyy">
+					<reportElement x="444" y="22" width="48" height="15" uuid="218c611f-e9b5-4972-8ffe-0c238f5ed7be"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+				</textField>
+				<line>
+					<reportElement x="2" y="76" width="550" height="1" uuid="7b4a2c37-260e-4f46-a921-b7cccf93f84c"/>
+					<graphicElement>
+						<pen lineWidth="0.5"/>
+					</graphicElement>
+				</line>
+				<staticText>
+					<reportElement x="3" y="175" width="75" height="15" uuid="e5c0224f-41fc-41f6-916a-3ddbc9a5c90e"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Quarter day]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="335" y="193" width="75" height="15" uuid="ca039480-d038-4e75-98fa-6d494ce7a94a"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Half day]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="80" y="175" width="5" height="15" uuid="80d70484-51a0-4c90-b92b-bef5a4f7a8ea"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[:]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="120" y="176" width="31" height="15" uuid="76d772c7-6b58-492e-a677-6f2ad6739010"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Day(s)]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="461" y="191" width="31" height="15" uuid="f6d1f676-4a72-4e9d-8320-97ad09f2e75d"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Day(s)]]></text>
+				</staticText>
+				<textField isBlankWhenNull="false">
+					<reportElement x="90" y="176" width="30" height="15" uuid="536d1636-5d73-4888-896f-b8fd770c49f0"/>
+					<textElement verticalAlignment="Middle"/>
+					<textFieldExpression><![CDATA[$F{quarterday}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="424" y="193" width="36" height="15" uuid="81649b7b-76be-4f99-9b40-2fae1c2c4363"/>
+					<textElement verticalAlignment="Middle"/>
+					<textFieldExpression><![CDATA[$F{halfday}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="413" y="192" width="5" height="15" uuid="7f536892-7cd2-4f62-bc0b-d7e0cac85611"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[:]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="429" y="211" width="123" height="17" uuid="b3874c29-a345-47d9-a6c7-7091204331f0"/>
+					<textElement textAlignment="Center">
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[Comment]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="3" y="191" width="75" height="15" uuid="3d39307d-f72d-40b8-9ad3-b3684659046b"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Early Out]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="80" y="192" width="5" height="15" uuid="9469e68f-a6f5-434c-ab51-9017284a3a13"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[:]]></text>
+				</staticText>
+				<textField>
+					<reportElement x="90" y="193" width="29" height="14" uuid="811a438c-3cbc-4e5c-9514-cd4938d1f025"/>
+					<textFieldExpression><![CDATA[$F{EarlyOut}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="120" y="193" width="31" height="14" uuid="e8d4ff4d-0442-486f-a59d-de22ef879ccf"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Day(s)]]></text>
+				</staticText>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="1"/>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band splitType="Stretch"/>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band height="15" splitType="Stretch">
+			<textField pattern="dd-MMM-yy">
+				<reportElement x="1" y="-1" width="100" height="15" uuid="b2101dfa-8a85-4082-87c5-f6c54dacabbb"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Verdana" size="10" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{punche_date}]]></textFieldExpression>
+			</textField>
+			<textField pattern="HH.mm">
+				<reportElement x="103" y="-1" width="66" height="15" uuid="2ca80a04-f339-4694-8d37-c8baf3f53785"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Verdana"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{in_time}]]></textFieldExpression>
+			</textField>
+			<textField pattern="HH.mm">
+				<reportElement x="169" y="-1" width="74" height="15" uuid="97d0a703-4b43-4a3e-80a8-74118aede228"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Verdana"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{out_time}]]></textFieldExpression>
+			</textField>
+			<textField pattern="HH.mm">
+				<reportElement x="245" y="-1" width="66" height="15" uuid="e0e76ba2-1161-4cbd-b5e5-04335997798c"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Verdana"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{late_time}]]></textFieldExpression>
+			</textField>
+			<textField pattern="HH.mm">
+				<reportElement x="313" y="-1" width="69" height="15" uuid="fbd8941a-cb93-4dff-a8a6-e9cc81db816c"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Verdana"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{overtime_time}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="386" y="-1" width="42" height="15" uuid="53f213e3-8b90-400b-b1e9-56d7cb4268de"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Verdana"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{attendance_status}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="1" y="14" width="551" height="1" uuid="e1b88d73-dc8a-478d-b2fc-e25251eea985"/>
+				<graphicElement>
+					<pen lineWidth="0.5"/>
+				</graphicElement>
+			</line>
+			<textField isBlankWhenNull="true">
+				<reportElement x="429" y="0" width="120" height="14" uuid="cfd2417d-3003-4926-b036-b69aafb687a5"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Verdana" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{comment}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="17" splitType="Stretch">
+			<staticText>
+				<reportElement x="1" y="0" width="555" height="16" uuid="96de4eae-f596-42a3-be28-28ba875fd5bb"/>
+				<textElement textAlignment="Center">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Software Generated Report || Design & Developed By : i-infotech Business Solution, www.i-infotechsolution.com]]></text>
+			</staticText>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="26" splitType="Stretch"/>
+	</summary>
+</jasperReport>

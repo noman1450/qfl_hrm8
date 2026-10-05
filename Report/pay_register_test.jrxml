@@ -1,0 +1,359 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.16.0.final using JasperReports Library version 6.4.0  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="pay_register" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="6c032f61-3613-4d51-afd4-b09bc4754951">
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="129"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="866"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="HRM Local Database"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<parameter name="id" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="title" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="address" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="company_name" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT 
+    c.employee_name,
+    d.depertment_name,
+    f.designation_name,
+    e.location_name,
+    a.amount AS salary_amount,
+    a.year_id,
+    a.hrm_month_id,
+    a.day_of_month,
+    a.total_present,
+    g.month_name,
+    h.section_name,
+    i.plant_name,
+    b.employee_code,
+    j.joining_date,
+    ((SELECT SUM(aa.actual_amount) FROM pay_register_details aa JOIN hrm_salary_head bb ON aa.hrm_salary_head_id = bb.id AND aa.pay_register_id = 54425 JOIN hrm_salary_head_group cc ON bb.hrm_salary_head_group_id = cc.id AND cc.generate_type = 1 ) - 
+    (SELECT SUM(aa.actual_amount) FROM pay_register_details aa JOIN hrm_salary_head bb ON aa.hrm_salary_head_id = bb.id AND aa.pay_register_id = 54425 JOIN hrm_salary_head_group cc ON bb.hrm_salary_head_group_id = cc.id AND cc.generate_type = 2 )) as net_salary
+FROM
+    pay_register a
+        JOIN
+    hrm_employee_job_info b ON a.hrm_employee_job_info_id = b.id
+        AND a.id = 54425
+        JOIN
+    hrm_employee c ON b.hrm_employee_id = c.id
+        JOIN
+    hrm_depertment d ON b.hrm_depertment_id = d.id
+        JOIN
+    hrm_location e ON b.hrm_location_id = e.id
+        JOIN
+    hrm_designation f ON b.hrm_designation_id = f.id
+        JOIN
+    hrm_month g ON a.hrm_month_id = g.id
+        JOIN
+    hrm_section h ON b.hrm_section_id = h.id
+        JOIN
+    hrm_plant i ON b.hrm_plant_id = i.id
+        JOIN
+    hrm_employee_joining j ON j.hrm_employee_id = b.hrm_employee_id]]>
+	</queryString>
+	<field name="employee_name" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="employee_name"/>
+		<property name="com.jaspersoft.studio.field.label" value="employee_name"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="hrm_employee"/>
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="depertment_name" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="depertment_name"/>
+		<property name="com.jaspersoft.studio.field.label" value="depertment_name"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="hrm_depertment"/>
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="designation_name" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="designation_name"/>
+		<property name="com.jaspersoft.studio.field.label" value="designation_name"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="hrm_designation"/>
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="location_name" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="location_name"/>
+		<property name="com.jaspersoft.studio.field.label" value="location_name"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="hrm_location"/>
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="salary_amount" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="amount"/>
+		<property name="com.jaspersoft.studio.field.label" value="salary_amount"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="pay_register"/>
+	</field>
+	<field name="year_id" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="year_id"/>
+		<property name="com.jaspersoft.studio.field.label" value="year_id"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="pay_register"/>
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="hrm_month_id" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="hrm_month_id"/>
+		<property name="com.jaspersoft.studio.field.label" value="hrm_month_id"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="pay_register"/>
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="day_of_month" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="day_of_month"/>
+		<property name="com.jaspersoft.studio.field.label" value="day_of_month"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="pay_register"/>
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="total_present" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="total_present"/>
+		<property name="com.jaspersoft.studio.field.label" value="total_present"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="pay_register"/>
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="month_name" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="month_name"/>
+		<property name="com.jaspersoft.studio.field.label" value="month_name"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="hrm_month"/>
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="section_name" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="section_name"/>
+		<property name="com.jaspersoft.studio.field.label" value="section_name"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="hrm_section"/>
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="plant_name" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="plant_name"/>
+		<property name="com.jaspersoft.studio.field.label" value="plant_name"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="hrm_plant"/>
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="employee_code" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="employee_code"/>
+		<property name="com.jaspersoft.studio.field.label" value="employee_code"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="hrm_employee_job_info"/>
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="joining_date" class="java.sql.Date">
+		<property name="com.jaspersoft.studio.field.name" value="joining_date"/>
+		<property name="com.jaspersoft.studio.field.label" value="joining_date"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="hrm_employee_joining"/>
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="net_salary" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="net_salary"/>
+		<property name="com.jaspersoft.studio.field.label" value="net_salary"/>
+	</field>
+	<title>
+		<band height="59"/>
+	</title>
+	<pageHeader>
+		<band height="132">
+			<line>
+				<reportElement x="0" y="131" width="555" height="1" forecolor="#A8A8A8" backcolor="#A8A8A8" uuid="f134d86a-bd7f-434e-bc79-6efc36c31ef4"/>
+			</line>
+			<staticText>
+				<reportElement x="321" y="26" width="101" height="20" uuid="41e3f9ef-b8b9-46a6-8106-e960bd475a17"/>
+				<textElement verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Joining Date]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="321" y="8" width="99" height="20" uuid="ee3a0b6b-891f-474a-b603-4d265c9d6517"/>
+				<textElement verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Department]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="7" y="69" width="87" height="20" uuid="75a679c0-f084-4bfc-be45-b3e6a328c549"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Designation]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="431" y="8" width="129" height="20" uuid="0819eb05-c056-4c56-84d8-3756a74c5ce5"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{depertment_name}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="106" y="48" width="192" height="20" uuid="054e73f1-aa28-47ce-a9aa-44a474f57747"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{employee_name}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="7" y="48" width="87" height="20" uuid="2ed1dcc3-6e81-42cf-a596-90d872783eb3"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Name]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="106" y="69" width="192" height="20" uuid="68fb4dca-e5c1-4206-8dd2-30ecbdfbec6f"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{designation_name}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="97" y="6" width="5" height="20" uuid="739e23b5-a36e-46fe-958d-d741ecd41560"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="7" y="111" width="87" height="20" uuid="457bcf32-b190-49ee-90b0-0920a98e89a6"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Payable Days]]></text>
+			</staticText>
+			<textField pattern="###0">
+				<reportElement x="106" y="111" width="100" height="20" uuid="c2e2b376-2150-469d-a339-5201aa6ef0b7"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{total_present}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="106" y="26" width="100" height="20" uuid="1f38d6f6-39d4-44d3-a86c-55e1bd516427"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{month_name}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="106" y="6" width="100" height="20" uuid="1e3be1ae-db68-492d-97c3-872f698b849d"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{year_id}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="7" y="26" width="87" height="20" uuid="a361b0cb-597b-40ab-94ed-2ca29a092e59"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Month ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="7" y="6" width="87" height="20" uuid="37dc49c8-e3e8-4d8d-8067-7bddbf691109"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Year]]></text>
+			</staticText>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="431" y="26" width="100" height="20" uuid="2ad865a6-53fe-49a2-9a7e-1ee70a0c8fde"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{joining_date}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="106" y="90" width="192" height="20" uuid="2dcc0f8c-b21a-424d-b739-cb6314e44730"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{section_name}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="7" y="90" width="87" height="20" uuid="d3690657-3f47-4e0f-87da-59d64926e1d8"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Section]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="319" y="47" width="101" height="20" uuid="7d921c8b-2877-4c0d-923f-113b3b0dc698"/>
+				<textElement verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Work/Plant Place]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="431" y="47" width="129" height="20" uuid="7d741825-37b5-4aff-b8ed-94c5f36314f0"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{plant_name}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="97" y="26" width="5" height="20" uuid="ce6539bd-66a3-48fc-ad51-9e55ac84b1a8"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="97" y="69" width="5" height="20" uuid="2ef883db-8d2e-487a-9d5c-fb9a45c0da87"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="97" y="48" width="5" height="20" uuid="be83ee68-25be-4a24-9614-13dea1743d1c"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="97" y="90" width="5" height="20" uuid="e2a7deb5-607b-402c-8002-65efddd3501d"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="97" y="111" width="5" height="20" uuid="1e5df1b4-a48d-4944-86b2-c78c11318f9c"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="423" y="47" width="5" height="20" uuid="bb05de15-daee-45cd-8b54-8477fd26f43a"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="423" y="8" width="5" height="20" uuid="cbc517f4-1303-42d0-9c1a-74598ee3b69a"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="423" y="26" width="5" height="20" uuid="98bc8690-0307-4818-93ce-7277f82189cd"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="319" y="69" width="101" height="20" uuid="250719c9-7bd9-46dc-9028-924c14e0cf0b"/>
+				<textElement verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Employee Code]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="432" y="69" width="128" height="20" uuid="ea1badea-1600-4f2c-adef-810c289de377"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{employee_code}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="423" y="68" width="5" height="20" uuid="422729c9-519a-436c-ac5e-229d84dd290b"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+		</band>
+	</pageHeader>
+	<summary>
+		<band height="247">
+			<subreport>
+				<reportElement x="0" y="0" width="555" height="247" uuid="fd2e9810-44c3-4804-82a7-8b7e70792868"/>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA["pay_register_subreport.jrxml"]]></subreportExpression>
+			</subreport>
+		</band>
+	</summary>
+</jasperReport>

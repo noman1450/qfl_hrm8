@@ -1,0 +1,881 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.16.0.final using JasperReports Library version 6.4.0  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="hrm_fringe_benefit" language="groovy" pageWidth="930" pageHeight="612" orientation="Landscape" columnWidth="890" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="e83a313a-da91-4cea-a175-c5ea9079c9d8">
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="58"/>
+	<property name="ireport.y" value="0"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="289"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="706"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="HRM Local Database"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<style name="Crosstab Data Text" hTextAlign="Center" hImageAlign="Center">
+		<paragraph lineSpacing="Single"/>
+	</style>
+	<parameter name="condition_parameter" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="title" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="address" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="company_name" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="year_id" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="hrm_month_id" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT aa.id,aa.employee_name,aa.depertment_name,designation_name,accounts_code,tin,joining_date,confirmation_date,day_of_month,
+aa.total_present,aa.absent,aa.section_name,aa.section_id,aa.payment_mode,aa.account_no,
+    aa.priority,SUM(aa.fixed_allowance) as fixed_allowance,SUM(aa.outOfPocket) as outOfPocket,SUM(aa.house_rent_allowance) as house_rent_allowance,
+SUM(aa.car_allowance) as car_allowance,SUM(aa.OutOfPocketDeduction) as OutOfPocketDeduction,SUM(aa.CarAllowanceDeduction) as CarAllowanceDeduction,SUM(aa.fixed_allowance+aa.outOfPocket+aa.house_rent_allowance+aa.car_allowance) as total_addition
+,SUM(aa.OutOfPocketDeduction+aa.CarAllowanceDeduction) as total_deduction,SUM(aa.fixed_allowance+aa.outOfPocket+aa.house_rent_allowance+aa.car_allowance-aa.OutOfPocketDeduction-aa.CarAllowanceDeduction) as
+net_total
+FROM
+(SELECT
+	e.id,
+    e.employee_name,
+    f.depertment_name,
+    g.alis as designation_name,
+    aa.accounts_code,
+    e.tin,
+    h.joining_date,
+    h.confirmation_date,
+    aa.day_of_month,
+    aa.total_present,
+    (aa.day_of_month - aa.total_present) AS absent,
+    IF(d.id = 12,
+        SUM(b.actual_amount),
+        0) AS fixed_allowance,
+    IF(d.id = 16,
+        SUM(b.actual_amount),
+        0) AS outOfPocket,
+	   IF(d.id = 15,
+        SUM(b.actual_amount),
+        0) AS house_rent_allowance,
+		     IF(d.id = 14,
+        SUM(b.actual_amount),
+        0) AS car_allowance,
+          IF(d.id = 17,
+        SUM(b.actual_amount),
+        0) AS OutOfPocketDeduction,
+       IF(d.id = 13,
+        SUM(b.actual_amount),
+        0) AS CarAllowanceDeduction,
+    aa.payment_mode,
+    aa.account_no,
+    g.priority,
+    i.section_name,
+    i.id as section_id
+FROM
+    pay_register aa
+        JOIN
+    hrm_employee_job_info a ON aa.hrm_employee_job_info_id = a.id
+	 	AND aa.year_id = $P{year_id}
+      AND aa.hrm_month_id = $P{hrm_month_id}
+        JOIN
+    pay_register_details b ON aa.id = b.pay_register_id
+        JOIN
+    hrm_salary_head c ON b.hrm_salary_head_id = c.id
+        JOIN
+    hrm_salary_head_group d ON c.hrm_salary_head_group_id = d.id
+        JOIN
+    hrm_employee e ON a.hrm_employee_id = e.id
+        JOIN
+    hrm_depertment f ON a.hrm_depertment_id = f.id
+        JOIN
+    hrm_designation g ON a.hrm_designation_id = g.id
+        JOIN
+    hrm_employee_joining h ON a.hrm_employee_id = h.hrm_employee_id
+        JOIN
+    hrm_section i ON a.hrm_section_id = i.id
+ $P!{condition_parameter}
+GROUP BY e.id,e.employee_name,  f.depertment_name, g.alis, aa.accounts_code, e.tin, h.joining_date, h.confirmation_date, aa.day_of_month, aa.total_present,aa.day_of_month,aa.total_present,d.id,  aa.payment_mode, aa.account_no, g.priority, i.section_name, i.id) aa
+GROUP BY aa.id,aa.employee_name,aa.depertment_name,aa.designation_name,aa.accounts_code,aa.tin,aa.joining_date,aa.confirmation_date, aa.day_of_month, aa.total_present,aa.day_of_month,aa.total_present,aa.id,aa.payment_mode, aa.account_no,aa.priority,aa.section_name,aa.section_id
+Order By aa.section_name,aa.aa.priority]]>
+	</queryString>
+	<field name="id" class="java.lang.Integer">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="employee_name" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="depertment_name" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="designation_name" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="accounts_code" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="tin" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="joining_date" class="java.sql.Date">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="confirmation_date" class="java.sql.Date">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="day_of_month" class="java.lang.Double">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="total_present" class="java.lang.Double">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="absent" class="java.lang.Double"/>
+	<field name="section_name" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="section_id" class="java.lang.Integer"/>
+	<field name="payment_mode" class="java.lang.Integer">
+		<fieldDescription><![CDATA[1 for cash
+2 for bank]]></fieldDescription>
+	</field>
+	<field name="account_no" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="priority" class="java.lang.Integer">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="fixed_allowance" class="java.lang.Double"/>
+	<field name="outOfPocket" class="java.lang.Double"/>
+	<field name="house_rent_allowance" class="java.lang.Double"/>
+	<field name="car_allowance" class="java.lang.Double"/>
+	<field name="OutOfPocketDeduction" class="java.lang.Double"/>
+	<field name="CarAllowanceDeduction" class="java.lang.Double"/>
+	<field name="total_addition" class="java.lang.Double"/>
+	<field name="total_deduction" class="java.lang.Double"/>
+	<field name="net_total" class="java.lang.Double"/>
+	<variable name="basic_salary_1" class="java.lang.Double" resetType="Group" resetGroup="section_name" calculation="Sum">
+		<variableExpression><![CDATA[]]></variableExpression>
+	</variable>
+	<variable name="house_rent_1" class="java.lang.Double" resetType="Group" resetGroup="section_name" calculation="Sum">
+		<variableExpression><![CDATA[]]></variableExpression>
+	</variable>
+	<variable name="medical_allowance_1" class="java.lang.Double" resetType="Group" resetGroup="section_name" calculation="Sum">
+		<variableExpression><![CDATA[]]></variableExpression>
+	</variable>
+	<variable name="others_addition_1" class="java.lang.Double" resetType="Group" resetGroup="section_name" calculation="Sum">
+		<variableExpression><![CDATA[]]></variableExpression>
+	</variable>
+	<variable name="total_addition_1" class="java.lang.Double" resetType="Group" resetGroup="section_name" calculation="Sum">
+		<variableExpression><![CDATA[$F{total_addition}]]></variableExpression>
+	</variable>
+	<variable name="attendance_deduction_1" class="java.lang.Double" resetType="Group" resetGroup="section_name" calculation="Sum">
+		<variableExpression><![CDATA[]]></variableExpression>
+	</variable>
+	<variable name="PF_1" class="java.lang.Double" resetType="Group" resetGroup="section_name" calculation="Sum">
+		<variableExpression><![CDATA[]]></variableExpression>
+	</variable>
+	<variable name="TDS_1" class="java.lang.Double" resetType="Group" resetGroup="section_name" calculation="Sum">
+		<variableExpression><![CDATA[]]></variableExpression>
+	</variable>
+	<variable name="loan_advance_1" class="java.lang.Double" resetType="Group" resetGroup="section_name" calculation="Sum">
+		<variableExpression><![CDATA[]]></variableExpression>
+	</variable>
+	<variable name="others_addition_2" class="java.lang.Double" resetType="Group" resetGroup="section_name" calculation="Sum">
+		<variableExpression><![CDATA[]]></variableExpression>
+	</variable>
+	<variable name="total_deduction_1" class="java.lang.Double" resetType="Group" resetGroup="section_name" calculation="Sum">
+		<variableExpression><![CDATA[$F{total_deduction}]]></variableExpression>
+	</variable>
+	<variable name="net_total_1" class="java.lang.Double" resetType="Group" resetGroup="section_name" calculation="Sum">
+		<variableExpression><![CDATA[$F{net_total}]]></variableExpression>
+	</variable>
+	<variable name="fixed_allowance_1" class="java.lang.Double" resetType="Group" resetGroup="section_name" calculation="Sum">
+		<variableExpression><![CDATA[$F{fixed_allowance}]]></variableExpression>
+	</variable>
+	<variable name="house_rent_allowance_1" class="java.lang.Double" resetType="Group" resetGroup="section_name" calculation="Sum">
+		<variableExpression><![CDATA[$F{house_rent_allowance}]]></variableExpression>
+	</variable>
+	<variable name="car_allowance_1" class="java.lang.Double" resetType="Group" resetGroup="section_name" calculation="Sum">
+		<variableExpression><![CDATA[$F{car_allowance}]]></variableExpression>
+	</variable>
+	<variable name="outOfPocket_1" class="java.lang.Double" resetType="Group" resetGroup="section_name" calculation="Sum">
+		<variableExpression><![CDATA[$F{outOfPocket}]]></variableExpression>
+	</variable>
+	<variable name="total_addition_2" class="java.lang.Double" resetType="Group" resetGroup="section_name" calculation="Sum">
+		<variableExpression><![CDATA[$F{total_addition}]]></variableExpression>
+	</variable>
+	<variable name="CarAllowanceDeduction_1" class="java.lang.Double" resetType="Group" resetGroup="section_name" calculation="Sum">
+		<variableExpression><![CDATA[$F{CarAllowanceDeduction}]]></variableExpression>
+	</variable>
+	<variable name="OutOfPocketDeduction_1" class="java.lang.Double" resetType="Group" resetGroup="section_name" calculation="Sum">
+		<variableExpression><![CDATA[$F{OutOfPocketDeduction}]]></variableExpression>
+	</variable>
+	<variable name="net_total_2" class="java.lang.Double" resetType="Group" resetGroup="section_name" calculation="Sum">
+		<variableExpression><![CDATA[$F{net_total}]]></variableExpression>
+	</variable>
+	<variable name="total_deduction_2" class="java.lang.Double" resetType="Group" resetGroup="section_name" calculation="Sum">
+		<variableExpression><![CDATA[$F{total_deduction}]]></variableExpression>
+	</variable>
+	<variable name="account_no_1" class="java.lang.Integer" resetType="Group" resetGroup="section_name" calculation="Count">
+		<variableExpression><![CDATA[$F{account_no}]]></variableExpression>
+	</variable>
+	<variable name="OutOfPocketDeduction_2" class="java.lang.Double" resetType="Group" resetGroup="section_name" calculation="Sum">
+		<variableExpression><![CDATA[$F{OutOfPocketDeduction}]]></variableExpression>
+	</variable>
+	<variable name="net_total_3" class="java.lang.Double" resetType="Group" resetGroup="section_name" calculation="Sum">
+		<variableExpression><![CDATA[$F{net_total}]]></variableExpression>
+	</variable>
+	<variable name="fixed_allowance_2" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{fixed_allowance}]]></variableExpression>
+	</variable>
+	<variable name="house_rent_allowance_2" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{house_rent_allowance}]]></variableExpression>
+	</variable>
+	<variable name="car_allowance_2" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{car_allowance}]]></variableExpression>
+	</variable>
+	<variable name="outOfPocket_2" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{outOfPocket}]]></variableExpression>
+	</variable>
+	<variable name="total_addition_3" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{total_addition}]]></variableExpression>
+	</variable>
+	<variable name="CarAllowanceDeduction_2" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{CarAllowanceDeduction}]]></variableExpression>
+	</variable>
+	<variable name="OutOfPocketDeduction_3" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{OutOfPocketDeduction}]]></variableExpression>
+	</variable>
+	<variable name="total_deduction_3" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{total_deduction}]]></variableExpression>
+	</variable>
+	<variable name="net_total_4" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{net_total}]]></variableExpression>
+	</variable>
+	<group name="section_name">
+		<groupExpression><![CDATA[$F{section_id}]]></groupExpression>
+		<groupHeader>
+			<band height="23">
+				<textField>
+					<reportElement x="3" y="0" width="175" height="20" uuid="157d1b6c-0031-4712-860c-80d5ad3e9c7a"/>
+					<textElement verticalAlignment="Middle">
+						<font isBold="true"/>
+						<paragraph lineSpacing="Single"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{section_name}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="13">
+				<textField pattern="###0">
+					<reportElement x="480" y="1" width="45" height="12" uuid="8f5d491c-fce8-44bd-9005-d6c6ceb53518"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8"/>
+						<paragraph lineSpacing="Single"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{car_allowance}]]></textFieldExpression>
+				</textField>
+				<textField pattern="###0">
+					<reportElement x="382" y="1" width="51" height="12" uuid="cf21e9af-d8b5-4edd-b7c6-cb4f4a5226d4"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8"/>
+						<paragraph lineSpacing="Single"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{fixed_allowance_1}]]></textFieldExpression>
+				</textField>
+				<textField pattern="###0">
+					<reportElement x="433" y="1" width="47" height="12" uuid="bcd4853c-f808-48ea-b2ee-0f65ad062ce3"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8"/>
+						<paragraph lineSpacing="Single"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{house_rent_allowance_1}]]></textFieldExpression>
+				</textField>
+				<textField pattern="###0">
+					<reportElement x="525" y="1" width="40" height="12" uuid="67eace29-7a5f-410a-a590-c87e56f73167"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8"/>
+						<paragraph lineSpacing="Single"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{outOfPocket_1}]]></textFieldExpression>
+				</textField>
+				<textField pattern="###0">
+					<reportElement x="565" y="1" width="40" height="12" uuid="70f388d2-019f-441b-8b92-f55ff57084c6"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8"/>
+						<paragraph lineSpacing="Single"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{total_addition_2}]]></textFieldExpression>
+				</textField>
+				<textField pattern="###0">
+					<reportElement x="605" y="1" width="48" height="12" uuid="f847c5b2-6536-40b2-9cd1-b764b8698fd2"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8"/>
+						<paragraph lineSpacing="Single"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{CarAllowanceDeduction_1}]]></textFieldExpression>
+				</textField>
+				<textField pattern="###0">
+					<reportElement x="697" y="1" width="42" height="12" uuid="ca5febee-d104-4ce2-8bc2-6603e505c146"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8"/>
+						<paragraph lineSpacing="Single"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{total_deduction_2}]]></textFieldExpression>
+				</textField>
+				<textField pattern="###0">
+					<reportElement x="739" y="1" width="55" height="12" uuid="94763c22-3684-4d12-95c1-64b4d7b349de"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8"/>
+						<paragraph lineSpacing="Single"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{net_total_3}]]></textFieldExpression>
+				</textField>
+				<textField pattern="###0">
+					<reportElement x="654" y="1" width="42" height="12" uuid="06e98d7a-92b1-4b0c-9990-7e142ea8925e"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8"/>
+						<paragraph lineSpacing="Single"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{OutOfPocketDeduction_2}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="1" splitType="Stretch"/>
+	</title>
+	<pageHeader>
+		<band height="108" splitType="Stretch">
+			<textField pattern="h.mm a">
+				<reportElement x="836" y="41" width="47" height="20" uuid="f73d8e85-7778-471a-bff7-8d47adfa0e07"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="794" y="25" width="42" height="16" uuid="640f947a-f2af-42f2-b224-6ed52bd9c94e">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<text><![CDATA[Print Date]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="794" y="41" width="42" height="20" uuid="fa27ee21-5566-47cd-b643-d2c4fc51669f"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<text><![CDATA[Print Time]]></text>
+			</staticText>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="836" y="25" width="47" height="16" uuid="e53fc461-d298-424e-8ff2-6bca3adf5ac5">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="836" y="4" width="47" height="19" uuid="0b17222d-8502-4d89-920e-6af62c399c5f"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="794" y="4" width="42" height="19" uuid="2175821d-d50c-4d64-bfef-0e5311b5b827"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="4" y="41" width="790" height="20" uuid="46657045-c6e0-40c1-b03e-e8b506dff06f"/>
+				<textElement verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{title}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="4" y="25" width="790" height="16" uuid="fda788d3-ccf7-410c-8a8c-e0fa629b67db"/>
+				<textElement verticalAlignment="Middle">
+					<font size="12"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{address}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="4" y="4" width="790" height="20" uuid="bae7e668-a019-4a3a-bb57-de94074f2481"/>
+				<textElement verticalAlignment="Middle">
+					<font size="15" isBold="true"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{company_name}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="31" y="83" width="110" height="23" uuid="0af3f365-354e-4313-bde8-38cd72c60c19"/>
+				<textElement verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<text><![CDATA[Name]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="141" y="83" width="57" height="23" uuid="bccdf5f4-bd11-472a-9d1a-e456fd0111c9"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<text><![CDATA[Designation]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="198" y="83" width="77" height="23" uuid="86d7148f-2468-4cdd-a629-45d037f9a9c4"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<text><![CDATA[Id No]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1" y="83" width="30" height="23" uuid="336e02ed-e91c-4184-b944-95acf70167f5"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<text><![CDATA[Sl.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="275" y="83" width="52" height="23" uuid="2ddc9e88-e591-40d1-9326-581b713de406"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<text><![CDATA[Date of Joining]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="327" y="83" width="55" height="23" uuid="01fce7d3-ea3d-4dae-839b-5c9f47552d1d"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<text><![CDATA[Date of Confirmation]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="382" y="83" width="53" height="23" uuid="a0a8a196-81ec-4e43-9827-f72df5108770"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<text><![CDATA[Fixed Allowance]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="435" y="83" width="45" height="23" uuid="aecb19e2-340c-42ae-841c-acfa869ee6df"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<text><![CDATA[House Rent Allowance]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="480" y="83" width="46" height="23" uuid="aaae1561-80ec-4f68-9e23-e531016d7194"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<text><![CDATA[Car Allowance]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="526" y="83" width="39" height="23" uuid="ba8e8f6a-3858-4eeb-b7dc-daa4c67f47db"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<text><![CDATA[Out Of pocket]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="565" y="83" width="43" height="23" uuid="ac725e67-dc50-46f9-bcd7-2a9a99dc40ff"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<text><![CDATA[Total Addition]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="608" y="83" width="45" height="23" uuid="7f614fc8-b617-4ad6-b339-9d4a5419b026"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<text><![CDATA[Car Allow. Deduction]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="654" y="83" width="42" height="23" uuid="4aa8adb1-2cea-4a34-bde0-69fcb692594d"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<text><![CDATA[Out of Pocket Deduction]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="739" y="83" width="55" height="23" uuid="600a8d41-ab34-401b-a46e-505e1ba41f67"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<text><![CDATA[Net Total]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="696" y="83" width="43" height="23" uuid="bda1614d-537d-4706-8d20-dcd4ee5459d6"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<text><![CDATA[Total Deduction]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="794" y="83" width="89" height="23" uuid="22ad3601-b57a-41a2-8f7e-d12b48abc0ad"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<text><![CDATA[Signature & Remarks]]></text>
+			</staticText>
+			<line>
+				<reportElement x="0" y="80" width="883" height="1" uuid="6ae8451f-c03c-4496-96bf-f59ed44c10bb"/>
+			</line>
+			<line>
+				<reportElement x="0" y="106" width="883" height="1" uuid="94df846b-2b01-439f-9cdf-0714eba4ef2a"/>
+			</line>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band height="21" splitType="Stretch">
+			<textField isStretchWithOverflow="true">
+				<reportElement x="32" y="0" width="109" height="13" uuid="eb081be4-2a60-4d3c-93bd-864befec0256"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{employee_name}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="141" y="0" width="55" height="13" uuid="052dead5-9e92-47cc-bc7f-d24c273383b8"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{designation_name}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="196" y="0" width="79" height="13" uuid="9cc49603-22a3-46b6-a736-2faba25efd11"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{accounts_code}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="1" y="0" width="31" height="13" uuid="230dab07-a423-4224-9752-0f743fd87ebd"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="327" y="0" width="55" height="13" uuid="72dbb743-9742-468a-8dd0-cdef4778ffcf"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{confirmation_date}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0">
+				<reportElement x="565" y="0" width="40" height="13" uuid="22fcae2c-9419-44ce-b5d3-e8e75efef0c6"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{total_addition}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0">
+				<reportElement x="739" y="0" width="55" height="13" uuid="b55f2044-e653-4146-b54b-5c97443cc97c"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{net_total}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="275" y="0" width="52" height="13" uuid="0f20cb3a-239a-453a-a878-680702d0d919"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{joining_date}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0">
+				<reportElement x="696" y="0" width="43" height="13" uuid="4b02a76c-9462-4895-9c1d-a1c444bb58c2"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{total_deduction}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="1" y="16" width="882" height="1" forecolor="#0F0D0D" backcolor="#CCCACA" uuid="c3bc903a-15dc-4d95-8af0-720fcc9f32d1"/>
+				<graphicElement>
+					<pen lineWidth="0.7" lineStyle="Solid" lineColor="#331F1F"/>
+				</graphicElement>
+			</line>
+			<textField pattern="###0">
+				<reportElement x="382" y="0" width="51" height="13" uuid="474b5447-7862-4008-8b08-ae9b6995e4af"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{fixed_allowance}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0">
+				<reportElement x="433" y="0" width="47" height="13" uuid="e1295a0a-970f-4eb4-a3e6-ade7a18cf6b7"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{house_rent_allowance}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0">
+				<reportElement x="525" y="0" width="40" height="13" uuid="55441191-314a-46ef-83b8-30f2d830d501"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{outOfPocket}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0">
+				<reportElement x="605" y="0" width="48" height="13" uuid="c43b1c69-3212-4ded-816c-b709b1caa39f"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CarAllowanceDeduction}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0">
+				<reportElement x="653" y="0" width="43" height="13" uuid="9138d364-0e34-4f41-bea9-ce5e7c5df5fa"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{OutOfPocketDeduction}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0">
+				<reportElement x="482" y="0" width="43" height="13" uuid="c6450016-226d-4ec9-9f02-65df421f37be"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{car_allowance}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="72" splitType="Stretch">
+			<staticText>
+				<reportElement x="178" y="56" width="555" height="16" uuid="f0219c51-2077-4e14-9649-4c97981ea00b"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<text><![CDATA[Software Generated Report || Design & Developed By : i-infotech Business Solution, www.i-infotechsolution.com]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="181" y="35" width="74" height="15" uuid="1171b4fa-4908-4ffc-8196-53e2027c871d"/>
+				<box topPadding="2">
+					<topPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<text><![CDATA[Executive(A/C)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="748" y="35" width="57" height="15" uuid="110de5fc-6b61-43e4-b8b1-d1bead0dba20"/>
+				<box topPadding="2">
+					<topPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<text><![CDATA[Director]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="13" y="35" width="71" height="15" uuid="bb6888f3-f8ac-492e-8e42-81abbadf0256"/>
+				<box topPadding="2">
+					<topPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<text><![CDATA[Admin(Officer)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="552" y="37" width="57" height="15" uuid="24f4f415-3e1e-4237-95e8-1fe946163073"/>
+				<box topPadding="2">
+					<topPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<text><![CDATA[G.M(A/C)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="362" y="37" width="57" height="15" uuid="5a7e83c1-38f2-4cd9-b981-462725a7598a"/>
+				<box topPadding="2">
+					<topPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<text><![CDATA[Incharge(A/C)]]></text>
+			</staticText>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="22" splitType="Stretch">
+			<textField pattern="###0">
+				<reportElement x="382" y="2" width="50" height="18" uuid="d6e55eb4-2b15-4dae-bde8-f31331e7b9ba"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75" lineStyle="Double"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{fixed_allowance_2}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0">
+				<reportElement x="433" y="2" width="48" height="18" uuid="b46bc97c-5012-4ec9-b1e3-35e8037be3c2"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75" lineStyle="Double"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{house_rent_allowance_2}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0">
+				<reportElement x="483" y="2" width="42" height="18" uuid="570c891d-5ab7-454e-9da6-2628a04811ab"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75" lineStyle="Double"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{car_allowance_2}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0">
+				<reportElement x="526" y="2" width="39" height="18" uuid="9836b94b-af89-48b6-a03b-7a2358f40090"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75" lineStyle="Double"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{outOfPocket_2}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0">
+				<reportElement x="567" y="2" width="38" height="18" uuid="26214692-2152-4b69-8e24-292302761982"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75" lineStyle="Double"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{total_addition_3}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0">
+				<reportElement x="606" y="2" width="46" height="18" uuid="6ca86621-0c30-41ad-a34e-074620db8068"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75" lineStyle="Double"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{CarAllowanceDeduction_2}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0">
+				<reportElement x="654" y="2" width="40" height="18" uuid="f6f46458-4d8e-4b6a-a0db-00aa7f5a7817"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75" lineStyle="Double"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{OutOfPocketDeduction_3}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0">
+				<reportElement x="696" y="2" width="42" height="18" uuid="6c6c64b7-2fd7-422c-8786-a2da5c377348"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75" lineStyle="Double"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{total_deduction_3}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0">
+				<reportElement x="740" y="2" width="54" height="18" uuid="6ca4880f-1283-452e-b6b3-a8a8cfb31b7b"/>
+				<box>
+					<topPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75" lineStyle="Double"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{net_total_4}]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>
