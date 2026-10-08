@@ -1411,6 +1411,54 @@ class ManualAttendanceController extends Controller
         return Redirect::to('manual_attendance');
     }
 
+    public function processPendingManualAttendances($approvedByUserId = null)
+    {
+        // ১. যেসব রেকর্ডের hrm_attendance_raw_data_id NULL কেবল সেগুলো আনা হবে
+        $pendingRecords = HrmManualAttendance::whereNull('hrm_attendance_raw_data_id')->get();
+        // dd($pendingRecords);
+        $processedCount = 0;
+
+        foreach ($pendingRecords as $manual) {
+            // প্রতিটি রেকর্ডের জন্য ডাটাবেস ট্রানজেকশন নিশ্চিত করা হচ্ছে
+            DB::transaction(function () use ($manual, $approvedByUserId, &$processedCount) {
+                
+                // ২. hrm_attendance_raw_data টেবিলে ইনসার্ট
+                $attendance = HrmAttendance::create([
+                    'device_no'       => $manual->device_no,
+                    'employee_code'   => $manual->employee_code,
+                    'punch_date'      => $manual->punch_date,
+                    'punch_time'      => $manual->punch_time,
+                    'hrm_location_id' => $manual->hrm_location_id,
+                    'is_new'          => 1,
+                    'hrm_employee_id' => $manual->hrm_employee_id,
+                    'data_from'       => 2,
+                    'valid'           => $manual->valid,
+                ]);
+
+                // ৩. hrm_attendance_comment টেবিলে ইনসার্ট
+                HrmAttendanceComment::create([
+                    'comment'                    => $manual->comment,
+                    'hrm_attendance_raw_data_id' => $attendance->id,
+                    'entry_status'               => $manual->entry_status,
+                    'osd_time_status'            => $manual->osd_time_status,
+                    'users_id'                   => $manual->users_id,
+                    'created_at'                 => $manual->created_at,
+                ]);
+
+                // ৪. hrm_manual_attendance_data টেবিলে আইডি, এপ্রুভার ও সময় আপডেট
+                $manual->update([
+                    'hrm_attendance_raw_data_id' => $attendance->id,
+                    'approved_by'                => $approvedByUserId ?? $manual->users_id ?? auth()->id(),
+                    'approved_at'                => now(),
+                ]);
+
+                $processedCount++;
+            });
+        }
+
+        return $processedCount;
+    }
+
 
 
 

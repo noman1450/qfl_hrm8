@@ -1,7 +1,11 @@
 <?php
-use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\AssetStoreMasterController;
+use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\ManualAttendanceController;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
+
+
 
 
 
@@ -400,6 +404,11 @@ Route::post('submitmanual_inout',	        'ManualAttendanceController@submitmanu
 Route::get('pending_manual_attendance',	    'ManualAttendanceController@pending_manual_attendance');
 Route::get('approved_manual_attendance',	    'ManualAttendanceController@approved_manual_attendance');
 Route::post('pending_manual_attendance_action', 'ManualAttendanceController@pending_manual_attendance_action');
+
+Route::get('/process-manual-attendance', function () {
+    $count = (new ManualAttendanceController)->processPendingManualAttendances();
+    return "Total Processed: " . $count;
+});
 
 // Route::resource('manual_ot',				'ManualOTController');
 // Route::post('manual_otlistdata',	        'ManualOTController@manual_otlistdata');
