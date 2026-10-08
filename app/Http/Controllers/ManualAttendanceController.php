@@ -122,7 +122,7 @@ class ManualAttendanceController extends Controller
                             and cc.employee_activity=1
                             and aa.data_from=2
                             $approval_condition
-                      -- and aa.punch_date between '$date_from' AND '$date_to'
+                      and aa.punch_date between '$date_from' AND '$date_to'
                       $condition
                           JOIN
                       hrm_depertment ee ON cc.hrm_depertment_id = ee.id
@@ -1310,71 +1310,81 @@ class ManualAttendanceController extends Controller
 
 
 
-    // public function manual_attendance_delete(Request $request,$id){
+    public function manual_attendance_delete(Request $request,$id){
 
-    //     // dd("i am here");
+        // dd("i am here");
 
-    //     $cancel = HrmAttendance::find($id);
-    //     $hrm_employee_id=$cancel->hrm_employee_id;
-    //     $hrm_month_id    = date('m', strtotime($cancel->punch_date));
-    //     $year_id         = date('Y', strtotime($cancel->punch_date));
-
-
-    //     $pay_register = DB::table('pay_register as a')
-    //                 ->select('a.*','b.hrm_employee_id')
-    //                 ->join('hrm_employee_job_info as b','b.id','=','a.hrm_employee_job_info_id')
-    //                 ->where('b.hrm_employee_id',$hrm_employee_id)
-    //                 ->where('a.hrm_month_id',$hrm_month_id)
-    //                 ->where('a.year_id',$year_id)
-    //                 ->whereIn('a.salary_genarate_type', [1, 2])
-    //                 ->first();
+        $cancel = HrmAttendance::find($id);
+        $hrm_employee_id=   $cancel->hrm_employee_id;
+        $hrm_month_id    = date('m', strtotime($cancel->punch_date));
+        $year_id         = date('Y', strtotime($cancel->punch_date));
 
 
-
-    //     if (!empty($pay_register)){
-    //         session()->flash('alert-danger', 'This months salary has already been processed. Deletion or editing is not allowed. !!');
-    //         return Redirect()->back();
-    //     }
-
-    //     // dd($pay_register);
+        $pay_register = DB::table('pay_register as a')
+                    ->select('a.*','b.hrm_employee_id')
+                    ->join('hrm_employee_job_info as b','b.id','=','a.hrm_employee_job_info_id')
+                    ->where('b.hrm_employee_id',$hrm_employee_id)
+                    ->where('a.hrm_month_id',$hrm_month_id)
+                    ->where('a.year_id',$year_id)
+                    ->whereIn('a.salary_genarate_type', [1, 2])
+                    ->first();
 
 
 
-    //     if (empty($cancel)){
-    //         session()->flash('alert-danger', 'Invalid Data !!');
-    //         return Redirect()->back();
-    //     }
+        if (!empty($pay_register)){
+            session()->flash('alert-danger', 'This months salary has already been processed. Deletion or editing is not allowed. !!');
+            return Redirect()->back();
+        }
 
-    //     $this->recordActivity(
-    //          1,
-    //          'Deleted Manual Attandance',
-    //          $cancel,
-    //          $id,
-    //          'hrm_attendance_raw_data'
-    //     );
+        // dd($pay_register);
 
 
 
-    //     DB::table('hrm_attendance_comment')->where('hrm_attendance_raw_data_id', '=', $id)->delete();
-    //     DB::table('hrm_attendance_data')->where('row_data_id', '=', $id)->delete();
-    //     DB::table('hrm_attendance_raw_data')->where('id', '=', $id)->delete();
+        if (empty($cancel)){
+            session()->flash('alert-danger', 'Invalid Data !!');
+            return Redirect()->back();
+        }
+
+        $this->recordActivity(
+             1,
+             'Deleted Manual Attandance',
+             $cancel,
+             $id,
+             'hrm_attendance_raw_data'
+        );
 
 
-    //     //-------Data Process
-    //     $attendance = new AttendanceDataProcessController();
-    //     $attendance->attandanceProcess($cancel->hrm_location_id,$cancel->punch_date,$cancel->hrm_employee_id);
 
-    //     $request->session()->flash('alert-success', 'successfully deleted !');
-    //     return Redirect::to('manual_attendance');
-    // }
+        DB::table('hrm_attendance_comment')->where('hrm_attendance_raw_data_id', '=', $id)->delete();
+        DB::table('hrm_attendance_data')->where('row_data_id', '=', $id)->delete();
+        DB::table('hrm_attendance_raw_data')->where('id', '=', $id)->delete();
+
+
+        //-------Data Process
+        $attendance = new AttendanceDataProcessController();
+        $attendance->attandanceProcess($cancel->hrm_location_id,$cancel->punch_date,$cancel->hrm_employee_id);
+
+        $request->session()->flash('alert-success', 'successfully deleted !');
+        return Redirect::to('manual_attendance');
+    }
 
     public function delete(Request $request, $id)
     {
+        
         $auto_approve = (int) DB::table('company_information')->value('manual_attendance_auto_approved') === 1;
+
+        
 
         $manual = $auto_approve
             ? HrmManualAttendance::find($id)
             : HrmManualAttendance::whereNull('hrm_attendance_raw_data_id')->find($id);
+
+        if ($this->isLocationSalaryProcessed($manual->hrm_location_id, $manual->punch_date)) {
+                session()->flash('alert-danger', 'This months salary has already been processed for this location. Manual Entry is not allowed!');
+                return Redirect()->back();
+            }
+
+
 
         if (empty($manual)) {
             session()->flash('alert-danger', 'Invalid Data !!');
