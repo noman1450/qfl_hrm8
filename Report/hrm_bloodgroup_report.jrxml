@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.21.3.final using JasperReports Library version 6.21.3-4a3078d20785ebe464f18037d738d12fc98c13cf  -->
+<!-- Created with Jaspersoft Studio version 6.21.5.final using JasperReports Library version 6.21.5-74d586df47b25dbd05bd0957999819196e59934a  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="hrm_bloodgroup_report" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="9438248a-295f-40af-a669-de9baf60f08d">
 	<property name="ireport.zoom" value="2.0"/>
 	<property name="ireport.x" value="324"/>
@@ -40,6 +40,7 @@
     j.employee_name AS manage_by_name,
     a.contact_number,
     n.blood_group,
+    a.dob,
     a.nid
 FROM
     hrm_employee a
@@ -185,6 +186,7 @@ Order by d.id,e.priority]]>
 		<property name="com.jaspersoft.studio.field.tree.path" value="hrm_employee"/>
 		<fieldDescription><![CDATA[]]></fieldDescription>
 	</field>
+	<field name="dob" class="java.sql.Date"/>
 	<group name="department">
 		<groupExpression><![CDATA[$F{depertment_name}]]></groupExpression>
 		<groupHeader>
@@ -285,9 +287,9 @@ Order by d.id,e.priority]]>
 		<band splitType="Stretch"/>
 	</pageHeader>
 	<columnHeader>
-		<band height="20" splitType="Stretch">
+		<band height="24" splitType="Stretch">
 			<staticText>
-				<reportElement mode="Opaque" x="30" y="2" width="120" height="17" backcolor="#CCCCCC" uuid="600314c6-b98c-4a83-80ac-0978e3f5e54b"/>
+				<reportElement mode="Opaque" x="30" y="2" width="113" height="17" backcolor="#CCCCCC" uuid="600314c6-b98c-4a83-80ac-0978e3f5e54b"/>
 				<box>
 					<rightPen lineWidth="0.5"/>
 				</box>
@@ -298,7 +300,7 @@ Order by d.id,e.priority]]>
 				<text><![CDATA[Employee Name]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="152" y="2" width="84" height="17" backcolor="#CCCCCC" uuid="a8348786-8ba2-4a06-baa6-6134c7d495d1"/>
+				<reportElement mode="Opaque" x="143" y="2" width="75" height="17" backcolor="#CCCCCC" uuid="a8348786-8ba2-4a06-baa6-6134c7d495d1"/>
 				<box>
 					<rightPen lineWidth="0.5"/>
 				</box>
@@ -309,7 +311,7 @@ Order by d.id,e.priority]]>
 				<text><![CDATA[Designation]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="238" y="2" width="73" height="17" backcolor="#CCCCCC" uuid="f45dc1be-359a-404a-a8e3-b87550c12005"/>
+				<reportElement mode="Opaque" x="219" y="2" width="61" height="17" backcolor="#CCCCCC" uuid="f45dc1be-359a-404a-a8e3-b87550c12005"/>
 				<box>
 					<rightPen lineWidth="0.5"/>
 				</box>
@@ -343,7 +345,7 @@ Order by d.id,e.priority]]>
 				<text><![CDATA[SL]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="422" y="2" width="72" height="17" backcolor="#CCCCCC" uuid="d1623fa6-952a-46ce-9ff5-01781ac35d82"/>
+				<reportElement mode="Opaque" x="385" y="2" width="70" height="17" backcolor="#CCCCCC" uuid="d1623fa6-952a-46ce-9ff5-01781ac35d82"/>
 				<box>
 					<rightPen lineWidth="0.5"/>
 				</box>
@@ -354,7 +356,7 @@ Order by d.id,e.priority]]>
 				<text><![CDATA[NID]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="313" y="2" width="46" height="17" backcolor="#CCCCCC" uuid="6580a081-681f-44a7-93d9-f63450f9b740"/>
+				<reportElement mode="Opaque" x="280" y="2" width="46" height="17" backcolor="#CCCCCC" uuid="6580a081-681f-44a7-93d9-f63450f9b740"/>
 				<box>
 					<rightPen lineWidth="0.5"/>
 				</box>
@@ -365,18 +367,21 @@ Order by d.id,e.priority]]>
 				<text><![CDATA[Unique Code]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="496" y="2" width="55" height="17" backcolor="#CCCCCC" uuid="025c6680-5c4c-4ba2-b5e8-dee4a6b18d21"/>
+				<reportElement mode="Opaque" x="455" y="2" width="46" height="17" backcolor="#CCCCCC" uuid="025c6680-5c4c-4ba2-b5e8-dee4a6b18d21">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
 				<box>
 					<rightPen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font size="7" isBold="true"/>
+					<font size="5.5" isBold="true"/>
 					<paragraph leftIndent="2"/>
 				</textElement>
 				<text><![CDATA[Blood Group]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="361" y="2" width="59" height="17" backcolor="#CCCCCC" uuid="ff5b46cc-dd10-4b65-ba23-707bfda26991"/>
+				<reportElement mode="Opaque" x="326" y="2" width="59" height="17" backcolor="#CCCCCC" uuid="ff5b46cc-dd10-4b65-ba23-707bfda26991"/>
 				<box>
 					<rightPen lineWidth="0.5"/>
 				</box>
@@ -386,12 +391,26 @@ Order by d.id,e.priority]]>
 				</textElement>
 				<text><![CDATA[Contact No]]></text>
 			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="501" y="2" width="49" height="17" backcolor="#CCCCCC" uuid="ceb3f7c5-3376-4abb-ba9a-d2fb3afdf444">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[DOB]]></text>
+			</staticText>
 		</band>
 	</columnHeader>
 	<detail>
-		<band height="17" splitType="Stretch">
+		<band height="19" splitType="Stretch">
 			<textField>
-				<reportElement x="30" y="0" width="120" height="15" uuid="e329f4a9-1a69-4ab6-aabb-5d190159f00e"/>
+				<reportElement x="30" y="0" width="112" height="15" uuid="e329f4a9-1a69-4ab6-aabb-5d190159f00e"/>
 				<textElement verticalAlignment="Middle">
 					<font size="7"/>
 				</textElement>
@@ -415,21 +434,21 @@ Order by d.id,e.priority]]>
 				</graphicElement>
 			</line>
 			<textField>
-				<reportElement x="152" y="0" width="84" height="16" uuid="e1372548-677f-4212-98f0-0585c63683bd"/>
+				<reportElement x="142" y="0" width="76" height="16" uuid="e1372548-677f-4212-98f0-0585c63683bd"/>
 				<textElement verticalAlignment="Middle">
 					<font size="7"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{designation_name}]]></textFieldExpression>
 			</textField>
 			<textField pattern="dd/MM/yyyy">
-				<reportElement x="237" y="0" width="74" height="16" uuid="2a65ce8e-dc3a-450a-b055-a0e7e90869be"/>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<reportElement x="218" y="0" width="60" height="16" uuid="2a65ce8e-dc3a-450a-b055-a0e7e90869be"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
 					<font size="7"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{joining_date}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="360" y="0" width="62" height="16" uuid="6ead6f2d-9abc-4b6a-bd53-8f836838a471"/>
+				<reportElement x="325" y="0" width="60" height="16" uuid="6ead6f2d-9abc-4b6a-bd53-8f836838a471"/>
 				<textElement verticalAlignment="Middle">
 					<font size="7"/>
 					<paragraph leftIndent="5"/>
@@ -437,25 +456,36 @@ Order by d.id,e.priority]]>
 				<textFieldExpression><![CDATA[$F{contact_number}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="497" y="0" width="52" height="16" uuid="797db846-c0be-4555-be7b-559a8eb0fcc8"/>
+				<reportElement x="455" y="0" width="46" height="16" uuid="797db846-c0be-4555-be7b-559a8eb0fcc8"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="7"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{blood_group}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="312" y="0" width="47" height="16" uuid="03a05231-d895-4857-b9a5-1b8ccbd51b76"/>
+				<reportElement x="278" y="0" width="47" height="16" uuid="03a05231-d895-4857-b9a5-1b8ccbd51b76"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="7"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{Unique_Code}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="423" y="0" width="72" height="16" uuid="c2794615-4b20-4838-b25f-b8f155eec16a"/>
+				<reportElement x="385" y="0" width="70" height="16" uuid="c2794615-4b20-4838-b25f-b8f155eec16a"/>
 				<textElement verticalAlignment="Middle">
 					<font size="7"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{nid}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="501" y="0" width="48" height="16" uuid="8e593af1-186f-4a12-92e1-214a7f0a740a">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="5c0df25e-58c9-4157-8915-cba394d173de"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font size="5.5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{dob}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
