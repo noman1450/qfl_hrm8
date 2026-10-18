@@ -306,6 +306,9 @@ Route::post('resignapprovedlist',		     'EmployeeResignController@resignapproved
 Route::get('employeeresign/{id}/rejoin/',	 'EmployeeResignController@resign_rejoin');
 Route::post('shiftdatechange_single',		 'EmployeeResignController@shiftdatechange_single');
 Route::get('resignapproved_export',		     'EmployeeResignController@resignApprovedExport')->name('resignapproved_export');
+Route::get('multiple_resign',		         'EmployeeResignController@multiple_resign');
+Route::post('multiple_resign',		         'EmployeeResignController@multipleResignSubmit');
+Route::post('multiple_resign_list',		     'EmployeeResignController@multiple_resign_list');
 
 // Resignation Type Controller
 Route::resource('resignation_type',			'ResignationTypeController');

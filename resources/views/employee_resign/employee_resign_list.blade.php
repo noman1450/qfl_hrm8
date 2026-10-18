@@ -19,6 +19,7 @@
           <a href="{{ URL::to('employeeresign/create')}}"><input type="button" value="Create New" class="btn-success btn btn-sm button pull-left btn-flat" style="font-size: 12px; font-weight: bold;"></a>
           {{-- @endpermission --}}
           <a href="{{ URL::to('resignapproved')}}"><input type="button" value="Approved List" class="btn-info btn btn-sm button pull-left btn-flat" style="font-size: 12px;  margin-left: 20px; font-weight: bold;"></a>
+          <!-- <a href="{{ URL::to('multiple_resign')}}"><input type="button" value="Multiple Resign" class="btn-danger btn btn-sm button pull-left btn-flat" style="font-size: 12px;  margin-left: 20px; font-weight: bold;"></a> -->
           <div class="col-lg-3 col-md-3 col-xs-12 form-group">
             <select class="form-control" id="location" name="location" style="width: 100%;" required>
 
