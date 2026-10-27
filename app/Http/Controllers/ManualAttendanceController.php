@@ -352,6 +352,7 @@ class ManualAttendanceController extends Controller
                     ->select('a.*','b.hrm_employee_id')
                     ->join('hrm_employee_job_info as b','b.id','=','a.hrm_employee_job_info_id')
                     ->where('b.hrm_employee_id',$hrm_employee_id)
+                    ->where('a.apply_for','!=',2)
                     ->where('a.hrm_month_id',$hrm_month_id)
                     ->where('a.year_id',$year_id)
                     ->whereIn('a.salary_genarate_type', [1, 2])
@@ -456,7 +457,7 @@ class ManualAttendanceController extends Controller
             );
 
             if ($auto_approve) {
-                if ($this->isLocationSalaryProcessed($insert->hrm_location_id, $insert->punch_date)) {
+                if ($this->isLocationSalaryProcessed($insert->hrm_location_id, $insert->punch_date,$request->employee_name)) {
                     session()->flash('alert-danger', 'This months salary has already been processed for this location. Manual Entry is not allowed!');
                     return Redirect()->back();
                 }
@@ -505,6 +506,7 @@ class ManualAttendanceController extends Controller
                         ->join('hrm_employee_job_info as b','b.id','=','a.hrm_employee_job_info_id')
                         ->where('b.hrm_employee_id',$hrm_employee_id)
                         ->where('a.hrm_month_id',$hrm_month_id)
+                        ->where('a.apply_for','!=',2)
                         ->where('a.year_id',$year_id)
                         ->whereIn('a.salary_genarate_type', [1, 2])
                         ->first();
@@ -581,7 +583,7 @@ class ManualAttendanceController extends Controller
             );
 
             if ($auto_approve) {
-                if ($this->isLocationSalaryProcessed($insert_in->hrm_location_id, $insert_in->punch_date)) {
+                if ($this->isLocationSalaryProcessed($insert_in->hrm_location_id, $insert_in->punch_date,$employee_id)) {
                     session()->flash('alert-danger', 'This months salary has already been processed for this location. Manual Entry is not allowed!');
                     return Redirect()->back();
                 }
@@ -620,7 +622,7 @@ class ManualAttendanceController extends Controller
             );
 
             if ($auto_approve) {
-                if ($this->isLocationSalaryProcessed($insert_out->hrm_location_id, $insert_out->punch_date)) {
+                if ($this->isLocationSalaryProcessed($insert_out->hrm_location_id, $insert_out->punch_date,$employee_id)) {
                     session()->flash('alert-danger', 'This months salary has already been processed for this location. Manual Entry is not allowed!');
                     return Redirect()->back();
                 }
@@ -641,15 +643,21 @@ class ManualAttendanceController extends Controller
     }
 
 
-    private function isLocationSalaryProcessed($hrmLocationId, $punchDate)
+    private function isLocationSalaryProcessed($hrmLocationId, $punchDate,$hrm_employee_id)
     {
+        
         $pay_register = DB::table('pay_register as a')
                     ->select('a.id')
+                    ->join('hrm_employee_job_info as b','b.id','=','a.hrm_employee_job_info_id')
+                    ->where('b.hrm_employee_id',$hrm_employee_id)
                     ->where('a.hrm_location_id',$hrmLocationId)
                     ->where('a.hrm_month_id',date('m', strtotime($punchDate)))
+                    ->where('a.apply_for','!=',2)
                     ->where('a.year_id',date('Y', strtotime($punchDate)))
                     ->whereIn('a.salary_genarate_type', [1, 2])
                     ->first();
+
+                    // dd($pay_register);
 
         return !empty($pay_register);
     }
@@ -896,6 +904,7 @@ class ManualAttendanceController extends Controller
                                 ->where('a.hrm_location_id',$hrm_location_id)
                                 ->where('a.hrm_month_id',$hrm_month_id)
                                 ->where('a.year_id',$year_id)
+                                ->where('a.apply_for','!=',2)
                                 ->whereIn('a.salary_genarate_type', [1, 2])
                                 ->first();
 
@@ -1011,6 +1020,7 @@ class ManualAttendanceController extends Controller
                     ->join('hrm_employee_job_info as b','b.id','=','a.hrm_employee_job_info_id')
                     ->where('b.hrm_employee_id',$hrm_employee_id)
                     ->where('a.hrm_month_id',$hrm_month_id)
+                    ->where('a.apply_for','!=',2)
                     ->where('a.year_id',$year_id)
                     ->whereIn('a.salary_genarate_type', [1, 2])
                     ->first();
@@ -1138,6 +1148,7 @@ class ManualAttendanceController extends Controller
                         ->join('hrm_employee_job_info as b','b.id','=','a.hrm_employee_job_info_id')
                         ->where('b.hrm_employee_id',$hrm_employee_id)
                         ->where('a.hrm_month_id',$hrm_month_id)
+                        ->where('a.apply_for','!=',2)
                         ->where('a.year_id',$year_id)
                         ->whereIn('a.salary_genarate_type', [1, 2])
                         ->first();
@@ -1325,6 +1336,7 @@ class ManualAttendanceController extends Controller
                     ->join('hrm_employee_job_info as b','b.id','=','a.hrm_employee_job_info_id')
                     ->where('b.hrm_employee_id',$hrm_employee_id)
                     ->where('a.hrm_month_id',$hrm_month_id)
+                    ->where('a.apply_for','!=',2)
                     ->where('a.year_id',$year_id)
                     ->whereIn('a.salary_genarate_type', [1, 2])
                     ->first();
@@ -1378,8 +1390,9 @@ class ManualAttendanceController extends Controller
         $manual = $auto_approve
             ? HrmManualAttendance::find($id)
             : HrmManualAttendance::whereNull('hrm_attendance_raw_data_id')->find($id);
-
-        if ($this->isLocationSalaryProcessed($manual->hrm_location_id, $manual->punch_date)) {
+       
+        if ($this->isLocationSalaryProcessed($manual->hrm_location_id, $manual->punch_date,$manual->hrm_employee_id)) {
+               
                 session()->flash('alert-danger', 'This months salary has already been processed for this location. Manual Entry is not allowed!');
                 return Redirect()->back();
             }
