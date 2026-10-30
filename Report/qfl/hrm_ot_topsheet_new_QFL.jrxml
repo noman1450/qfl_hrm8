@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.20.6.final using JasperReports Library version 6.0.2  -->
+<!-- Created with Jaspersoft Studio version 7.0.6.final using JasperReports Library version 6.2.0  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="hrm_ot_topsheet_new_QFL" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="46477e6d-659d-4902-a08e-dd1193fc592c">
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="QFL HRM"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
@@ -120,7 +120,7 @@ FROM
     JOIN hrm_location f ON a.hrm_location_id = f.id
     GROUP BY e.id, f.id) aa
 GROUP BY aa.category_name,aa.location_name,aa.payment_info
- HAVING SUM( aa.net_overtime + aa.total_amount + aa.last_month_amount) > 0]]>
+]]>
 	</queryString>
 	<field name="category_name" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.name" value="category_name"/>
