@@ -512,13 +512,10 @@
                                                     href="{{URL::to('manual_out')}}"> <i class="fa fa-circle-o"></i>Manual
                                                     Attendance Out</a></li>
                                         @endcan
-                                        
+                                        @can('PendingManualAttendance')
                                             <li {!! Request::is('pending_manual_attendance') ? '        class="active"' : null !!}><a
                                                     href="{{URL::to('pending_manual_attendance')}}"> <i class="fa fa-circle-o"></i>Waiting for Approval</a></li>
-                                        
-                                       
-                                            <li {!! Request::is('approved_manual_attendance') ? '        class="active"' : null !!}><a
-                                                    href="{{URL::to('approved_manual_attendance')}}"> <i class="fa fa-circle-o"></i>Approved List</a></li>
+                                        @endcan
                                         
                                     </ul>
 

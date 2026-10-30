@@ -56,7 +56,7 @@ class CWSalaryProcessController extends Controller
                                                     JOIN
                                                 hrm_salary_generate_master c ON a.hrm_salary_generate_master_id = c.id
                                                     JOIN
-                                                user_location d ON a.hrm_location_id = d.hrm_location_id AND c.valid=1 AND c.status=3
+                                                user_location d ON a.hrm_location_id = d.hrm_location_id AND c.valid=1 AND c.status = 3
                                                     AND d.`users_id`= $user_id
                                                     JOIN
                                                 hrm_location e ON d.hrm_location_id = e.id

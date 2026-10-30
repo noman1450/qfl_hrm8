@@ -284,9 +284,7 @@ $(document).ready(function($) {
               { "data": "users_name" },
               { "data": "Link",
                 "mRender": function (data, type, full) {
-                    var url = full.source_type == 'Manual'
-                        ? '/manual_attendance/'+full.id+'/delete'
-                        : '/manual_attendance/'+full.id+'/cancel';
+                    var url = '/manual_attendance/'+full.id+'/delete';
                     return '<a href="{{URL::to('/')}}'+url+'"  onclick="return confirm(\'Do you really want to DELETE?\');" class="btn btn-danger btn-sm btn-flat"><span class="glyphicon glyphicon-trash"></a>';
                 }
               },

@@ -46,6 +46,200 @@ class EmployeeResignController extends Controller
     }
 
 
+    public function multiple_resign()
+    {
+        $user_id = Auth::user()->id;
+
+        $default_user_location = DB::select("SELECT b.id,b.location_name FROM `user_location` a JOIN hrm_location b ON a.`hrm_location_id`=b.id and a.`users_id`= $user_id AND a.`default_location`=1");
+
+        return view('employee_resign.multiple_resign')
+                ->with('default_user_location', $default_user_location);
+    }
+
+
+    public function multiple_resign_list(Request $request)
+    {
+        $user_id = Auth::user()->id;
+
+        if($request->location==null){
+            $condition = '';
+        }else{
+            $condition = 'AND b.hrm_location_id='.$request->location;
+        }
+
+        $resignlist = DB::select("SELECT
+                                      a.id AS employee_id,
+                                      CONCAT(a.employee_name, ' | ', IFNULL(b.employee_code,'')) AS employee_name,
+                                      a.Images,
+                                      c.depertment_name,
+                                      d.designation_name,
+                                      e.location_name,
+                                      DATE_FORMAT(f.joining_date, '%d-%m-%Y') AS joining_date
+                                  FROM
+                                      hrm_employee a
+                                          JOIN
+                                      hrm_employee_job_info b ON b.hrm_employee_id = a.id
+                                          AND b.employee_activity = 1
+                                          AND a.active_status = 1
+                                          $condition
+                                          JOIN
+                                      hrm_depertment c ON b.hrm_depertment_id = c.id
+                                          JOIN
+                                      hrm_designation d ON b.hrm_designation_id = d.id
+                                          JOIN
+                                      hrm_location e ON b.hrm_location_id = e.id
+                                          JOIN
+                                      user_location g ON b.hrm_location_id = g.hrm_location_id
+                                          AND g.users_id = $user_id
+                                          JOIN
+                                      hrm_employee_joining f ON f.hrm_employee_id = a.id
+                                  WHERE
+                                      a.id NOT IN (SELECT c.id
+                                                    FROM hrm_employee_resignation a2
+                                                        JOIN hrm_employee_job_info b2 ON b2.id = a2.hrm_employee_job_info_id
+                                                        JOIN hrm_employee c ON c.id = b2.hrm_employee_id
+                                                    WHERE a2.valid = 1
+                                                        AND a2.resingnation_status IN (1, 2, 4))");
+
+        return json_encode(array('data' => $resignlist));
+    }
+
+
+    public function multipleResignSubmit(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'employee_ids'              => 'required|array',
+            'hrm_resignation_type_id'   => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            $request->session()->flash('alert-danger', 'Please select at least one employee and resignation type!');
+            return Redirect::to('multiple_resign');
+        }
+
+        $user_id = Auth::user()->id;
+        $ldate   = date('Y-m-d');
+
+        DB::beginTransaction();
+        try{
+
+            foreach ($request->employee_ids as $employee_id) {
+
+                $hrm_employee_job_info_id = DB::Select("SELECT id FROM hrm_employee_job_info WHERE hrm_employee_id=$employee_id AND employee_activity=1");
+
+                if(empty($hrm_employee_job_info_id)){
+                    continue;
+                }
+                $hrm_employee_job_info_id = $hrm_employee_job_info_id[0]->id;
+
+                $check_aaa = DB::SELECT("SELECT id FROM hrm_employee_resignation
+                    WHERE hrm_employee_job_info_id = $hrm_employee_job_info_id
+                    AND resingnation_status IN(1,2,4) AND valid=1");
+
+                if(!empty($check_aaa)){
+                    continue;
+                }
+
+                $joining = DB::Select("SELECT joining_date FROM hrm_employee_joining WHERE hrm_employee_id=$employee_id");
+
+                if(empty($joining)){
+                    continue;
+                }
+
+                $resign_date = $joining[0]->joining_date;
+
+                $insert                     = new HrmEmployeeResign;
+                $insert->hrm_employee_job_info_id     = $hrm_employee_job_info_id;
+                $insert->apply_date                   = $resign_date;
+                $insert->effective_date               = $resign_date;
+                $insert->hrm_resignation_type_id      = $request->hrm_resignation_type_id;
+                $insert->valid                        = 1;
+                $insert->comment                      = $request->comment;
+                $insert->resingnation_status          = 2;
+                $insert->users_id                     = $user_id;
+                $insert->save();
+
+                $update_job_info = HrmEmployeeJobInfo::find($hrm_employee_job_info_id);
+                $update_job_info->employee_activity = 0;
+                $update_job_info->save();
+
+                $check_data = DB::select("SELECT *
+                                    FROM
+                                        hrm_employee_shift
+                                    WHERE
+                                        id IN (SELECT
+                                                MAX(id) id
+                                            FROM
+                                                hrm_employee_shift
+                                            WHERE
+                                                hrm_employee_job_info_id = $hrm_employee_job_info_id)")[0];
+
+                 if(!empty($check_data)){
+
+                      if($resign_date<$check_data->start_date){
+                           $enddate = $check_data->start_date;
+                      }else{
+                           $enddate = $resign_date;
+                      }
+
+                      DB::update("UPDATE hrm_employee_shift
+                              SET end_date = '$enddate',
+                                  comment  = 'from Multiple Employee Resign',
+                                  users_id = $user_id,
+                                  updated_at = '$ldate'
+                              WHERE hrm_employee_job_info_id = $hrm_employee_job_info_id
+                              AND end_date is null");
+
+                 }
+
+                $id = DB::SELECT("SELECT id FROM users WHERE hrm_employee_id = $employee_id");
+
+                If(!empty($id)){
+                    $id = $id[0]->id;
+                    $password = bcrypt('zax!1%$l:)^'.$id);
+                    DB::update("UPDATE users SET valid = 0,password='$password' WHERE id = $id");
+                }
+
+                $xmasDay  = new DateTime($resign_date.'- 1 day');
+                $end_date = $xmasDay->format('Y-m-d');
+
+                DB::update("UPDATE hrm_employee_activity SET end_date = '$end_date'
+                            WHERE end_date is null AND hrm_employee_job_info_id = $hrm_employee_job_info_id");
+
+                $insert_employee_activity  = new HrmEmployeeActivity;
+                $insert_employee_activity->hrm_employee_job_info_id  = $hrm_employee_job_info_id;
+                $insert_employee_activity->activity_date             = $resign_date;
+                $insert_employee_activity->comment                   = $request->comment;
+                $insert_employee_activity->users_id                  = $user_id;
+                $insert_employee_activity->activity                  = 1;
+                $insert_employee_activity->hrm_employee_activity_status_id  = 5;
+                $insert_employee_activity->start_date                = $resign_date;
+                $insert_employee_activity->end_date                  = $resign_date;
+                $insert_employee_activity->save();
+
+                $this->recordActivity(
+                     1,
+                     'Created Multiple Employee Resignation (Auto Approved)',
+                     null,
+                     $insert->id,
+                     'hrm_employee_resignation'
+                );
+
+            }
+
+        DB::commit();
+
+        }catch (\Exception $e) {
+            DB::rollback();
+            $request->session()->flash('alert-danger', 'Something went wrong !! ' . $e->getMessage());
+            return Redirect::to('multiple_resign');
+        }
+
+        $request->session()->flash('alert-success', 'Multiple resign has been successfully added!');
+        return Redirect::to('multiple_resign');
+    }
+
+
     public function resignapproved()
     {
           $user_id = Auth::user()->id;

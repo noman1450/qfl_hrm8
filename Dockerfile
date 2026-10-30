@@ -22,5 +22,8 @@ COPY . .
 RUN chown -R www-data:www-data /var/www \
     && chmod -R 755 /var/www
 
+# Make entrypoint executable
+RUN chmod +x /usr/local/bin/docker-php-entrypoint /var/www/docker/entrypoint.sh
+
 EXPOSE 9000
-CMD ["php-fpm"]
+CMD ["/var/www/docker/entrypoint.sh"]
