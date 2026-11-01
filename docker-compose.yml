@@ -5,8 +5,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: hrm_8-app
-    container_name: hrm_8-app
+    image: qfl_hrm_8-app
+    container_name: qfl_hrm_8-app
     restart: unless-stopped
     working_dir: /var/www
     volumes:
@@ -14,12 +14,12 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     networks:
-      - hrm_8-network
+      - qfl_hrm_8-network
 
 
   nginx:
     image: nginx:latest
-    container_name: hrm_8-nginx
+    container_name: qfl_hrm_8-nginx
     restart: unless-stopped
     ports:
       - "8083:80"
@@ -30,9 +30,9 @@ services:
     depends_on:
       - app
     networks:
-      - hrm_8-network
+      - qfl_hrm_8-network
 
 networks:
-  hrm_8-network:
+  qfl_hrm_8-network:
 
 

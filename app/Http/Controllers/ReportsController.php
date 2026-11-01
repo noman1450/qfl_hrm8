@@ -16,9 +16,6 @@ use Session;
 use Crypt;
 use Config;
 use Response;
-use Barryvdh\DomPDF\Facade as PDF;
-use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\CostToTheCompanyExport;
 
 use App\User;
 use App\Models\HrmLocation;
@@ -65,7 +62,7 @@ class ReportsController extends Controller
 
         $default_user_location = DB::select("SELECT b.id,b.location_name FROM `user_location` a JOIN hrm_location b ON a.`hrm_location_id`=b.id and a.`users_id`= $userid AND a.`default_location`=1");
 
-        $location = DB::select("SELECT a.id,a.location_name FROM hrm_location a JOIN user_location b ON a.id=b.hrm_location_id AND b.users_id = $userid");
+        $location = DB::select("SELECT a.id,a.location_name FROM hrm_location a JOIN user_location b ON a.id=b.hrm_location_id AND a.valid=1 AND b.users_id = $userid");
 
 
 
@@ -835,68 +832,61 @@ class ReportsController extends Controller
             ));
         }
 
-        $employee_id = $request->employee_name;
-        $leave_year_id     = $request->hrm_leave_years_id;
-
-        return redirect()->route('emp_leave_balance.pdf', [
-            'id' => $employee_id,
-            'leave_year_id' => $leave_year_id,
-        ]);
 
 
-        // $jasper_server = new Client(
-        //     Config::get('configaration.jasperjasper_url'),
-        //     Config::get('configaration.jasper_user'),
-        //     Config::get('configaration.jasper_password')
-        // );
+        $jasper_server = new Client(
+            Config::get('configaration.jasperjasper_url'),
+            Config::get('configaration.jasper_user'),
+            Config::get('configaration.jasper_password')
+        );
 
-        // $parameter="";
-
-
-        // $parameter  = " WHERE b.id = $request->employee_name AND j.id=$request->hrm_leave_years_id ";
+        $parameter="";
 
 
-        // // dd($parameter);
+        $parameter  = " WHERE b.id = $request->employee_name AND j.id=$request->hrm_leave_years_id ";
 
 
-        // $controls = array(
-        //     'company_name'          => Config::get('configaration.company_name'),
-        //     'address'               => Config::get('configaration.company_address'),
-        //     'title'                 => "Individual Leave Ledger",
-        //     'condition_parameter'   => $parameter,
-        // );
+        // dd($parameter);
 
 
-        // $report_path = Config::get('configaration.report_path').'hrm_individual_leave_ledger';
+        $controls = array(
+            'company_name'          => Config::get('configaration.company_name'),
+            'address'               => Config::get('configaration.company_address'),
+            'title'                 => "Individual Leave Ledger",
+            'condition_parameter'   => $parameter,
+        );
 
-        // $report      = $jasper_server->reportService()->runReport($report_path, "pdf",null,null,$controls);
 
-        // $generate_type  = $request->generate_type;
+        $report_path = Config::get('configaration.report_path').'hrm_individual_leave_ledger';
 
-        // if (strlen($report) > 988){
+        $report      = $jasper_server->reportService()->runReport($report_path, "pdf",null,null,$controls);
 
-        //     if($generate_type=="pdf"){
+        $generate_type  = $request->generate_type;
 
-        //             $report      = $jasper_server->reportService()->runReport($report_path, $generate_type,null,null,$controls);
-        //             header("Content-type:application/pdf");
-        //             echo $report;
-        //             echo "data:application/pdf;base64, " . $report;
+        if (strlen($report) > 988){
 
-        //     }else{
+            if($generate_type=="pdf"){
 
-        //             $report      = $jasper_server->reportService()->runReport($report_path, $generate_type,null,null,$controls);
-        //             header('Cache-Control: must-revalidate');
-        //             header('Pragma: public');
-        //             header('Content-Description: File Transfer');
-        //             header('Content-Disposition: attachment; filename=mr_statement.'.$generate_type);
-        //             header('Content-Transfer-Encoding: binary');
-        //             header('Content-Length: ' . strlen($report));
-        //             header('Content-Type: application/'.$generate_type);
-        //             echo $report;
-        //     }
-        // }else{
-        //    dd("No data found");
-        // }
+                    $report      = $jasper_server->reportService()->runReport($report_path, $generate_type,null,null,$controls);
+                    header("Content-type:application/pdf");
+                    echo $report;
+                    echo "data:application/pdf;base64, " . $report;
+
+            }else{
+
+                    $report      = $jasper_server->reportService()->runReport($report_path, $generate_type,null,null,$controls);
+                    header('Cache-Control: must-revalidate');
+                    header('Pragma: public');
+                    header('Content-Description: File Transfer');
+                    header('Content-Disposition: attachment; filename=mr_statement.'.$generate_type);
+                    header('Content-Transfer-Encoding: binary');
+                    header('Content-Length: ' . strlen($report));
+                    header('Content-Type: application/'.$generate_type);
+                    echo $report;
+            }
+        }else{
+           dd("No data found");
+        }
     }
 
     public function employee_leave_summary_report (Request $request)
@@ -3163,7 +3153,7 @@ public function bonus_topSheet (Request $request)
         // dd(strlen($report));
 
         if (strlen($report) > 988){
-        // if (!empty($report)) {
+
             if($generate_type=="pdf"){
 
                     $report      = $jasper_server->reportService()->runReport($report_path, $generate_type,null,null,$controls);
@@ -4060,7 +4050,6 @@ public function bonus_topSheet (Request $request)
 
                     if($request->report_number==1){
                         $report_path = Config::get('configaration.report_path').'hrm_bonus_sheet';
-                        // dd($report_path);
                     }elseif ($request->report_number==2) {
                         $report_path = Config::get('configaration.report_path').'hrm_bank_bonus_sheet';
                     }else{
@@ -4459,594 +4448,5 @@ public function bonus_topSheet (Request $request)
     public function destroy($id)
     {
         //
-    }
-
-    public function cost_to_the_company(){
-        return view('reports.cost-to-the-company');
-    }
-
-    public function get_cost_to_the_company(Request $request){
-        [$monthFrom, $monthTo, $locationCondition, $durationFrom, $durationTo] = $this->buildCostParams($request);
-        $dataset = $this->getCostToTheCompanyGroupedData($monthFrom, $monthTo, $locationCondition, $durationFrom, $durationTo);
-
-        $columns = [
-            ['data' => 'sl_no',                 'title' => 'Sl.'],
-            ['data' => 'details',               'title' => 'Details'],
-            ['data' => 'no_of_employees',       'title' => 'No. of Employees'],
-            ['data' => 'gross_salary',          'title' => 'Gross Salary'],
-            ['data' => 'two_festival_bonus',    'title' => 'Two Festival Bonus'],
-            ['data' => 'pf_contribution',       'title' => 'PF Com. Contribution'],
-            ['data' => 'transport_outOfPocket', 'title' => 'Out of Pocket & Transport'],
-            ['data' => 'houseRent_allowance',   'title' => 'House Rent'],
-            ['data' => 'fixed_allowance',       'title' => 'Fixed Allowance'],
-            ['data' => 'total_cost',            'title' => 'Total Cost'],
-        ];
-
-        return json_encode(array('data' => $dataset, 'columns' => $columns));
-    }
-
-    public function exportExcelCostToTheCompany(Request $request){
-        if (ob_get_level()) {
-            ob_end_clean();
-        }
-        ob_start();
-
-        [$monthFrom, $monthTo, $locationCondition, $durationFrom, $durationTo] = $this->buildCostParams($request);
-        $dataset     = $this->getCostToTheCompanyData($monthFrom, $monthTo, $locationCondition, $durationFrom, $durationTo);
-        $month_from  = $request->month_from;
-        $month_to    = $request->month_to;
-
-        return Excel::download(new CostToTheCompanyExport($dataset, $month_from, $month_to), 'cost_to_the_company.xlsx');
-    }
-
-    public function exportPdfCostToTheCompany(Request $request){
-        [$monthFrom, $monthTo, $locationCondition, $durationFrom, $durationTo] = $this->buildCostParams($request);
-        $dataset     = $this->getCostToTheCompanyData($monthFrom, $monthTo, $locationCondition, $durationFrom, $durationTo);
-        $data        = $dataset;
-        $month_from  = $request->month_from;
-        $month_to    = $request->month_to;
-        $company_name = Config::get('configaration.company_name');
-        $company_address = Config::get('configaration.company_address');
-
-        $pdf = PDF::loadView('reports.cost-to-the-company-pdf', compact('data', 'month_from', 'month_to', 'company_name', 'company_address'))
-                    ->setPaper('a4', 'P');
-
-        return $pdf->download('cost_to_the_company.pdf');
-    }
-
-    private function buildCostParams(Request $request){
-        $monthFrom       = date('Ym', strtotime(str_replace('/', '-', $request->month_from)));
-        $monthTo         = date('Ym', strtotime(str_replace('/', '-', $request->month_to)));
-        $durationFrom    = date('Y-m-d', strtotime(str_replace('/', '-', $request->month_from)));
-        $durationTo      = date('Y-m-d', strtotime(str_replace('/', '-', $request->month_to)));
-
-        $locationCondition = '';
-        $locationId = $request->hrm_location_id;
-        if (is_numeric($locationId) && $locationId != '999') {
-            $locationCondition = " AND a.hrm_location_id = {$locationId}";
-        }
-
-        return [$monthFrom, $monthTo, $locationCondition, $durationFrom, $durationTo];
-    }
-
-    private function getCostToTheCompanyData($monthFrom, $monthTo, $locationCondition, $durationFrom, $durationTo){
-        return DB::select("SELECT
-                                yyy.level_name,
-                                yyy.hrm_location_id,
-                                yyy.location_name,
-                                SUM(yyy.pf_contribution) AS pf_contribution,
-                                SUM(yyy.gross_salary) AS gross_salary,
-                                SUM(yyy.two_festival_bonus) AS two_festival_bonus,
-                                SUM(yyy.houseRent_allowance) AS houseRent_allowance,
-                                SUM(yyy.fixed_allowance) AS fixed_allowance,
-                                SUM(yyy.transport_outOfPocket) AS transport_outOfPocket,
-                                COUNT(DISTINCT yyy.hrm_employee_id) AS NoOfEmployee,
-                                SUM(
-                                    IFNULL(yyy.gross_salary, 0) +
-                                    IFNULL(yyy.two_festival_bonus, 0) +
-                                    IFNULL(yyy.pf_contribution, 0) +
-                                    IFNULL(yyy.transport_outOfPocket, 0) +
-                                    IFNULL(yyy.houseRent_allowance, 0) +
-                                    IFNULL(yyy.fixed_allowance, 0)
-                                ) AS existing_cost
-                            FROM (
-                                SELECT
-                                    aa.hrm_location_id,
-                                    aa.location_name,
-                                    aa.hrm_employee_id,
-                                    aa.level_name,
-                                    SUM(aa.PF) AS pf_contribution,
-                                    SUM(IFNULL(aa.basic_salary, 0) + IFNULL(aa.medical_allowance, 0) + IFNULL(aa.house_rent, 0)) AS gross_salary,
-                                    (SUM(aa.bonusCalculate) * (TIMESTAMPDIFF(MONTH, '$durationFrom', '$durationTo') + 1)) AS two_festival_bonus,
-                                    SUM(aa.houseRent_allowance) AS houseRent_allowance,
-                                    SUM(aa.fixed_allowance) AS fixed_allowance,
-                                    SUM(aa.transport_outOfPocket) AS transport_outOfPocket
-                                FROM (
-                                    /* ========================================== */
-                                    /* 1. Contractual Worker (Status ID = 4)       */
-                                    /* ========================================== */
-                                    SELECT
-                                        l.id AS hrm_location_id,
-                                        a.hrm_employee_id,
-                                        IF(c.id = 1, b.actual_amount, 0) AS basic_salary,
-                                        IF(c.id = 2, b.actual_amount, 0) AS medical_allowance,
-                                        IF(c.id = 5, b.actual_amount, 0) AS house_rent,
-                                        IF(c.id = 6, b.actual_amount, 0) AS PF,
-                                        IF(c.id = 9, b.actual_amount, 0) AS houseRent_allowance,
-                                        IF(c.id = 12, b.actual_amount, 0) AS fixed_allowance,
-                                        IF(c.id IN (11, 8), b.actual_amount, 0) AS transport_outOfPocket,
-                                        ROUND(IF(c.id = 1, b.actual_amount, 0) * 2 / 12, 0) AS bonusCalculate,
-                                        IF(l.location_type = 3, 'All Depot', l.location_name) AS location_name,
-                                        'Contructual Worker' AS level_name
-                                    FROM pay_register ap
-                                    JOIN hrm_employee_job_info a ON ap.hrm_employee_job_info_id = a.id AND a.hrm_employment_status_id IN (4)
-                                    JOIN pay_register_details b ON ap.id = b.pay_register_id
-                                    JOIN hrm_salary_head c ON b.hrm_salary_head_id = c.id
-                                    JOIN hrm_employee e ON a.hrm_employee_id = e.id
-                                    JOIN hrm_location l ON a.hrm_location_id = l.id
-                                    WHERE ap.salary_genarate_type <> 0
-                                    AND ap.apply_for IN (1, 2)
-                                    AND CONCAT(ap.year_id, LPAD(ap.hrm_month_id, 2, '0')) BETWEEN '$monthFrom' AND '$monthTo' $locationCondition
-
-                                    UNION ALL
-
-                                    SELECT
-                                        l.id AS hrm_location_id,
-                                        a.hrm_employee_id,
-                                        0 AS basic_salary,
-                                        0 AS medical_allowance,
-                                        (((IFNULL(ap.amount, 0) * IFNULL(ap.total_present, 0)) + IFNULL(b.due_adjust, 0)) - IFNULL(b.adv_adjust, 0)) AS house_rent,
-                                        0 AS PF,
-                                        0 AS houseRent_allowance,
-                                        0 AS fixed_allowance,
-                                        0 AS transport_outOfPocket,
-                                        ROUND((a.basic_salary * 2 * 0.60 / 12)) AS bonusCalculate,
-                                        IF(l.location_type = 3, 'All Depot', l.location_name) AS location_name,
-                                        'Contructual Worker' AS level_name
-                                    FROM pay_register ap
-                                    JOIN hrm_employee_job_info a ON ap.hrm_employee_job_info_id = a.id AND a.hrm_employment_status_id IN (4)
-                                    JOIN pay_register_cw b ON ap.id = b.pay_register_id
-                                    JOIN hrm_employee e ON a.hrm_employee_id = e.id
-                                    JOIN hrm_location l ON a.hrm_location_id = l.id
-                                    WHERE ap.salary_genarate_type <> 0
-                                    AND ap.apply_for = 3
-                                    AND CONCAT(ap.year_id, LPAD(ap.hrm_month_id, 2, '0')) BETWEEN '$monthFrom' AND '$monthTo' $locationCondition
-
-                                    UNION ALL
-
-                                    /* ========================================== */
-                                    /* 2. Regular Employees (Status NOT IN 3, 4)   */
-                                    /* ========================================== */
-                                    SELECT
-                                        l.id AS hrm_location_id,
-                                        a.hrm_employee_id,
-                                        IF(c.id = 1, b.actual_amount, 0) AS basic_salary,
-                                        IF(c.id = 2, b.actual_amount, 0) AS medical_allowance,
-                                        IF(c.id = 5, b.actual_amount, 0) AS house_rent,
-                                        IF(c.id = 6, b.actual_amount, 0) AS PF,
-                                        IF(c.id = 9, b.actual_amount, 0) AS houseRent_allowance,
-                                        IF(c.id = 12, b.actual_amount, 0) AS fixed_allowance,
-                                        IF(c.id IN (11, 8), b.actual_amount, 0) AS transport_outOfPocket,
-                                        ROUND(IF(c.id = 1, b.actual_amount, 0) * 2 / 12, 0) AS bonusCalculate,
-                                        IF(l.location_type = 3, 'All Depot', l.location_name) AS location_name,
-                                        q.Level_name AS level_name
-                                    FROM pay_register ap
-                                    JOIN hrm_employee_job_info a ON ap.hrm_employee_job_info_id = a.id
-                                     AND a.hrm_employment_status_id NOT IN (3, 4)
-                                    JOIN pay_register_details b ON ap.id = b.pay_register_id
-                                    JOIN hrm_salary_head c ON b.hrm_salary_head_id = c.id
-                                    JOIN hrm_employee e ON a.hrm_employee_id = e.id
-                                    JOIN hrm_location l ON a.hrm_location_id = l.id
-                                    JOIN hrm_employee_salary m ON m.hrm_employee_job_info_id = a.id
-                                    JOIN hrm_salary_grade_master o ON o.id = m.hrm_salary_grade_master_id
-                                    JOIN hrm_employee_leveling_details p ON p.hrm_salary_grade_id = o.hrm_salary_grade_id AND p.valid = 1
-                                    JOIN hrm_employee_leveling_master q ON q.id = p.hrm_employee_leveling_master_id AND q.valid = 1
-                                    WHERE ap.salary_genarate_type <> 0
-                                    AND ap.apply_for IN (1, 2)
-                                    AND CONCAT(ap.year_id, LPAD(ap.hrm_month_id, 2, '0')) BETWEEN '$monthFrom' AND '$monthTo' $locationCondition
-
-                                    UNION ALL
-
-                                    SELECT
-                                        l.id AS hrm_location_id,
-                                        a.hrm_employee_id,
-                                        0 AS basic_salary,
-                                        0 AS medical_allowance,
-                                        (((IFNULL(ap.amount, 0) * IFNULL(ap.total_present, 0)) + IFNULL(b.due_adjust, 0)) - IFNULL(b.adv_adjust, 0)) AS house_rent,
-                                        0 AS PF,
-                                        0 AS houseRent_allowance,
-                                        0 AS fixed_allowance,
-                                        0 AS transport_outOfPocket,
-                                        ROUND((a.basic_salary * 2 * 0.60 / 12)) AS bonusCalculate,
-                                        IF(l.location_type = 3, 'All Depot', l.location_name) AS location_name,
-                                        q.Level_name AS level_name
-                                    FROM pay_register ap
-                                    JOIN hrm_employee_job_info a ON ap.hrm_employee_job_info_id = a.id AND a.hrm_employment_status_id NOT IN (3, 4)
-                                    JOIN pay_register_cw b ON ap.id = b.pay_register_id
-                                    JOIN hrm_employee e ON a.hrm_employee_id = e.id
-                                    JOIN hrm_location l ON a.hrm_location_id = l.id
-                                    JOIN hrm_employee_salary m ON m.hrm_employee_job_info_id = a.id
-                                    JOIN hrm_salary_grade_master o ON o.id = m.hrm_salary_grade_master_id
-                                    JOIN hrm_employee_leveling_details p ON p.hrm_salary_grade_id = o.hrm_salary_grade_id AND p.valid = 1
-                                    JOIN hrm_employee_leveling_master q ON q.id = p.hrm_employee_leveling_master_id AND q.valid = 1
-                                    WHERE ap.salary_genarate_type <> 0
-                                    AND ap.apply_for = 3
-                                    AND CONCAT(ap.year_id, LPAD(ap.hrm_month_id, 2, '0')) BETWEEN '$monthFrom' AND '$monthTo' $locationCondition
-
-                                    UNION ALL
-
-                                    /* ========================================== */
-                                    /* 3. Casual Worker (Status ID = 3)            */
-                                    /* ========================================== */
-                                    SELECT
-                                        l.id AS hrm_location_id,
-                                        a.hrm_employee_id,
-                                        IF(c.id = 1, b.actual_amount, 0) AS basic_salary,
-                                        IF(c.id = 2, b.actual_amount, 0) AS medical_allowance,
-                                        IF(c.id = 5, b.actual_amount, 0) AS house_rent,
-                                        IF(c.id = 6, b.actual_amount, 0) AS PF,
-                                        IF(c.id = 9, b.actual_amount, 0) AS houseRent_allowance,
-                                        IF(c.id = 12, b.actual_amount, 0) AS fixed_allowance,
-                                        IF(c.id IN (11, 8), b.actual_amount, 0) AS transport_outOfPocket,
-                                        ROUND(IF(c.id = 1, b.actual_amount, 0) * 2 / 12, 0) AS bonusCalculate,
-                                        IF(l.location_type = 3, 'All Depot', l.location_name) AS location_name,
-                                        'Casual Worker' AS level_name
-                                    FROM pay_register ap
-                                    JOIN hrm_employee_job_info a ON ap.hrm_employee_job_info_id = a.id AND a.hrm_employment_status_id IN (3)
-                                    JOIN pay_register_details b ON ap.id = b.pay_register_id
-                                    JOIN hrm_salary_head c ON b.hrm_salary_head_id = c.id
-                                    JOIN hrm_employee e ON a.hrm_employee_id = e.id
-                                    JOIN hrm_location l ON a.hrm_location_id = l.id
-                                    WHERE ap.salary_genarate_type <> 0
-                                    AND ap.apply_for IN (1, 2)
-                                    AND CONCAT(ap.year_id, LPAD(ap.hrm_month_id, 2, '0')) BETWEEN '$monthFrom' AND '$monthTo' $locationCondition
-
-                                    UNION ALL
-
-                                    SELECT
-                                        l.id AS hrm_location_id,
-                                        a.hrm_employee_id,
-                                        0 AS basic_salary,
-                                        0 AS medical_allowance,
-                                        (((IFNULL(ap.amount, 0) * IFNULL(ap.total_present, 0)) + IFNULL(b.due_adjust, 0)) - IFNULL(b.adv_adjust, 0)) AS house_rent,
-                                        0 AS PF,
-                                        0 AS houseRent_allowance,
-                                        0 AS fixed_allowance,
-                                        0 AS transport_outOfPocket,
-                                        ROUND((a.basic_salary * 2 * 0.60 / 12)) AS bonusCalculate,
-                                        IF(l.location_type = 3, 'All Depot', l.location_name) AS location_name,
-                                        'Casual Worker' AS level_name
-                                    FROM pay_register ap
-                                    JOIN hrm_employee_job_info a ON ap.hrm_employee_job_info_id = a.id AND a.hrm_employment_status_id IN (3)
-                                    JOIN pay_register_cw b ON ap.id = b.pay_register_id
-                                    JOIN hrm_employee e ON a.hrm_employee_id = e.id
-                                    JOIN hrm_location l ON a.hrm_location_id = l.id
-                                    WHERE ap.salary_genarate_type <> 0
-                                    AND ap.apply_for = 3
-                                    AND CONCAT(ap.year_id, LPAD(ap.hrm_month_id, 2, '0')) BETWEEN '$monthFrom' AND '$monthTo' $locationCondition
-                                ) aa
-                                GROUP BY aa.hrm_employee_id, aa.hrm_location_id, aa.location_name, aa.level_name
-                            ) yyy
-                            GROUP BY yyy.level_name, yyy.location_name
-                            ORDER BY CASE yyy.level_name
-                                        WHEN 'Casual Worker' THEN 2
-                                        WHEN 'Contructual Worker' THEN 3
-                                        ELSE 1
-                                    END,
-                                    yyy.level_name, yyy.location_name;
-                                    ");
-    }
-
-    private function getCostToTheCompanyDataOld($monthFrom, $monthTo, $locationCondition, $durationFrom, $durationTo){
-        return DB::select("SELECT
-                                yyy.level_name,
-                                yyy.hrm_location_id,
-                                yyy.location_name,
-                                SUM(yyy.pf_contribution) AS pf_contribution,
-                                SUM(yyy.gross_salary) AS gross_salary,
-                                SUM(yyy.two_festival_bonus) AS two_festival_bonus,
-                                SUM(yyy.houseRent_allowance) AS houseRent_allowance,
-                                SUM(yyy.fixed_allowance) AS fixed_allowance,
-                                SUM(yyy.transport_outOfPocket) AS transport_outOfPocket,
-                                COUNT(DISTINCT yyy.hrm_employee_id) AS NoOfEmployee,
-                                SUM(
-                                    IFNULL(yyy.gross_salary, 0) +
-                                    IFNULL(yyy.two_festival_bonus, 0) +
-                                    IFNULL(yyy.pf_contribution, 0) +
-                                    IFNULL(yyy.transport_outOfPocket, 0) +
-                                    IFNULL(yyy.houseRent_allowance, 0) +
-                                    IFNULL(yyy.fixed_allowance, 0)
-                                ) AS existing_cost
-                            FROM (
-                                SELECT
-                                    aa.hrm_location_id,
-                                    aa.location_name,
-                                    aa.hrm_employee_id,
-                                    aa.level_name,
-                                    SUM(aa.PF) AS pf_contribution,
-                                    SUM(IFNULL(aa.basic_salary, 0) + IFNULL(aa.medical_allowance, 0) + IFNULL(aa.house_rent, 0)) AS gross_salary,
-                                    (SUM(aa.bonusCalculate) * (TIMESTAMPDIFF(MONTH, '$durationFrom', '$durationTo') + 1)) AS two_festival_bonus,
-                                    SUM(aa.houseRent_allowance) AS houseRent_allowance,
-                                    SUM(aa.fixed_allowance) AS fixed_allowance,
-                                    SUM(aa.transport_outOfPocket) AS transport_outOfPocket
-                                FROM (
-                                    /* ========================================== */
-                                    /* 1. Contractual Worker (Status ID = 4)       */
-                                    /* ========================================== */
-                                    SELECT
-                                        l.id AS hrm_location_id,
-                                        a.hrm_employee_id,
-                                        IF(c.id = 1, b.actual_amount, 0) AS basic_salary,
-                                        IF(c.id = 2, b.actual_amount, 0) AS medical_allowance,
-                                        IF(c.id = 5, b.actual_amount, 0) AS house_rent,
-                                        IF(c.id = 6, b.actual_amount, 0) AS PF,
-                                        IF(c.id = 9, b.actual_amount, 0) AS houseRent_allowance,
-                                        IF(c.id = 12, b.actual_amount, 0) AS fixed_allowance,
-                                        IF(c.id IN (11, 8), b.actual_amount, 0) AS transport_outOfPocket,
-                                        ROUND(IF(c.id = 1, b.actual_amount, 0) * 2 / 12, 0) AS bonusCalculate,
-                                        l.location_name,
-                                        'Contructual Worker' AS level_name
-                                    FROM pay_register ap
-                                    JOIN hrm_employee_job_info a ON ap.hrm_employee_job_info_id = a.id AND a.hrm_employment_status_id IN (4)
-                                    JOIN pay_register_details b ON ap.id = b.pay_register_id
-                                    JOIN hrm_salary_head c ON b.hrm_salary_head_id = c.id
-                                    JOIN hrm_employee e ON a.hrm_employee_id = e.id
-                                    JOIN hrm_location l ON a.hrm_location_id = l.id
-                                    WHERE ap.salary_genarate_type <> 0
-                                    AND ap.apply_for IN (1, 2)
-                                    AND CONCAT(ap.year_id, LPAD(ap.hrm_month_id, 2, '0')) BETWEEN '$monthFrom' AND '$monthTo' $locationCondition
-
-                                    UNION ALL
-
-                                    SELECT
-                                        l.id AS hrm_location_id,
-                                        a.hrm_employee_id,
-                                        0 AS basic_salary,
-                                        0 AS medical_allowance,
-                                        (((IFNULL(ap.amount, 0) * IFNULL(ap.total_present, 0)) + IFNULL(b.due_adjust, 0)) - IFNULL(b.adv_adjust, 0)) AS house_rent,
-                                        0 AS PF,
-                                        0 AS houseRent_allowance,
-                                        0 AS fixed_allowance,
-                                        0 AS transport_outOfPocket,
-                                        ROUND((a.basic_salary * 2 * 0.60 / 12)) AS bonusCalculate,
-                                        l.location_name,
-                                        'Contructual Worker' AS level_name
-                                    FROM pay_register ap
-                                    JOIN hrm_employee_job_info a ON ap.hrm_employee_job_info_id = a.id AND a.hrm_employment_status_id IN (4)
-                                    JOIN pay_register_cw b ON ap.id = b.pay_register_id
-                                    JOIN hrm_employee e ON a.hrm_employee_id = e.id
-                                    JOIN hrm_location l ON a.hrm_location_id = l.id
-                                    WHERE ap.salary_genarate_type <> 0
-                                    AND ap.apply_for = 3
-                                    AND CONCAT(ap.year_id, LPAD(ap.hrm_month_id, 2, '0')) BETWEEN '$monthFrom' AND '$monthTo' $locationCondition
-
-                                    UNION ALL
-
-                                    /* ========================================== */
-                                    /* 2. Regular Employees (Status NOT IN 3, 4)   */
-                                    /* ========================================== */
-                                    SELECT
-                                        l.id AS hrm_location_id,
-                                        a.hrm_employee_id,
-                                        IF(c.id = 1, b.actual_amount, 0) AS basic_salary,
-                                        IF(c.id = 2, b.actual_amount, 0) AS medical_allowance,
-                                        IF(c.id = 5, b.actual_amount, 0) AS house_rent,
-                                        IF(c.id = 6, b.actual_amount, 0) AS PF,
-                                        IF(c.id = 9, b.actual_amount, 0) AS houseRent_allowance,
-                                        IF(c.id = 12, b.actual_amount, 0) AS fixed_allowance,
-                                        IF(c.id IN (11, 8), b.actual_amount, 0) AS transport_outOfPocket,
-                                        ROUND(IF(c.id = 1, b.actual_amount, 0) * 2 / 12, 0) AS bonusCalculate,
-                                        l.location_name,
-                                        q.Level_name AS level_name
-                                    FROM pay_register ap
-                                    JOIN hrm_employee_job_info a ON ap.hrm_employee_job_info_id = a.id
-                                     AND a.hrm_employment_status_id NOT IN (3, 4)
-                                    JOIN pay_register_details b ON ap.id = b.pay_register_id
-                                    JOIN hrm_salary_head c ON b.hrm_salary_head_id = c.id
-                                    JOIN hrm_employee e ON a.hrm_employee_id = e.id
-                                    JOIN hrm_location l ON a.hrm_location_id = l.id
-                                    JOIN hrm_employee_salary m ON m.hrm_employee_job_info_id = a.id
-                                    JOIN hrm_salary_grade_master o ON o.id = m.hrm_salary_grade_master_id
-                                    JOIN hrm_employee_leveling_details p ON p.hrm_salary_grade_id = o.hrm_salary_grade_id AND p.valid = 1
-                                    JOIN hrm_employee_leveling_master q ON q.id = p.hrm_employee_leveling_master_id AND q.valid = 1
-                                    WHERE ap.salary_genarate_type <> 0
-                                    AND ap.apply_for IN (1, 2)
-                                    AND CONCAT(ap.year_id, LPAD(ap.hrm_month_id, 2, '0')) BETWEEN '$monthFrom' AND '$monthTo' $locationCondition
-
-                                    UNION ALL
-
-                                    SELECT
-                                        l.id AS hrm_location_id,
-                                        a.hrm_employee_id,
-                                        0 AS basic_salary,
-                                        0 AS medical_allowance,
-                                        (((IFNULL(ap.amount, 0) * IFNULL(ap.total_present, 0)) + IFNULL(b.due_adjust, 0)) - IFNULL(b.adv_adjust, 0)) AS house_rent,
-                                        0 AS PF,
-                                        0 AS houseRent_allowance,
-                                        0 AS fixed_allowance,
-                                        0 AS transport_outOfPocket,
-                                        ROUND((a.basic_salary * 2 * 0.60 / 12)) AS bonusCalculate,
-                                        l.location_name,
-                                        q.Level_name AS level_name
-                                    FROM pay_register ap
-                                    JOIN hrm_employee_job_info a ON ap.hrm_employee_job_info_id = a.id AND a.hrm_employment_status_id NOT IN (3, 4)
-                                    JOIN pay_register_cw b ON ap.id = b.pay_register_id
-                                    JOIN hrm_employee e ON a.hrm_employee_id = e.id
-                                    JOIN hrm_location l ON a.hrm_location_id = l.id
-                                    JOIN hrm_employee_salary m ON m.hrm_employee_job_info_id = a.id
-                                    JOIN hrm_salary_grade_master o ON o.id = m.hrm_salary_grade_master_id
-                                    JOIN hrm_employee_leveling_details p ON p.hrm_salary_grade_id = o.hrm_salary_grade_id AND p.valid = 1
-                                    JOIN hrm_employee_leveling_master q ON q.id = p.hrm_employee_leveling_master_id AND q.valid = 1
-                                    WHERE ap.salary_genarate_type <> 0
-                                    AND ap.apply_for = 3
-                                    AND CONCAT(ap.year_id, LPAD(ap.hrm_month_id, 2, '0')) BETWEEN '$monthFrom' AND '$monthTo' $locationCondition
-
-                                    UNION ALL
-
-                                    /* ========================================== */
-                                    /* 3. Casual Worker (Status ID = 3)            */
-                                    /* ========================================== */
-                                    SELECT
-                                        l.id AS hrm_location_id,
-                                        a.hrm_employee_id,
-                                        IF(c.id = 1, b.actual_amount, 0) AS basic_salary,
-                                        IF(c.id = 2, b.actual_amount, 0) AS medical_allowance,
-                                        IF(c.id = 5, b.actual_amount, 0) AS house_rent,
-                                        IF(c.id = 6, b.actual_amount, 0) AS PF,
-                                        IF(c.id = 9, b.actual_amount, 0) AS houseRent_allowance,
-                                        IF(c.id = 12, b.actual_amount, 0) AS fixed_allowance,
-                                        IF(c.id IN (11, 8), b.actual_amount, 0) AS transport_outOfPocket,
-                                        ROUND(IF(c.id = 1, b.actual_amount, 0) * 2 / 12, 0) AS bonusCalculate,
-                                        l.location_name,
-                                        'Casual Worker' AS level_name
-                                    FROM pay_register ap
-                                    JOIN hrm_employee_job_info a ON ap.hrm_employee_job_info_id = a.id AND a.hrm_employment_status_id IN (3)
-                                    JOIN pay_register_details b ON ap.id = b.pay_register_id
-                                    JOIN hrm_salary_head c ON b.hrm_salary_head_id = c.id
-                                    JOIN hrm_employee e ON a.hrm_employee_id = e.id
-                                    JOIN hrm_location l ON a.hrm_location_id = l.id
-                                    WHERE ap.salary_genarate_type <> 0
-                                    AND ap.apply_for IN (1, 2)
-                                    AND CONCAT(ap.year_id, LPAD(ap.hrm_month_id, 2, '0')) BETWEEN '$monthFrom' AND '$monthTo' $locationCondition
-
-                                    UNION ALL
-
-                                    SELECT
-                                        l.id AS hrm_location_id,
-                                        a.hrm_employee_id,
-                                        0 AS basic_salary,
-                                        0 AS medical_allowance,
-                                        (((IFNULL(ap.amount, 0) * IFNULL(ap.total_present, 0)) + IFNULL(b.due_adjust, 0)) - IFNULL(b.adv_adjust, 0)) AS house_rent,
-                                        0 AS PF,
-                                        0 AS houseRent_allowance,
-                                        0 AS fixed_allowance,
-                                        0 AS transport_outOfPocket,
-                                        ROUND((a.basic_salary * 2 * 0.60 / 12)) AS bonusCalculate,
-                                        l.location_name,
-                                        'Casual Worker' AS level_name
-                                    FROM pay_register ap
-                                    JOIN hrm_employee_job_info a ON ap.hrm_employee_job_info_id = a.id AND a.hrm_employment_status_id IN (3)
-                                    JOIN pay_register_cw b ON ap.id = b.pay_register_id
-                                    JOIN hrm_employee e ON a.hrm_employee_id = e.id
-                                    JOIN hrm_location l ON a.hrm_location_id = l.id
-                                    WHERE ap.salary_genarate_type <> 0
-                                    AND ap.apply_for = 3
-                                    AND CONCAT(ap.year_id, LPAD(ap.hrm_month_id, 2, '0')) BETWEEN '$monthFrom' AND '$monthTo' $locationCondition
-                                ) aa
-                                GROUP BY aa.hrm_employee_id, aa.hrm_location_id, aa.location_name, aa.level_name
-                            ) yyy
-                            GROUP BY yyy.level_name, yyy.hrm_location_id, yyy.location_name
-                            ORDER BY CASE yyy.level_name
-                                        WHEN 'Casual Worker' THEN 2
-                                        WHEN 'Contructual Worker' THEN 3
-                                        ELSE 1
-                                    END,
-                                    yyy.level_name, yyy.location_name;
-                                    ");
-    }
-
-    private function getCostToTheCompanyGroupedData($monthFrom, $monthTo, $locationCondition, $durationFrom, $durationTo){
-        $dataset = $this->getCostToTheCompanyData($monthFrom, $monthTo, $locationCondition, $durationFrom, $durationTo);
-
-        $groups = [];
-        $order = [];
-        $totalEmployees = 0;
-        $totalGross     = 0;
-        $totalBonus     = 0;
-        $totalPF        = 0;
-        $totalTransport = 0;
-        $totalHouseRent = 0;
-        $totalFixed     = 0;
-        $totalCost      = 0;
-
-        foreach ($dataset as $row) {
-            if (!isset($groups[$row->level_name])) {
-                $groups[$row->level_name] = [
-                    'rows' => [],
-                    'employees' => 0, 'gross' => 0, 'bonus' => 0, 'pf' => 0,
-                    'transport' => 0, 'house_rent' => 0, 'fixed' => 0, 'cost' => 0,
-                ];
-                $order[] = $row->level_name;
-            }
-
-            $groups[$row->level_name]['rows'][] = $row;
-            $groups[$row->level_name]['employees']  += $row->NoOfEmployee;
-            $groups[$row->level_name]['gross']      += $row->gross_salary;
-            $groups[$row->level_name]['bonus']      += $row->two_festival_bonus;
-            $groups[$row->level_name]['pf']         += $row->pf_contribution;
-            $groups[$row->level_name]['transport']  += $row->transport_outOfPocket;
-            $groups[$row->level_name]['house_rent'] += $row->houseRent_allowance;
-            $groups[$row->level_name]['fixed']      += $row->fixed_allowance;
-            $groups[$row->level_name]['cost']       += $row->existing_cost;
-
-            $totalEmployees += $row->NoOfEmployee;
-            $totalGross     += $row->gross_salary;
-            $totalBonus     += $row->two_festival_bonus;
-            $totalPF        += $row->pf_contribution;
-            $totalTransport += $row->transport_outOfPocket;
-            $totalHouseRent += $row->houseRent_allowance;
-            $totalFixed     += $row->fixed_allowance;
-            $totalCost      += $row->existing_cost;
-        }
-
-        $result = [];
-        $sl = 0;
-
-        foreach ($order as $levelName) {
-            $sl++;
-            $g = $groups[$levelName];
-
-            $result[] = (object)[
-                'sl_no'                 => $sl,
-                'details'               => $levelName,
-                'row_type'              => 'subtotal',
-                'no_of_employees'       => $g['employees'],
-                'gross_salary'          => $g['gross'],
-                'two_festival_bonus'    => $g['bonus'],
-                'pf_contribution'       => $g['pf'],
-                'transport_outOfPocket' => $g['transport'],
-                'houseRent_allowance'   => $g['house_rent'],
-                'fixed_allowance'       => $g['fixed'],
-                'total_cost'            => $g['cost'],
-                'hrm_location_id'       => null,
-                'location_name'         => null,
-            ];
-
-            foreach ($g['rows'] as $r) {
-                $result[] = (object)[
-                    'sl_no'                 => '',
-                    'details'               => $r->location_name,
-                    'row_type'              => 'location',
-                    'no_of_employees'       => $r->NoOfEmployee,
-                    'gross_salary'          => $r->gross_salary,
-                    'two_festival_bonus'    => $r->two_festival_bonus,
-                    'pf_contribution'       => $r->pf_contribution,
-                    'transport_outOfPocket' => $r->transport_outOfPocket,
-                    'houseRent_allowance'   => $r->houseRent_allowance,
-                    'fixed_allowance'       => $r->fixed_allowance,
-                    'total_cost'            => $r->existing_cost,
-                    'hrm_location_id'       => $r->hrm_location_id,
-                    'location_name'         => $r->location_name,
-                ];
-            }
-        }
-
-        $result[] = (object)[
-            'sl_no'                 => '',
-            'details'               => 'TOTAL',
-            'row_type'              => 'total',
-            'no_of_employees'       => $totalEmployees,
-            'gross_salary'          => $totalGross,
-            'two_festival_bonus'    => $totalBonus,
-            'pf_contribution'       => $totalPF,
-            'transport_outOfPocket' => $totalTransport,
-            'houseRent_allowance'   => $totalHouseRent,
-            'fixed_allowance'       => $totalFixed,
-            'total_cost'            => $totalCost,
-            'hrm_location_id'       => null,
-            'location_name'         => null,
-        ];
-
-        return $result;
     }
 }

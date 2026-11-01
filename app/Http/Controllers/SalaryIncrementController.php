@@ -1242,12 +1242,12 @@ class SalaryIncrementController extends Controller
 
 
     public function approved_delete($hrm_salary_increment_details_id){
-        
+
         dd("Need to test");
-        
+
 
         $user_id = Auth::user()->id;
-        
+
 
         $id= DB::SELECT("SELECT hrm_employee_job_info_id from  hrm_salary_increment_details Where id = $hrm_salary_increment_details_id")[0]->hrm_employee_job_info_id;
 
@@ -1258,8 +1258,8 @@ class SalaryIncrementController extends Controller
 
 
            $getPreJobId= DB::SELECT("select * from  hrm_employee_activity Where hrm_employee_job_info_id = $id")[0]->old_hrm_employee_job_info_id;
-           
-  
+
+
            if(!empty($getPreData)){
 
                 DB::DELETE("Delete From hrm_employee_activity Where hrm_employee_job_info_id = $id");

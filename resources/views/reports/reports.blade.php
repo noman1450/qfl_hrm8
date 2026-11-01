@@ -422,7 +422,7 @@
                 <div class="col-md-10">
                     <div class="form-group">
                         <a href="{{ url('cost-to-the-company') }}" target="_blank" class="btn btn-block btn-primary btn-lg btn-flat">Cost to The Company (Employee Segment Wise)</a>
-                       
+
                     </div>
                 </div>
             </div>
