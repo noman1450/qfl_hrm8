@@ -2,27 +2,32 @@
 return array(
 
 
-	'jasperjasper_url' 	=> 'http://138.68.175.110:8081/jasperserver',
-	// 'jasperjasper_url' 	=> 'http://localhost:8080/jasperserver',
+	// FOR QIL
+	// 'jasperjasper_url' 	=> 'http://27.147.217.132:8080/jasperserver',
+    'jasperjasper_url'  => 'http://host.docker.internal:8080/jasperserver',
 	'jasper_user' 		=> 'jasperadmin',
 	'jasper_password' 	=> 'jasperadmin',
 
-	'company_name' 		=> 'Al-Mostafa Group',
-	'company_address' 	=> 'Uday Tower (2nd Floor), 57 & 57/A, Gulshan Avenue, Gulshan-1, Dhaka-1212, Bangladesh.',
-	'report_path' 		=> '/reports/amg/report/',
+	'company_name' 		=> 'Quality Integrated Agro Limited',
+	'company_address' 	=> 'Plot C-11/1,Park Avenue,Block-A,Purbachal Expressway,Dhaka-1229',
+	'report_path' 		=> '/reports/qilhrm8/report/',
 
 
-	// // FOR QIL
+
+
+	// FOR QFL
 	// 'jasperjasper_url' 	=> 'http://27.147.217.132:8080/jasperserver',
 	// 'jasper_user' 		=> 'jasperadmin',
 	// 'jasper_password' 	=> 'jasperadmin',
 
-	// 'company_name' 		=> 'Quality Integrated Agro Limited',
+	// 'company_name' 		=> 'Quality Feeds Limited',
 	// 'company_address' 	=> 'House 14, Road 7, Sector 4, Uttara, Dhaka 1230, Bangladesh,',
-	// 'report_path' 		=> '/reports/qilhrm8/report/',
+	// 'report_path' 		=> '/reports/hrm_qfl/report/',
 
 
 
+
+	// FOR BF
 	// 'company_name' 		=> 'Biopharma Limited',
 	// 'company_address' 	=> 'House No # 01, Road No# 01, Dhaka Housing Main Rd, Dhaka-1207, Dhaka, Bangladesh',
 	// 'phone_no' 	        => '+88 02-58151661',

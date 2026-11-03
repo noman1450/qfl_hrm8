@@ -84,6 +84,10 @@ class EmployeeJoinController extends Controller
             $condition .= " AND b.hrm_employment_status_id = {$employee_type_id}";
         }
 
+        if ($hrm_plant_id = $request->hrm_plant_id) {
+            $condition .= " AND b.hrm_plant_id = {$hrm_plant_id}";
+        }
+
         $user_id=Auth::user()->id;
 
 
