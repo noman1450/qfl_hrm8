@@ -19,9 +19,21 @@
     #designation_list_table td.nowrap {
         white-space: nowrap;
     }
+    #employee_list_modal .modal-dialog {
+        width: 90%;
+        max-width: 90%;
+        margin: 0;
+    }
+    #employee_list_modal.in {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+    }
     #employee_list_modal .modal-content {
         display: flex;
         flex-direction: column;
+        width: 100%;
+        max-width: 100%;
         max-height: calc(100vh - 60px);
     }
     #employee_list_modal .modal-header {
@@ -30,7 +42,11 @@
     #employee_list_modal .modal-body {
         flex: 1 1 auto;
         min-height: 0;
-        overflow-y: auto;
+        overflow: auto;
+    }
+    #employee_details_table {
+        width: max-content;
+        min-width: 100%;
     }
 </style>
 
@@ -141,11 +157,24 @@
       <div class="modal-body">
         <div id="employee_list_loading" class="text-center" style="display:none;">Loading employees...</div>
         <div class="table-responsive">
-          <table class="table table-bordered table-hover">
+          <table id="employee_details_table" class="table table-bordered table-hover">
             <thead>
-              <tr><th style="width: 60px;">Sl.</th><th style="width: 120px;">Employee ID</th><th>Employee Name</th><th>Designation</th></tr>
+              <tr>
+                <th>Sl.</th>
+                <th>Employee ID</th>
+                <th>Employee Name</th>
+                <th>Designation</th>
+                <th>Gross Salary</th>
+                <th>Two Festival Bonus</th>
+                <th>PF Com. Contribution</th>
+                <th>Out of Pocket &amp; Transport</th>
+                <th>House Rent</th>
+                <th>Fixed Allowance</th>
+                <th>Total Cost</th>
+              </tr>
             </thead>
             <tbody id="employee_list_body"></tbody>
+            <tfoot id="employee_list_footer"></tfoot>
           </table>
         </div>
       </div>
@@ -479,7 +508,11 @@ $(document).ready(function($) {
                     if (!row) { return; }
 
                     $('#employee_list_modal .modal-title').text('Employees — ' + row.details);
+                    if ($.fn.DataTable.isDataTable('#employee_details_table')) {
+                        $('#employee_details_table').DataTable().destroy();
+                    }
                     $('#employee_list_body').empty();
+                    $('#employee_list_footer').empty();
                     $('#employee_list_loading').show();
                     $('#employee_list_modal').modal('show');
 
@@ -500,7 +533,7 @@ $(document).ready(function($) {
                         var employees = response.data || [];
                         if (!employees.length) {
                             $('#employee_list_body').append($('<tr>').append(
-                                $('<td>').attr('colspan', 4).addClass('text-center').text('No employees found.')
+                                $('<td>').attr('colspan', 11).addClass('text-center').text('No employees found.')
                             ));
                             return;
                         }
@@ -508,14 +541,67 @@ $(document).ready(function($) {
                         $.each(employees, function (index, employee) {
                             var $row = $('<tr>');
                             $row.append($('<td>').text(index + 1));
-                            $row.append($('<td>').text(employee.id));
+                            $row.append($('<td>').text(employee.employee_id));
                             $row.append($('<td>').text(employee.employee_name || ''));
                             $row.append($('<td>').text(employee.designation_name || ''));
+                            $row.append($('<td>').text(employee.gross_salary || 0));
+                            $row.append($('<td>').text(employee.two_festival_bonus || 0));
+                            $row.append($('<td>').text(employee.pf_contribution || 0));
+                            $row.append($('<td>').text(employee.transport_outOfPocket || 0));
+                            $row.append($('<td>').text(employee.houseRent_allowance || 0));
+                            $row.append($('<td>').text(employee.fixed_allowance || 0));
+                            $row.append($('<td>').text(employee.total_cost || 0));
                             $('#employee_list_body').append($row);
+                        });
+
+                        var totalOf = function (field) {
+                            return employees.reduce(function (total, employee) {
+                                var value = parseFloat(String(employee[field] || 0).replace(/,/g, ''));
+                                return total + (isNaN(value) ? 0 : value);
+                            }, 0);
+                        };
+                        var formatTotal = function (value) {
+                            return value.toLocaleString(undefined, {maximumFractionDigits: 2});
+                        };
+                        var totals = [
+                            '',
+                            '',
+                            'TOTAL:',
+                            '',
+                            formatTotal(totalOf('gross_salary')),
+                            formatTotal(totalOf('two_festival_bonus')),
+                            formatTotal(totalOf('pf_contribution')),
+                            formatTotal(totalOf('transport_outOfPocket')),
+                            formatTotal(totalOf('houseRent_allowance')),
+                            formatTotal(totalOf('fixed_allowance')),
+                            formatTotal(totalOf('total_cost'))
+                        ];
+                        var $footerRow = $('<tr>');
+                        $.each(totals, function (index, total) {
+                            $footerRow.append($('<th>').text(total));
+                        });
+                        $('#employee_list_footer').html($footerRow);
+
+                        $('#employee_details_table').DataTable({
+                            paging: false,
+                            searching: true,
+                            ordering: false,
+                            info: false,
+                            dom: 'Bfrtip',
+                            buttons: [{
+                                extend: 'excelHtml5',
+                                text: 'Export Excel',
+                                className: 'btn btn-success',
+                                title: 'Cost to the Company Employee Details',
+                                footer: true,
+                                exportOptions: {
+                                    modifier: {search: 'none'}
+                                }
+                            }]
                         });
                     }).fail(function () {
                         $('#employee_list_body').append($('<tr>').append(
-                            $('<td>').attr('colspan', 4).addClass('text-center text-danger').text('Unable to load employees.')
+                            $('<td>').attr('colspan', 11).addClass('text-center text-danger').text('Unable to load employees.')
                         ));
                     }).always(function () {
                         $('#employee_list_loading').hide();

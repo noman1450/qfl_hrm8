@@ -4491,38 +4491,42 @@ public function bonus_topSheet (Request $request)
             return response()->json(array('data' => array()));
         }
 
-        [$monthFrom, $monthTo, $locationCondition, $durationFrom, $durationTo] = $this->buildCostParams($request);
-        $dataset = $this->getCostToTheCompanyData($monthFrom, $monthTo, $locationCondition, $durationFrom, $durationTo, true);
-        $employeeIds = array();
-
-        foreach ($dataset as $row) {
-            if ($rowType !== 'total' && $row->level_name !== $request->input('level_name')) {
-                continue;
-            }
-            if ($rowType === 'location' && (string) $row->hrm_location_id !== (string) $request->input('row_location_id')) {
-                continue;
-            }
-
-            $employeeIds = array_merge($employeeIds, explode(',', (string) $row->employee_ids));
+        $levelName = $request->input('level_name');
+        $rowLocationId = $request->input('row_location_id');
+        if ($rowType !== 'total' && (!is_string($levelName) || trim($levelName) === '')) {
+            return response()->json(array('data' => array()));
         }
-        $employeeIds = array_values(array_unique(array_filter($employeeIds, function($id){
-            return ctype_digit($id) && (int) $id > 0;
-        })));
-
-        if (empty($employeeIds)) {
+        if ($rowType === 'location' && !is_numeric($rowLocationId)) {
             return response()->json(array('data' => array()));
         }
 
-        $employees = DB::table('hrm_employee')
-            ->leftJoin('hrm_employee_job_info as job_info', function($join){
-                $join->on('job_info.hrm_employee_id', '=', 'hrm_employee.id')
-                    ->where('job_info.employee_activity', 1);
-            })
-            ->leftJoin('hrm_designation as designation', 'designation.id', '=', 'job_info.hrm_designation_id')
-            ->select('hrm_employee.id', 'hrm_employee.employee_name', 'designation.designation_name')
-            ->whereIn('hrm_employee.id', $employeeIds)
-            ->orderBy('hrm_employee.employee_name')
-            ->get();
+        [$monthFrom, $monthTo, $locationCondition, $durationFrom, $durationTo] = $this->buildCostParams($request);
+        $dataset = $this->getCostToTheCompanyData(
+            $monthFrom,
+            $monthTo,
+            $locationCondition,
+            $durationFrom,
+            $durationTo,
+            true,
+            $rowType === 'total' ? null : $levelName,
+            $rowType === 'location' ? $rowLocationId : null
+        );
+        $employees = array();
+
+        foreach ($dataset as $row) {
+            $employees[] = array(
+                'employee_id' => $row->employee_id,
+                'employee_name' => $row->employee_name,
+                'designation_name' => $row->designation_name,
+                'gross_salary' => $row->gross_salary,
+                'two_festival_bonus' => $row->two_festival_bonus,
+                'pf_contribution' => $row->pf_contribution,
+                'transport_outOfPocket' => $row->transport_outOfPocket,
+                'houseRent_allowance' => $row->houseRent_allowance,
+                'fixed_allowance' => $row->fixed_allowance,
+                'total_cost' => $row->existing_cost,
+            );
+        }
 
         return response()->json(array('data' => $employees));
     }
@@ -4571,33 +4575,78 @@ public function bonus_topSheet (Request $request)
         return [$monthFrom, $monthTo, $locationCondition, $durationFrom, $durationTo];
     }
 
-    private function getCostToTheCompanyData($monthFrom, $monthTo, $locationCondition, $durationFrom, $durationTo, $includeEmployeeIds = false){
-        $employeeIdsSelect = '';
-        if ($includeEmployeeIds) {
-            DB::statement('SET SESSION group_concat_max_len = 1000000');
-            $employeeIdsSelect = 'GROUP_CONCAT(DISTINCT yyy.hrm_employee_id) AS employee_ids,';
+    private function getCostToTheCompanyData($monthFrom, $monthTo, $locationCondition, $durationFrom, $durationTo, $employeeDetails = false, $detailLevelName = null, $detailLocationId = null){
+        $outerSelect = "yyy.level_name,
+                        yyy.hrm_location_id,
+                        yyy.location_name,
+                        SUM(yyy.pf_contribution) AS pf_contribution,
+                        SUM(yyy.gross_salary) AS gross_salary,
+                        SUM(yyy.two_festival_bonus) AS two_festival_bonus,
+                        SUM(yyy.houseRent_allowance) AS houseRent_allowance,
+                        SUM(yyy.fixed_allowance) AS fixed_allowance,
+                        SUM(yyy.transport_outOfPocket) AS transport_outOfPocket,
+                        COUNT(DISTINCT yyy.hrm_employee_id) AS NoOfEmployee,
+                        SUM(
+                            IFNULL(yyy.gross_salary, 0) +
+                            IFNULL(yyy.two_festival_bonus, 0) +
+                            IFNULL(yyy.pf_contribution, 0) +
+                            IFNULL(yyy.transport_outOfPocket, 0) +
+                            IFNULL(yyy.houseRent_allowance, 0) +
+                            IFNULL(yyy.fixed_allowance, 0)
+                        ) AS existing_cost";
+        $outerJoins = '';
+        $detailFilters = '';
+        $bindings = array();
+        $groupBy = 'GROUP BY yyy.level_name, yyy.location_name';
+        $orderBy = "ORDER BY CASE yyy.level_name
+                            WHEN 'Casual Worker' THEN 2
+                            WHEN 'Contructual Worker' THEN 3
+                            ELSE 1
+                        END,
+                        yyy.level_name, yyy.location_name";
+
+        if ($employeeDetails) {
+            $outerSelect = "yyy.level_name,
+                            yyy.hrm_location_id,
+                            yyy.location_name,
+                            yyy.hrm_employee_id AS employee_id,
+                            employee.employee_name,
+                            (SELECT designation.designation_name
+                             FROM hrm_employee_job_info current_job
+                             LEFT JOIN hrm_designation designation
+                                 ON designation.id = current_job.hrm_designation_id
+                             WHERE current_job.hrm_employee_id = yyy.hrm_employee_id
+                               AND current_job.employee_activity = 1
+                             ORDER BY current_job.id DESC
+                             LIMIT 1) AS designation_name,
+                            yyy.gross_salary,
+                            yyy.two_festival_bonus,
+                            yyy.pf_contribution,
+                            yyy.transport_outOfPocket,
+                            yyy.houseRent_allowance,
+                            yyy.fixed_allowance,
+                            (IFNULL(yyy.gross_salary, 0) +
+                             IFNULL(yyy.two_festival_bonus, 0) +
+                             IFNULL(yyy.pf_contribution, 0) +
+                             IFNULL(yyy.transport_outOfPocket, 0) +
+                             IFNULL(yyy.houseRent_allowance, 0) +
+                             IFNULL(yyy.fixed_allowance, 0)) AS existing_cost";
+            $outerJoins = 'LEFT JOIN hrm_employee employee ON employee.id = yyy.hrm_employee_id';
+            if ($detailLevelName !== null && $detailLevelName !== '') {
+                $detailFilters = 'WHERE yyy.level_name = ?';
+                $bindings[] = $detailLevelName;
+            }
+            if ($detailLocationId !== null) {
+                $detailFilters = $detailFilters
+                    ? $detailFilters . ' AND yyy.hrm_location_id = ?'
+                    : 'WHERE yyy.hrm_location_id = ?';
+                $bindings[] = $detailLocationId;
+            }
+            $groupBy = '';
+            $orderBy = 'ORDER BY employee.employee_name';
         }
 
-        return DB::select("SELECT 
-                                yyy.level_name,
-                                yyy.hrm_location_id,
-                                yyy.location_name,
-                                SUM(yyy.pf_contribution) AS pf_contribution,
-                                SUM(yyy.gross_salary) AS gross_salary,
-                                SUM(yyy.two_festival_bonus) AS two_festival_bonus,
-                                SUM(yyy.houseRent_allowance) AS houseRent_allowance,
-                                SUM(yyy.fixed_allowance) AS fixed_allowance,
-                                SUM(yyy.transport_outOfPocket) AS transport_outOfPocket,
-                                COUNT(DISTINCT yyy.hrm_employee_id) AS NoOfEmployee,
-                                $employeeIdsSelect
-                                SUM(
-                                    IFNULL(yyy.gross_salary, 0) + 
-                                    IFNULL(yyy.two_festival_bonus, 0) + 
-                                    IFNULL(yyy.pf_contribution, 0) + 
-                                    IFNULL(yyy.transport_outOfPocket, 0) + 
-                                    IFNULL(yyy.houseRent_allowance, 0) + 
-                                    IFNULL(yyy.fixed_allowance, 0)
-                                ) AS existing_cost
+        return DB::select("SELECT $outerSelect
                             FROM (
                                 SELECT 
                                     aa.hrm_location_id,
@@ -4776,14 +4825,10 @@ public function bonus_topSheet (Request $request)
                                 ) aa
                                 GROUP BY aa.hrm_employee_id, aa.hrm_location_id, aa.location_name, aa.level_name
                             ) yyy
-                            GROUP BY yyy.level_name, yyy.location_name
-                            ORDER BY CASE yyy.level_name
-                                        WHEN 'Casual Worker' THEN 2
-                                        WHEN 'Contructual Worker' THEN 3
-                                        ELSE 1
-                                    END,
-                                    yyy.level_name, yyy.location_name;
-                                    ");
+                            $outerJoins
+                            $detailFilters
+                            $groupBy
+                            $orderBy;", $bindings);
     }
 
     private function getCostToTheCompanyDataOld($monthFrom, $monthTo, $locationCondition, $durationFrom, $durationTo){
