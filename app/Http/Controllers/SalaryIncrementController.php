@@ -98,6 +98,10 @@ class SalaryIncrementController extends Controller
             $condition  =  $condition . " AND b.hrm_section_id = " . $request->section_id;
         }
 
+        if ($request->hrm_plant_id != 0) {
+            $condition  =  $condition . " AND b.hrm_plant_id = " . $request->hrm_plant_id;
+        }
+
         if (isset($request->salary_amount_search)) {
             $condition  =  $condition . " AND b.basic_salary " . $request->search_type . $request->salary_amount_search;
         }

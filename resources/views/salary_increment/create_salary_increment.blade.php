@@ -18,6 +18,45 @@
             text-overflow: ellipsis;
             vertical-align: middle !important;
         }
+
+        .salary-filter-grid {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 15px;
+            padding: 0 7px;
+        }
+
+        .salary-filter-grid .form-group {
+            margin-bottom: 0;
+            min-width: 0;
+        }
+
+        .salary-filter-grid .form-control {
+            width: 100%;
+        }
+
+        .salary-filter-grid .input-group-fields {
+            display: flex;
+            gap: 10px;
+        }
+
+        .salary-filter-grid .input-group-fields > div {
+            flex: 1;
+            min-width: 0;
+        }
+
+        @media (max-width: 1200px) {
+            .salary-filter-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 767px) {
+            .salary-filter-grid {
+                grid-template-columns: repeat(1, minmax(0, 1fr));
+            }
+        }
+
     </style>
 @endsection
 <!-- content -->
@@ -33,140 +72,102 @@
 
         <form id="salaryIncrementForm">
             {{ csrf_field() }}
-            <div class="row">
-
-                <div
-                    class="form-group has-feedback {{ $errors->has('apply_for') ? ' has-error' : '' }} col-lg-3 col-md-12 col-xs-12">
-                    <div class="col-lg-12 col-md-12 col-xs-12">
-                        <label>Apply For</label>
-                        <select class="form-control" name="apply_for" id="apply_for">
-                            <option value="1">Increment</option>
-                            <option value="2">Promotion</option>
-                        </select>
-                    </div>
+            <div class="salary-filter-grid">
+                {{-- Row 1: Keep the original field order and layout --}}
+                <div class="form-group has-feedback {{ $errors->has('apply_for') ? ' has-error' : '' }}">
+                    <label>Apply For</label>
+                    <select class="form-control" name="apply_for" id="apply_for">
+                        <option value="1">Increment</option>
+                        <option value="2">Promotion</option>
+                    </select>
                 </div>
 
-
-                <div
-                    class="form-group has-feedback {{ $errors->has('description') ? ' has-error' : '' }} col-lg-3 col-md-12 col-xs-12">
-                    <div class="col-lg-12 col-md-12 col-xs-12">
-                        <label>Effective Month</label>
-                        <input type="text" class="form-control" placeholder="Month From" name="date_from" id="date_from"
-                            value="" readonly required>
-                    </div>
+                <div class="form-group has-feedback {{ $errors->has('description') ? ' has-error' : '' }}">
+                    <label>Effective Month</label>
+                    <input type="text" class="form-control" placeholder="Month From" name="date_from" id="date_from"
+                        value="" readonly required>
                 </div>
 
-                <div
-                    class="form-group has-feedback {{ $errors->has('description') ? ' has-error' : '' }} col-lg-3 col-md-12 col-xs-12">
-                    <div class="col-lg-12 col-md-12 col-xs-12">
-                        <label>Note</label>
-                        <input type="text" class="form-control" placeholder="Note" name="note" id="note"
-                            value="">
-                    </div>
-                </div>
-                <div
-                    class="form-group has-feedback {{ $errors->has('description') ? ' has-error' : '' }} col-lg-3 col-md-12 col-xs-12">
-                    <div class="col-lg-6 col-md-6 col-xs-12">
-                        <label>Amount</label>
-                        <input type="text" class="form-control" placeholder="amount" name="amount" id="amount">
-                    </div>
-
-                    <div class="col-lg-6 col-md-6 col-xs-12">
-                        <label>Amount Type</label>
-                        <select class="form-control" name="amount_type" id="amount_type">
-                            <option value="1">%</option>
-                            <option value="2">Tk.</option>
-                        </select>
-                    </div>
-
+                <div class="form-group has-feedback {{ $errors->has('description') ? ' has-error' : '' }}">
+                    <label>Note</label>
+                    <input type="text" class="form-control" placeholder="Note" name="note" id="note" value="">
                 </div>
 
-                <div
-                    class="form-group has-feedback {{ $errors->has('location') ? ' has-error' : '' }} col-lg-3 col-md-12 col-xs-12">
-                    <div class="col-lg-12 col-md-12 col-xs-12">
-                        <label>Location Name</label>
-                        <select class="form-control" name="location" id="location">
-                            @foreach ($user_location as $keys)
-                                @if ($keys->default_location == 1)
-                                    <option value={{ $keys->id }} selected> {{ $keys->location_name }}</option>
-                                @endif
-                                <option value={{ $keys->id }}> {{ $keys->location_name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
+                <div class="form-group has-feedback {{ $errors->has('description') ? ' has-error' : '' }}">
+                    <label>Amount</label>
+                    <input type="text" class="form-control" placeholder="amount" name="amount" id="amount">
                 </div>
 
-                <div
-                    class="form-group has-feedback {{ $errors->has('department') ? ' has-error' : '' }} col-lg-3 col-md-12 col-xs-12">
-                    <div class="col-lg-12 col-md-12 col-xs-12">
-                        <label>Department Name</label>
-                        <select class="form-control" id="department" name="department" style="width: 100%;">
-                        </select>
-                    </div>
-                </div>
-                <div
-                    class="form-group has-feedback {{ $errors->has('category') ? ' has-error' : '' }} col-lg-3 col-md-12 col-xs-12">
-                    <div class="col-lg-12 col-md-12 col-xs-12">
-                        <label>Employee Category</label>
-                        <select class="form-control" id="category" name="category" style="width: 100%;">
-                        </select>
-                    </div>
+                <div class="form-group has-feedback {{ $errors->has('description') ? ' has-error' : '' }}">
+                    <label>Amount Type</label>
+                    <select class="form-control" name="amount_type" id="amount_type">
+                        <option value="1">%</option>
+                        <option value="2">Tk.</option>
+                    </select>
                 </div>
 
-
-                <div
-                    class="form-group has-feedback {{ $errors->has('section') ? ' has-error' : '' }} col-lg-3 col-md-12 col-xs-12">
-                    <div class="col-lg-12 col-md-12 col-xs-12">
-                        <label>Sub-Department</label>
-                        <select class="form-control" id="section" name="section" style="width: 100%;">
-                        </select>
-                    </div>
+                {{-- Row 2 --}}
+                <div class="form-group has-feedback {{ $errors->has('location') ? ' has-error' : '' }}">
+                    <label>Location Name</label>
+                    <select class="form-control" name="location" id="location">
+                        @foreach ($user_location as $keys)
+                            <option value="{{ $keys->id }}" {{ $keys->default_location == 1 ? 'selected' : '' }}>
+                                {{ $keys->location_name }}
+                            </option>
+                        @endforeach
+                    </select>
                 </div>
 
-                <div
-                    class="form-group has-feedback {{ $errors->has('designation') ? ' has-error' : '' }} col-lg-3 col-md-12 col-xs-12">
-                    <div class="col-lg-12 col-md-12 col-xs-12">
-                        <label>Designation</label>
-                        <select class="form-control designation" id="designation" name="designation" style="width: 100%;">
-                        </select>
-                    </div>
+                <div class="form-group">
+                    <label>Plant/Work Place</label>
+                    <select class="form-control" id="plant_name" name="plant_name" style="width: 100%;"></select>
                 </div>
 
-
-
-                <div
-                    class="form-group has-feedback {{ $errors->has('employee_name') ? ' has-error' : '' }} col-lg-3 col-md-12 col-xs-12">
-                    <div class="col-lg-12 col-md-12 col-xs-12">
-                        <label>Employee Name</label>
-                        <select class="form-control" id="employee_name" name="employee_name" style="width: 100%;">
-                        </select>
-                    </div>
+                <div class="form-group has-feedback {{ $errors->has('department') ? ' has-error' : '' }}">
+                    <label>Department Name</label>
+                    <select class="form-control" id="department" name="department" style="width: 100%;"></select>
                 </div>
-                <div
-                    class="form-group has-feedback {{ $errors->has('salary_amount_search') ? ' has-error' : '' }} col-lg-3 col-md-12 col-xs-12">
-                    <div class="col-lg-8 col-md-8 col-xs-12">
-                        <label>Salary Amount</label>
-                        <input class="form-control col-lg-6" type="text" placeholder="Salary Amount"
-                            id="salary_amount_search" name="salary_amount_search">
-                    </div>
-                    <div class="col-lg-4 col-md-4 col-xs-12">
-                        <label>Search Type</label>
-                        <select class="form-control" id="search_type" name="search_type" style="width: 100%;">
-                            <option value="=">=</option>
-                            <option value=">">
-                                << /option>
-                            <option value="<">></option>
-                        </select>
-                    </div>
+
+                <div class="form-group has-feedback {{ $errors->has('category') ? ' has-error' : '' }}">
+                    <label>Employee Category</label>
+                    <select class="form-control" id="category" name="category" style="width: 100%;"></select>
                 </div>
-                <div
-                    class="form-group has-feedback {{ $errors->has('employee_name') ? ' has-error' : '' }} col-lg-3 col-md-12 col-xs-12">
-                    <div class="col-lg-12 col-md-12 col-xs-12">
-                        <label>Action</label>
-                        <input type="button" id="search" value="Search" class=" btn-sm block btn-flat btn btn-info"
-                            style="width: 100%;">
-                        </select>
-                    </div>
+
+                <div class="form-group has-feedback {{ $errors->has('section') ? ' has-error' : '' }}">
+                    <label>Sub-Department</label>
+                    <select class="form-control" id="section" name="section" style="width: 100%;"></select>
+                </div>
+
+                {{-- Row 3 --}}
+                <div class="form-group has-feedback {{ $errors->has('designation') ? ' has-error' : '' }}">
+                    <label>Designation</label>
+                    <select class="form-control designation" id="designation" name="designation" style="width: 100%;"></select>
+                </div>
+
+                <div class="form-group has-feedback {{ $errors->has('employee_name') ? ' has-error' : '' }}">
+                    <label>Employee Name</label>
+                    <select class="form-control" id="employee_name" name="employee_name" style="width: 100%;"></select>
+                </div>
+
+                <div class="form-group has-feedback {{ $errors->has('salary_amount_search') ? ' has-error' : '' }}">
+                    <label>Salary Amount</label>
+                    <input class="form-control" type="text" placeholder="Salary Amount"
+                        id="salary_amount_search" name="salary_amount_search">
+                </div>
+
+                <div class="form-group has-feedback">
+                    <label>Search Type</label>
+                    <select class="form-control" id="search_type" name="search_type" style="width: 100%;">
+                        <option value="=">=</option>
+                        <option value=">">&gt;</option>
+                        <option value="<">&lt;</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Action</label>
+                    <input type="button" id="search" value="Search"
+                        class="btn-sm block btn-flat btn btn-info" style="width: 100%;">
                 </div>
             </div>
             <div class="row">
@@ -243,6 +244,27 @@
                     },
                     processResults: function(data, params) {
                         params.page = params.page || 1;
+                        return {
+                            results: data
+                        };
+                    },
+                    cache: true
+                }
+            });
+
+            $('#plant_name').select2({
+                placeholder: 'Search Plant/Work Place Name',
+                allowClear: true,
+                ajax: {
+                    dataType: 'json',
+                    url: '{{ URL::to('/') }}/plantname_list_data',
+                    delay: 250,
+                    data: function(params) {
+                        return {
+                            term: params.term
+                        }
+                    },
+                    processResults: function(data) {
                         return {
                             results: data
                         };
@@ -396,6 +418,12 @@
                     section_id = $("#section").val();
                 }
 
+                if ($("#plant_name").val() == null) {
+                    plant_id = 0;
+                } else {
+                    plant_id = $("#plant_name").val();
+                }
+
 
 
 
@@ -414,6 +442,7 @@
                         employee_id: employee_id,
                         category_id: category_id,
                         section_id: section_id,
+                        hrm_plant_id: plant_id,
                         amount_type: $("#amount_type").val(),
                         amount: $("#amount").val(),
                         salary_amount_search: $("#salary_amount_search").val(),

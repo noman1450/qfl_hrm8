@@ -29,7 +29,7 @@
       height: 25px;
       border:1px solid red;
       opacity: 1;
-
+ 
 
 }
 
@@ -81,6 +81,13 @@
                             <option value="{{ $keys->id }}" selected>{{$keys->location_name}}</option>
                         @endforeach
                     </select>
+                </div>
+            </div>
+
+            <div class="col-lg-2">
+                <div class="form-group">
+                    <label for="plant_name">Plant/Work Place</label>
+                    <select class="form-control" id="plant_name" style="width: 100%;"></select>
                 </div>
             </div>
 
@@ -195,6 +202,7 @@ dataLoad = function(){
                     category_id: $('#category_id option:selected').val(),
                     section_id: $('#section_id option:selected').val(),
                     employee_type_id: $('#employee_type_id option:selected').val(),
+                    hrm_plant_id: $('#plant_name').val(),
               }
             },
 
@@ -277,6 +285,7 @@ dataLoad = function(){
     });
 
     $designation = select2Dropdown("#designation_id", "{{ url('/designation_list_data') }}", "Enter Designation Name");
+    $plant_name = select2Dropdown("#plant_name", "{{ url('/plantname_list_data') }}", "Search Plant/Work Place Name");
     $department = select2Dropdown("#department_id", "{{ url('/depertment_list_data') }}", "Enter Department Name");
     $category = select2Dropdown("#category_id", "{{ url('/category_list_data') }}", "Enter Category Name");
     $section = select2Dropdown("#section_id", "{{ url('/section_list_data') }}", "Enter Sub-Department Name");
@@ -288,6 +297,15 @@ dataLoad = function(){
 
     $designation.on('select2:unselect', function (e) {
         $('#designation_id').val(null).trigger("change");
+        dataLoad();
+    });
+
+    $plant_name.on('select2:select', function (e) {
+        dataLoad();
+    });
+
+    $plant_name.on('select2:unselect', function (e) {
+        $('#plant_name').val(null).trigger("change");
         dataLoad();
     });
 
