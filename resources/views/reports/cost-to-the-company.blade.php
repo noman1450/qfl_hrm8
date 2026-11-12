@@ -19,6 +19,19 @@
     #designation_list_table td.nowrap {
         white-space: nowrap;
     }
+    #employee_list_modal .modal-content {
+        display: flex;
+        flex-direction: column;
+        max-height: calc(100vh - 60px);
+    }
+    #employee_list_modal .modal-header {
+        flex: 0 0 auto;
+    }
+    #employee_list_modal .modal-body {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-y: auto;
+    }
 </style>
 
 @endsection
@@ -116,6 +129,28 @@
     </div>
   </div>
   <!-- End of Create New Salary Grade Modal-->
+</div>
+
+<div class="modal fade" id="employee_list_modal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Employees</h4>
+      </div>
+      <div class="modal-body">
+        <div id="employee_list_loading" class="text-center" style="display:none;">Loading employees...</div>
+        <div class="table-responsive">
+          <table class="table table-bordered table-hover">
+            <thead>
+              <tr><th style="width: 60px;">Sl.</th><th style="width: 120px;">Employee ID</th><th>Employee Name</th><th>Designation</th></tr>
+            </thead>
+            <tbody id="employee_list_body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 @endsection
@@ -287,7 +322,7 @@ $(document).ready(function($) {
                 var rows = response.data || [];
 
                 var derivedColumns = function (rows) {
-                    var skip = { row_type: true, hrm_location_id: true, location_name: true };
+                    var skip = { row_type: true, hrm_location_id: true, location_name: true, level_name: true };
                     var cols = [];
                     var first = rows[0] || {};
                     $.each(first, function (key) {
@@ -349,6 +384,12 @@ $(document).ready(function($) {
                     if (col.data === 'no_of_employees') {
                         col.className = 'text-center nowrap';
                         col.width = '1%';
+                        col.mRender = function (data, type, full) {
+                            if (type !== 'display' || !full.row_type || !data) {
+                                return data;
+                            }
+                            return '<a href="#" class="employee-count-link">' + data + '</a>';
+                        };
                     }
                 });
 
@@ -430,6 +471,55 @@ $(document).ready(function($) {
                         },
 
                         "columns": columns
+                });
+
+                $table.off('click', '.employee-count-link').on('click', '.employee-count-link', function (e) {
+                    e.preventDefault();
+                    var row = table.row($(this).closest('tr')).data();
+                    if (!row) { return; }
+
+                    $('#employee_list_modal .modal-title').text('Employees — ' + row.details);
+                    $('#employee_list_body').empty();
+                    $('#employee_list_loading').show();
+                    $('#employee_list_modal').modal('show');
+
+                    $.ajax({
+                        url: "{{URL::to('/')}}/cost-to-the-company/employees",
+                        type: 'POST',
+                        headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'},
+                        data: {
+                            month_from: $('#month_from').val(),
+                            month_to: $('#month_to').val(),
+                            hrm_location_id: $('#location option:selected').val(),
+                            row_type: row.row_type,
+                            level_name: row.level_name,
+                            row_location_id: row.hrm_location_id
+                        },
+                        dataType: 'json'
+                    }).done(function (response) {
+                        var employees = response.data || [];
+                        if (!employees.length) {
+                            $('#employee_list_body').append($('<tr>').append(
+                                $('<td>').attr('colspan', 4).addClass('text-center').text('No employees found.')
+                            ));
+                            return;
+                        }
+
+                        $.each(employees, function (index, employee) {
+                            var $row = $('<tr>');
+                            $row.append($('<td>').text(index + 1));
+                            $row.append($('<td>').text(employee.id));
+                            $row.append($('<td>').text(employee.employee_name || ''));
+                            $row.append($('<td>').text(employee.designation_name || ''));
+                            $('#employee_list_body').append($row);
+                        });
+                    }).fail(function () {
+                        $('#employee_list_body').append($('<tr>').append(
+                            $('<td>').attr('colspan', 4).addClass('text-center text-danger').text('Unable to load employees.')
+                        ));
+                    }).always(function () {
+                        $('#employee_list_loading').hide();
+                    });
                 });
             }
         });

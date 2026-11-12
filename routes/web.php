@@ -637,6 +637,7 @@ Route::post('salary_review',  		           'ReportsController@salary_review');
 
 Route::get('cost-to-the-company',   	           'ReportsController@cost_to_the_company');
 Route::post('cost-to-the-company',   	           'ReportsController@get_cost_to_the_company');
+Route::post('cost-to-the-company/employees',    'ReportsController@getCostToTheCompanyEmployees');
 Route::post('cost-to-the-company/excel-export',    'ReportsController@exportExcelCostToTheCompany');
 Route::post('cost-to-the-company/pdf-export',      'ReportsController@exportPdfCostToTheCompany');
 
