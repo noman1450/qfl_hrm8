@@ -2,12 +2,25 @@
 
 @section('styles')
     <style>
+        label {
+                display: inline-block;
+                max-width: 100%;
+                margin-bottom: 2px;
+                font-weight: 700;
+            }
         @media print {
             @page {
                 margin: 1cm;
             }
             .break_section {
                 page-break-after: always !important;
+            }
+
+            label {
+                display: inline-block;
+                max-width: 100%;
+                margin-bottom: 2px;
+                font-weight: 700;
             }
         }
     </style>
@@ -27,7 +40,7 @@
                 <div style="box-shadow: 0px 0px 3px black!important; padding-top: 10px;">
                     <div class="header_logo">
                         <div>
-                            <img src="{{asset('dist/img/com-logo999.jpg')}}" class="img-circle" alt="User Image" style="height: 40px;width: 80px; display: block;margin-left: auto; margin-right: auto;">
+                            <img src="{{asset('dist/img/com-logo.jpg')}}" class="img-circle" alt="User Image" style="height: 40px;width: 80px; display: block;margin-left: auto; margin-right: auto;">
                         </div>
                         <div>
                             <label style="text-align: center; color: #007F3D!important; font-size: 13px;margin-left: 25px;"> {{ config('configaration.company_name')}}</label>
@@ -35,16 +48,19 @@
                     </div>
                     <div class="image" style="text-align: center;">
                         <div >
-                            <img  id="blah" src="{{asset('employee_image/'.$keys->Images)}}" alt="your image"  style="width: 75px;height: 75px; display: block;margin-left: auto; margin-right: auto; border:1px solid black"  />
+                            <img  id="blah" src="{{asset('employee_image/'.$keys->Images)}}" alt="your image"  style="width: 70px;height: 70px; display: block;margin-left: auto; margin-right: auto; border:1px solid black"  />
 
                         </div>
                         <div >
-                            <label style="color: #007F3D !important;font-size: 12px;">{{$keys->employee_name}}</label>
+                            <label style="color: #007F3D !important;font-size: 11px;">{{$keys->employee_name}}</label>
                         </div>
                     </div>
-                    <div class="body" style="text-align: center; font-size: 10px;">
+                    <div class="body" style="text-align: center; font-size: 9.5px;">
                         <div>
-                            Employee Id :	{{$keys->employee_code}}
+                            Employee Code :	{{$keys->employee_code}}
+                        </div>
+                        <div>
+                            Unique Id :	{{$keys->unique_id}}
                         </div>
                         <div>
                             Department : {{$keys->depertment_name}}

@@ -48,6 +48,11 @@
         width: max-content;
         min-width: 100%;
     }
+    #employee_details_table_wrapper .dt-buttons {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 8px;
+    }
 </style>
 
 @endsection
@@ -194,8 +199,6 @@
 <script src="{{asset('plugins/datepicker/bootstrap-datepicker.js')}}"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
 
@@ -596,6 +599,29 @@ $(document).ready(function($) {
                                 footer: true,
                                 exportOptions: {
                                     modifier: {search: 'none'}
+                                }
+                            }, {
+                                text: 'Export PDF',
+                                className: 'btn btn-danger',
+                                action: function () {
+                                    var exportUrl = "{{URL::to('/')}}/cost-to-the-company/employees/pdf-export";
+                                    var exportData = {
+                                        _token: '{{ csrf_token() }}',
+                                        month_from: $('#month_from').val(),
+                                        month_to: $('#month_to').val(),
+                                        hrm_location_id: $('#location option:selected').val(),
+                                        row_type: row.row_type,
+                                        level_name: row.level_name,
+                                        row_location_id: row.hrm_location_id,
+                                        row_title: row.details
+                                    };
+                                    var $form = $('<form>', {method: 'POST', action: exportUrl, style: 'display:none;'});
+                                    $.each(exportData, function (name, value) {
+                                        $('<input>', {type: 'hidden', name: name}).val(value || '').appendTo($form);
+                                    });
+                                    $('body').append($form);
+                                    $form.trigger('submit');
+                                    $form.remove();
                                 }
                             }]
                         });

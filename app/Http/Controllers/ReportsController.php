@@ -4486,18 +4486,53 @@ public function bonus_topSheet (Request $request)
     }
 
     public function getCostToTheCompanyEmployees(Request $request){
+        return response()->json(array('data' => $this->getCostToTheCompanyEmployeeRows($request)));
+    }
+
+    public function exportPdfCostToTheCompanyEmployees(Request $request){
+        $employees = $this->getCostToTheCompanyEmployeeRows($request);
+        $totals = array(
+            'gross_salary' => 0,
+            'two_festival_bonus' => 0,
+            'pf_contribution' => 0,
+            'transport_outOfPocket' => 0,
+            'houseRent_allowance' => 0,
+            'fixed_allowance' => 0,
+            'total_cost' => 0,
+        );
+
+        foreach ($employees as $employee) {
+            foreach ($totals as $field => $total) {
+                $totals[$field] += (float) $employee[$field];
+            }
+        }
+
+        $company_name = Config::get('configaration.company_name');
+        $company_address = Config::get('configaration.company_address');
+        $month_from = $request->input('month_from');
+        $month_to = $request->input('month_to');
+        $row_title = $request->input('row_title', 'All Employees');
+
+        $pdf = PDF::loadView('reports.cost-to-the-company-employees-pdf', compact(
+            'employees', 'totals', 'company_name', 'company_address', 'month_from', 'month_to', 'row_title'
+        ))->setPaper('a4', 'landscape');
+
+        return $pdf->download('cost_to_the_company_employee_details.pdf');
+    }
+
+    private function getCostToTheCompanyEmployeeRows(Request $request){
         $rowType = $request->input('row_type');
         if (!in_array($rowType, array('subtotal', 'location', 'total'))) {
-            return response()->json(array('data' => array()));
+            return array();
         }
 
         $levelName = $request->input('level_name');
         $rowLocationId = $request->input('row_location_id');
         if ($rowType !== 'total' && (!is_string($levelName) || trim($levelName) === '')) {
-            return response()->json(array('data' => array()));
+            return array();
         }
         if ($rowType === 'location' && !is_numeric($rowLocationId)) {
-            return response()->json(array('data' => array()));
+            return array();
         }
 
         [$monthFrom, $monthTo, $locationCondition, $durationFrom, $durationTo] = $this->buildCostParams($request);
@@ -4528,7 +4563,7 @@ public function bonus_topSheet (Request $request)
             );
         }
 
-        return response()->json(array('data' => $employees));
+        return $employees;
     }
 
     public function exportExcelCostToTheCompany(Request $request){
