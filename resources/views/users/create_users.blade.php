@@ -42,7 +42,7 @@
 
 							<div class="col-xs-12 form-group has-feedback {{ $errors->has('designation') ? ' has-error' : '' }}">
 								<label class="control-label">Designation</label>
-								<input type="text" class="form-control" name="designation" placeholder="Designation"  required>
+								<input type="text" class="form-control" name="designation" placeholder="Designation"  >
 							</div>
 
 
@@ -64,7 +64,7 @@
 
 							<div class="col-xs-12 form-group has-feedback {{ $errors->has('employee_name') ? ' has-error' : '' }}">
 								<label class="control-label">Employee Name</label>
-								<select class="form-control" id="employee_name" name="employee_name" required>
+								<select class="form-control" id="employee_name" name="employee_name" >
 								</select>
 							</div>
 
@@ -74,7 +74,7 @@
                                 <select class="form-control" id="userrole" name="userrole" required>
                                     <option>-- Select Role --</option>
                                     @foreach ($role_list as $keys)
-                                        <option value={{$keys->id}}>{{$keys->display_name}}</option>
+                                        <option value={{$keys->id }}>{{$keys->display_name}}</option>
                                     @endforeach
 								</select>
 							</div>

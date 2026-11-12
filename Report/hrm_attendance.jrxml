@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.16.0.final using JasperReports Library version 6.4.0  -->
+<!-- Created with Jaspersoft Studio version 6.21.5.final using JasperReports Library version 6.21.5-74d586df47b25dbd05bd0957999819196e59934a  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="hrm_attendance" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="9438248a-295f-40af-a669-de9baf60f08d">
 	<property name="ireport.zoom" value="2.0"/>
 	<property name="ireport.x" value="204"/>
@@ -21,52 +21,48 @@
 		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
 	</parameter>
 	<queryString>
-		<![CDATA[SELECT
+		<![CDATA[SELECT 
     e.employee_name,
     b.employee_code, 
     c.depertment_name,
-    d.alis as designation_name,
-d.priority,    
-	TIME_FORMAT(a.in_time,"%H:%i") AS in_time,
-    TIME_FORMAT(a.out_time,"%H:%i") AS out_time,
-    TIME_FORMAT(a.late_time,"%H:%i") AS late_time,
- TIME_FORMAT(IF((a.overtime_time>'00:30:00'),a.overtime_time,TIME_FORMAT("00:00:00", "%H:%i:%s")),"%H:%i:%s") AS overtime_time ,
+    d.alis AS designation_name,
+    d.priority,    
+    TIME_FORMAT(a.in_time, "%H:%i") AS in_time,
+    TIME_FORMAT(a.out_time, "%H:%i") AS out_time,
+    TIME_FORMAT(a.late_time, "%H:%i") AS late_time,
+    TIME_FORMAT(IF((a.overtime_time > '00:30:00'), a.overtime_time, '00:00:00'), "%H:%i:%s") AS overtime_time,
     aa.comment,
-    f.alies as attendance_status,
+    f.alies AS attendance_status,
     g.location_name,
-i.shift_name,
-j.section_name
-FROM
-    hrm_attendance a
-        JOIN
-    hrm_employee_job_info b ON a.hrm_employee_id = b.hrm_employee_id
-        JOIN
-    hrm_depertment c ON b.hrm_depertment_id = c.id
-        JOIN
-    hrm_designation d ON b.hrm_designation_id = d.id
-        JOIN
-    hrm_employee e ON a.hrm_employee_id = e.id
-        JOIN
-    hrm_attendance_status f ON a.attendance_status = f.id
-		JOIN
-	hrm_location g ON b.hrm_location_id = g.id
- Join hrm_employee_shift h on b.id=h.hrm_employee_job_info_id
-     Join hrm_shift i on h.hrm_shift_id=i.id
-join hrm_section j ON j.id=b.hrm_section_id
+    i.shift_name,
+    j.section_name
+FROM hrm_attendance a
+JOIN hrm_employee_job_info b ON a.hrm_employee_id = b.hrm_employee_id
+JOIN hrm_depertment c ON b.hrm_depertment_id = c.id
+JOIN hrm_designation d ON b.hrm_designation_id = d.id
+JOIN hrm_employee e ON a.hrm_employee_id = e.id
+JOIN hrm_attendance_status f ON a.attendance_status = f.id
+JOIN hrm_location g ON b.hrm_location_id = g.id
+JOIN hrm_employee_shift h ON b.id = h.hrm_employee_job_info_id
+JOIN hrm_shift i ON h.hrm_shift_id = i.id
+JOIN hrm_section j ON j.id = b.hrm_section_id
 $P!{condition_parameter}
-Left JOIN 
-(SELECT 
-  DISTINCT  a.hrm_employee_id, a.punch_date,group_concat(c.comment) as comment,b.id as job_id
-FROM
-    hrm_attendance_raw_data a
-        JOIN
-    hrm_employee_job_info b ON a.hrm_employee_id = b.hrm_employee_id
-        AND a.data_from = 2
-$P!{condition_parameter_1} 
-        JOIN
-    hrm_attendance_comment c ON a.id = c.hrm_attendance_raw_data_id
-    GROUP BY a.hrm_employee_id, a.punch_date,b.id) aa ON a.hrm_employee_id=aa.hrm_employee_id AND aa.punch_date=a.punche_date AND aa.job_id=b.id
-Order By j.section_name,d.priority,b.employee_code]]>
+LEFT JOIN (
+    SELECT 
+        a.hrm_employee_id, 
+        a.punch_date, 
+        GROUP_CONCAT(c.comment SEPARATOR ', ') AS comment,
+        b.id AS job_id
+    FROM hrm_attendance_raw_data a
+    JOIN hrm_employee_job_info b ON a.hrm_employee_id = b.hrm_employee_id
+    AND a.data_from = 2
+    $P!{condition_parameter_1} 
+    JOIN hrm_attendance_comment c ON a.id = c.hrm_attendance_raw_data_id
+    GROUP BY a.hrm_employee_id, a.punch_date, b.id
+) aa ON a.hrm_employee_id = aa.hrm_employee_id 
+     AND aa.punch_date = a.punche_date 
+     AND aa.job_id = b.id
+ORDER BY j.section_name, d.priority, b.employee_code]]>
 	</queryString>
 	<field name="employee_name" class="java.lang.String">
 		<fieldDescription><![CDATA[]]></fieldDescription>
@@ -309,7 +305,7 @@ Order By j.section_name,d.priority,b.employee_code]]>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{employee_name}]]></textFieldExpression>
 			</textField>
-			<textField isStretchWithOverflow="true">
+			<textField textAdjust="StretchHeight">
 				<reportElement x="183" y="0" width="57" height="15" isPrintWhenDetailOverflows="true" uuid="800485e6-c212-4576-94f3-5e9a44de2251">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -363,7 +359,7 @@ Order By j.section_name,d.priority,b.employee_code]]>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{overtime_time}]]></textFieldExpression>
 			</textField>
-			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+			<textField textAdjust="StretchHeight" isBlankWhenNull="true">
 				<reportElement x="477" y="0" width="78" height="15" isPrintWhenDetailOverflows="true" uuid="1989c4f4-568c-4b2b-8670-af900114f08d">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
